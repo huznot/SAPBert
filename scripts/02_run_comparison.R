@@ -1,26 +1,3 @@
-# ============================================================================
-# 02_run_comparison.R
-#
-# Runs the full parameter grid (similarity thresholds x flag combinations x
-# top-N co-occurrence values) for BOTH embedding models (ClinicalBERT,
-# SapBERT) on BOTH tracks (ICD-9-CM -> ICD-10-CA, ICD-9-CM -> ICDA-8), and
-# writes the overall metrics for every combination to CSV.
-#
-# Grid: similarity_threshold in {0.95, 0.99, 0.995, 0.999}
-#       top_n              in {3, 5, 10, 15}
-#       flag_combination   in {1, 2, 3, 4}
-# (0.995/10/3 and 0.995/5/3 are the exact points used in run_sanity_check.R
-#  and reproduce Dr. Lix's published numbers -- they're included in this
-#  grid as a cross-check; see 03_visualize_results.R / report.Rmd for where
-#  the grid maximum is compared against the known reference numbers.)
-#
-# Output: results/grid_results_10_9.csv, results/grid_results_8_9.csv
-#         (one row per model x threshold x top_n x flag_combination)
-#         results/best_by_model.csv (best F1 combo per model x track)
-#         results/ccs_breakdown_<track>.csv (per-CCS-category metrics for
-#         each model's best combo, for the improvement/regression chart)
-# ============================================================================
-
 source("pipeline_lib.R")
 
 ORIG_BASE    <- "../data/original"
@@ -35,10 +12,6 @@ flags      <- 1:4
 grid <- expand.grid(similarity_threshold = thresholds, top_n = top_ns,
                      flag_combination = flags, KEEP.OUT.ATTRS = FALSE)
 
-# ---------------------------------------------------------------------------
-# Shared reference data (same for both models)
-# ---------------------------------------------------------------------------
-
 cat("Loading shared reference data...\n")
 ccs_df <- read_excel(file.path(ORIG_BASE, "ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx"),
                       sheet = "CCS ICD-9-CM-3Level") %>% select(ICD_9_CM, CCS_ID)
@@ -51,10 +24,6 @@ manual_8_9 <- read_excel(file.path(ORIG_BASE, "ICD_Codes_Files_and_Validation_Da
 excl_8_9   <- read_excel(file.path(ORIG_BASE, "ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx"), sheet = "Validation_ICD9_ICD8_Excld")
 cooc_8_9   <- load_cooccurrence_df(file.path(ORIG_BASE, "Co_occurrence/icd_8_9_co_occurrence_3d.xlsx"))
 
-# ---------------------------------------------------------------------------
-# Similarity sheets per model x track
-# ---------------------------------------------------------------------------
-
 cat("Loading ClinicalBERT similarity sheets...\n")
 sheets_clin_10_9 <- load_similarity_sheets(file.path(ORIG_BASE, "Cosine_Similarity_Matrices/cosine_similarity_matrices_10_9_ClinicalBERT.xlsx"))
 sheets_clin_8_9  <- load_similarity_sheets(file.path(ORIG_BASE, "Cosine_Similarity_Matrices/cosine_similarity_matrices_8_9_ClinicalBERT.xlsx"))
@@ -62,25 +31,6 @@ sheets_clin_8_9  <- load_similarity_sheets(file.path(ORIG_BASE, "Cosine_Similari
 cat("Loading SapBERT similarity sheets...\n")
 sheets_sap_10_9 <- load_similarity_sheets(file.path(SAPBERT_BASE, "cosine_similarity_matrices_10_9_SapBERT.xlsx"))
 sheets_sap_8_9  <- load_similarity_sheets(file.path(SAPBERT_BASE, "cosine_similarity_matrices_8_9_SapBERT.xlsx"))
-
-# ---------------------------------------------------------------------------
-# Grid runner
-#
-# NOTE on performance: similarity_threshold and top_n only take 4 distinct
-# values each, but flag_combination doesn't affect similarity_df,
-# cooccurrence_df, or merge_and_flag() at all -- only the final filter step
-# (select_rows_by_flags) does. So instead of recomputing the expensive
-# similarity scoring / co-occurrence / chapter-distance merge from scratch
-# for all 64 (threshold x top_n x flag) combinations, we compute
-# similarity_df once per threshold (4x), cooccurrence_df once per top_n
-# (4x), and merge_and_flag() once per (threshold, top_n) pair (16x), then
-# just re-filter + re-validate per flag_combination (cheap). This is the
-# same 64-combination grid, just without redoing the same expensive work
-# 4-16x more often than necessary -- the naive version took ~88s/combo
-# (~29min for just 20/64 combos on one track/model); this version does the
-# full 256-combination grid across both models and both tracks in a much
-# smaller fraction of that time.
-# ---------------------------------------------------------------------------
 
 run_grid <- function(track, model_name, sheets, cooc_df, manual_df, valid_excluding_df,
                       target_col_name, icd9_col, target_col,
@@ -144,10 +94,6 @@ grid_8_9  <- bind_rows(res_clin_8_9, res_sap_8_9)
 write.csv(grid_10_9, file.path(OUT_DIR, "grid_results_10_9.csv"), row.names = FALSE)
 write.csv(grid_8_9,  file.path(OUT_DIR, "grid_results_8_9.csv"), row.names = FALSE)
 
-# ---------------------------------------------------------------------------
-# Best combination per track x model (by F1)
-# ---------------------------------------------------------------------------
-
 all_grid <- bind_rows(grid_10_9, grid_8_9)
 
 best_by_model <- all_grid %>%
@@ -159,11 +105,6 @@ write.csv(best_by_model, file.path(OUT_DIR, "best_by_model.csv"), row.names = FA
 
 cat("\n=== Best combination per track x model (by F1) ===\n")
 print(best_by_model)
-
-# ---------------------------------------------------------------------------
-# Per-CCS-category breakdown at each model's best combo, for the
-# improvement/regression chart in 03_visualize_results.R
-# ---------------------------------------------------------------------------
 
 get_best_grouped <- function(track, model_name, sheets, cooc_df, manual_df, valid_excluding_df, pipeline_fn) {
   b <- best_by_model %>% filter(track == !!track, model == !!model_name)

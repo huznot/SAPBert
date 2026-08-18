@@ -1,18 +1,7 @@
-# ============================================================================
-# run_sanity_check.R
-#
-# Before trusting any comparison, reproduce Dr. Lix's published numbers
-# using the original ClinicalBERT similarity files. If these don't match,
-# something in the R port is wrong and must be fixed before going further.
-# ============================================================================
-
 source("pipeline_lib.R")
 
 BASE <- "../data/original"
 
-# ---- ICD-9-CM -> ICD-10-CA track ----
-# Published (and Python-reproduced) numbers at threshold=0.995, top_n=10, alg=3:
-#   Precision 0.686, Recall 0.277, F1 0.395, Accuracy 0.246
 cat("Loading 10_9 ClinicalBERT similarity sheets...\n")
 sheets_10_9 <- load_similarity_sheets(file.path(BASE, "Cosine_Similarity_Matrices/cosine_similarity_matrices_10_9_ClinicalBERT.xlsx"))
 cooc_10_9 <- load_cooccurrence_df(file.path(BASE, "Co_occurrence/icd_10_9_co_occurrence_3c.xlsx"))
@@ -30,9 +19,6 @@ cat("Got:    Precision", result_10_9$overall$overall_precision,
     ", F1", result_10_9$overall$overall_f1_score,
     ", Accuracy", result_10_9$overall$overall_accuracy, "\n")
 
-# ---- ICD-9-CM -> ICDA-8 track ----
-# Published numbers at threshold=0.995, top_n=5, alg=3:
-#   Precision 0.753, Recall 0.680, F1 0.714 (Python repro gave 0.715), Accuracy 0.556
 cat("\nLoading 8_9 ClinicalBERT similarity sheets...\n")
 sheets_8_9 <- load_similarity_sheets(file.path(BASE, "Cosine_Similarity_Matrices/cosine_similarity_matrices_8_9_ClinicalBERT.xlsx"))
 cooc_8_9 <- load_cooccurrence_df(file.path(BASE, "Co_occurrence/icd_8_9_co_occurrence_3d.xlsx"))

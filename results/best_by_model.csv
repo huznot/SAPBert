@@ -1,5 +1,5 @@
-"track","model","similarity_threshold","top_n","flag_combination","precision","recall","f1","accuracy"
-"10_9","ClinicalBERT",0.995,15,4,0.584,0.331,0.423,0.268
-"10_9","SapBERT",0.95,10,4,0.7,0.418,0.523,0.355
-"8_9","ClinicalBERT",0.999,5,3,0.759,0.677,0.716,0.557
-"8_9","SapBERT",0.99,3,2,0.861,0.785,0.821,0.697
+track,model,similarity_threshold,top_n,flag_combination,precision,recall,f1,accuracy
+10_9,ClinicalBERT,0.995,30,4,0.578,0.338,0.427,0.271
+10_9,SapBERT,0.95,30,4,0.692,0.429,0.53,0.36
+8_9,ClinicalBERT,0.999,5,3,0.759,0.677,0.716,0.557
+8_9,SapBERT,0.99,3,2,0.861,0.785,0.821,0.697

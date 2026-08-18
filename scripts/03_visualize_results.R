@@ -1,15 +1,3 @@
-# ============================================================================
-# 03_visualize_results.R
-#
-# Reads the CSVs written by 02_run_comparison.R and produces the charts used
-# in report.Rmd: F1/accuracy comparison between ClinicalBERT and SapBERT on
-# both tracks, and a per-CCS-category improvement/regression breakdown.
-#
-# Output: results/plot_f1_accuracy_comparison.png
-#         results/plot_ccs_breakdown_10_9.png
-#         results/plot_ccs_breakdown_8_9.png
-# ============================================================================
-
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -21,10 +9,6 @@ ccs_10_9 <- read.csv(file.path(OUT_DIR, "ccs_breakdown_10_9.csv"))
 ccs_8_9  <- read.csv(file.path(OUT_DIR, "ccs_breakdown_8_9.csv"))
 
 track_labels <- c("10_9" = "ICD-9-CM -> ICD-10-CA", "8_9" = "ICD-9-CM -> ICDA-8")
-
-# ---------------------------------------------------------------------------
-# Chart 1: F1 / Accuracy comparison, best combo per model x track
-# ---------------------------------------------------------------------------
 
 comparison_long <- best_by_model %>%
   select(track, model, f1, accuracy) %>%
@@ -48,10 +32,6 @@ p1 <- ggplot(comparison_long, aes(x = metric, y = value, fill = model)) +
   theme(legend.position = "top", plot.title = element_text(face = "bold"))
 
 ggsave(file.path(OUT_DIR, "plot_f1_accuracy_comparison.png"), p1, width = 9, height = 5.5, dpi = 150)
-
-# ---------------------------------------------------------------------------
-# Chart 2 & 3: per-CCS-category improvement/regression, SapBERT - ClinicalBERT
-# ---------------------------------------------------------------------------
 
 make_ccs_breakdown_plot <- function(ccs_df, track_label, top_n_categories = 30) {
   wide <- ccs_df %>%
@@ -86,10 +66,6 @@ p3 <- make_ccs_breakdown_plot(ccs_8_9, track_labels["8_9"])
 
 ggsave(file.path(OUT_DIR, "plot_ccs_breakdown_10_9.png"), p2, width = 8, height = 8, dpi = 150)
 ggsave(file.path(OUT_DIR, "plot_ccs_breakdown_8_9.png"), p3, width = 8, height = 8, dpi = 150)
-
-# ---------------------------------------------------------------------------
-# Summary stats used in report.Rmd's caveats section
-# ---------------------------------------------------------------------------
 
 summarize_regressions <- function(ccs_df) {
   wide <- ccs_df %>%

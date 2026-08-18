@@ -1,26 +1,8 @@
-# ============================================================================
-# pipeline_lib.R
-#
-# Faithful R port of Dr. Lix lab's ICD automatic-mapping pipeline
-# (originally Pipeline_10_9_2024Nov27.ipynb / Pipeline_8_9_2024Oct30.ipynb,
-# Python + pandas). Re-implemented in R (dplyr/tidyr) so it can run natively
-# in RStudio. Logic is unchanged from the original notebooks -- same chapter
-# definitions, same flag-combination rules, same precision/recall/F1/accuracy
-# formulas -- only the language changed.
-#
-# This file defines functions only. See run_sanity_check.R and
-# run_comparison_10_9.R / run_comparison_8_9.R for how to use them.
-# ============================================================================
-
 library(dplyr)
 library(tidyr)
 library(readxl)
 library(stringr)
 library(purrr)
-
-# ---------------------------------------------------------------------------
-# Chapter definitions (unchanged from the original Python notebooks)
-# ---------------------------------------------------------------------------
 
 icd9cm_chapters <- tribble(
   ~chapter, ~start, ~end,
@@ -90,19 +72,13 @@ icda8_chapters <- tribble(
   17, "800", "999"
 )
 
-# ICD-9-CM chapter -> allowed ICD-10-CA chapter(s) for "chapter_distance == 0"
 chapter_alignment_10 <- list(
   `1` = 1, `2` = 2, `3` = 4, `4` = 3, `5` = 5, `6` = c(6, 7, 8), `7` = 9,
   `8` = 10, `9` = 11, `10` = 14, `11` = 15, `12` = 12, `13` = 13, `14` = 17,
   `15` = 16, `16` = 18, `17` = 19
 )
 
-# ICD-9-CM chapter -> ICDA-8 chapter is a straight 1:1 alignment
 chapter_alignment_8 <- setNames(as.list(1:17), as.character(1:17))
-
-# ---------------------------------------------------------------------------
-# Chapter lookup helpers
-# ---------------------------------------------------------------------------
 
 find_chapter <- function(code, chapter_table, pad_width = 3, alpha = FALSE) {
   code <- as.character(code)
@@ -124,11 +100,6 @@ compute_chapter_distance <- function(chapter_icd9cm, chapter_target, alignment) 
   return(2L)
 }
 
-# ---------------------------------------------------------------------------
-# Similarity scores: read every CCS sheet of the similarity workbook, and for
-# each ICD-9-CM column, keep target codes whose score >= threshold * max_score
-# ---------------------------------------------------------------------------
-
 load_similarity_sheets <- function(path) {
   sheets <- excel_sheets(path)
   setNames(lapply(sheets, function(s) read_excel(path, sheet = s)), sheets)
@@ -136,7 +107,7 @@ load_similarity_sheets <- function(path) {
 
 get_similarity_scores_from_sheets <- function(sheets_list, threshold, target_col_name) {
   purrr::map_dfr(sheets_list, function(df) {
-    id_col <- names(df)[1]                 # e.g. "ICD_10_CA" or "ICDA_8"
+    id_col <- names(df)[1]
     icd9_cols <- setdiff(names(df), id_col)
 
     purrr::map_dfr(icd9_cols, function(col) {
@@ -156,15 +127,9 @@ get_similarity_scores_from_sheets <- function(sheets_list, threshold, target_col
   })
 }
 
-# ---------------------------------------------------------------------------
-# Co-occurrence: for each ICD-9-CM code, keep the top-N most frequently
-# co-occurring target codes
-# ---------------------------------------------------------------------------
-
 load_cooccurrence_df <- function(path) read_excel(path)
 
 get_cooccurrence_codes_from_df <- function(df, top_n, icd9_col, target_col, target_col_name) {
-  # base-R renaming (robust to dynamic column names, avoids tidyselect/NSE pitfalls)
   df <- as.data.frame(df)
   names(df)[names(df) == icd9_col]  <- ".icd9"
   names(df)[names(df) == target_col] <- ".target"
@@ -181,10 +146,6 @@ get_cooccurrence_codes_from_df <- function(df, top_n, icd9_col, target_col, targ
   names(out)[names(out) == ".target"] <- target_col_name
   out
 }
-
-# ---------------------------------------------------------------------------
-# Merge similarity + co-occurrence, apply chapter-distance filter, flag rows
-# ---------------------------------------------------------------------------
 
 merge_and_flag <- function(similarity_df, cooccurrence_df, target_col_name,
                             find_target_chapter_fn, chapter_alignment) {
@@ -231,18 +192,10 @@ select_rows_by_flags <- function(merged_df, flag_combination) {
   )
 }
 
-# ---------------------------------------------------------------------------
-# Metric helpers
-# ---------------------------------------------------------------------------
-
 calc_precision <- function(tp, fp) if ((tp + fp) != 0) tp / (tp + fp) else 0
 calc_recall    <- function(tp, fn) if ((tp + fn) != 0) tp / (tp + fn) else 0
 calc_f1        <- function(p, r) if ((p + r) != 0) 2 * p * r / (p + r) else 0
 calc_accuracy  <- function(tp, fp, fn) if ((tp + fp + fn) != 0) tp / (tp + fp + fn) else 0
-
-# ---------------------------------------------------------------------------
-# Validation: compare auto-mapped codes against the manual crosswalk
-# ---------------------------------------------------------------------------
 
 validate_mapping <- function(manual_df, auto_df, ccs_df, valid_excluding_df,
                               manual_target_col, target_col_name) {
@@ -252,17 +205,12 @@ validate_mapping <- function(manual_df, auto_df, ccs_df, valid_excluding_df,
                                  !!target_col_name := as.character(.data[[target_col_name]]))
   ccs_df <- ccs_df %>% mutate(ICD_9_CM = as.character(ICD_9_CM))
 
-  # keep = TRUE mirrors pandas' merge(left_on=..., right_on=...), which keeps
-  # BOTH join columns separately rather than collapsing them into one --
-  # essential here since we need to know afterward which side (manual vs.
-  # auto) each row came from, for the TP/FP/FN logic below.
   valid_df <- full_join(
     manual_df, auto_df,
     by = c("ICD-9-CM" = "ICD_9_CM", setNames(target_col_name, manual_target_col)),
     keep = TRUE
   )
 
-  # ICD-9-CM present on whichever side matched (mirrors pandas combine_first)
   valid_df <- valid_df %>%
     mutate(`ICD-9-CM` = coalesce(`ICD-9-CM`, ICD_9_CM)) %>%
     rename(Manual = !!manual_target_col, Auto = !!target_col_name)
@@ -311,11 +259,6 @@ calculate_performance_metrics <- function(final_valid_df) {
        overall = list(overall_precision = p, overall_recall = r,
                        overall_f1_score = f1, overall_accuracy = acc))
 }
-
-# ---------------------------------------------------------------------------
-# Full pipeline runners (cached-sheets version -- load once, call many times
-# across a parameter grid, since re-reading the Excel workbook is the slow part)
-# ---------------------------------------------------------------------------
 
 run_pipeline_10_9_cached <- function(sheets_dict, cooc_df, manual_df, ccs_df, valid_excluding_df,
                                       similarity_threshold, top_n, flag_combination) {
