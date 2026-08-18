@@ -151,3 +151,109 @@ precision holds steady and recall goes up, this looks like a genuine
 improvement from searching a wider range rather than noise, so the
 higher SapBERT number is what's reported above. The ICDA-8 track is
 unaffected and still matches its reference exactly.
+
+## Task 1 + 2: filler-word stripping and a general-purpose embedding model
+
+```{r extended-setup, include=FALSE}
+have_extended <- file.exists(file.path(RESULTS, "old_vs_new_comparison.csv"))
+if (have_extended) {
+  old_vs_new <- read.csv(file.path(RESULTS, "old_vs_new_comparison.csv"))
+}
+```
+
+Filler words (see `scripts/filler_words.json` -- "and", "or", "with",
+"unspecified", "other", "nos", etc.) were stripped from ICD code label text
+before embedding, and a third, non-medical embedding model
+(`sentence-transformers/all-mpnet-base-v2`) was added as a comparison arm
+alongside ClinicalBERT and SapBERT, to test whether domain-specific medical
+pretraining actually helps on this short-text matching task.
+
+```{r extended-table, eval=have_extended}
+old_vs_new %>%
+  mutate(track = recode(track, `10_9` = "ICD-9-CM -> ICD-10-CA", `8_9` = "ICD-9-CM -> ICDA-8")) %>%
+  select(Track = track, Model = model, Source = source,
+         Precision = precision, Recall = recall, F1 = f1, Accuracy = accuracy) %>%
+  arrange(Track, Model, Source) %>%
+  kable(digits = 3)
+```
+
+```{r extended-missing, eval=!have_extended, results='asis'}
+cat("_Not yet run -- see `scripts/06_extended_comparison.R`. Needs `data/generated/*.xlsx`",
+    "from `scripts/generate_embeddings.py` first._")
+```
+
+**How to read this table.** `original_full_grid` is the existing baseline
+(full parameter sweep, already verified above). `extended_reduced_grid` is
+this task's new conditions, run on a smaller parameter grid for practicality
+(see the note at the top of `06_extended_comparison.R`) -- so a difference
+between `SapBERT` under `original_full_grid` and `SapBERT-base` under
+`extended_reduced_grid` reflects grid coverage, not a change in the
+embeddings, and isn't a fair "did stripping help" comparison by itself.
+The fair comparisons are **within** `extended_reduced_grid`: `*-base` vs.
+`*-stripped` for the same model (isolates the filler-word effect), and
+`ClinicalBERT-base` / `SapBERT-base` vs. `mpnet-base` (isolates the
+domain-specific-vs-general-model effect), since all of those ran on the
+identical reduced grid.
+
+**ClinicalBERT-base is a regenerated arm**, not the original externally-
+generated matrices (that generation method isn't documented anywhere in
+this repo -- see `PI_QUESTIONS.md`). It's included so filler-word stripping
+can be tested apples-to-apples against a *known* generation method. If
+`ClinicalBERT-base` here doesn't match `ClinicalBERT` under
+`original_full_grid`, that gap is the original pipeline's undocumented
+choices, not this task's change -- don't attribute it to filler stripping.
+**SapBERT-base** reuses the existing validated `data/sapbert` matrices
+directly (no regeneration needed, since that generation method already
+matches).
+
+## Task 3: bidirectional mapping and round-trip consistency
+
+```{r roundtrip-setup, include=FALSE}
+have_roundtrip <- file.exists(file.path(RESULTS, "bidirectional_roundtrip.csv"))
+if (have_roundtrip) {
+  roundtrip <- read.csv(file.path(RESULTS, "bidirectional_roundtrip.csv"))
+}
+```
+
+The reverse direction (ICD-10-CA -> ICD-9-CM, ICDA-8 -> ICD-9-CM) uses the
+same rule-based pipeline as the forward direction -- chapter-distance
+filtering, similarity threshold, top-N co-occurrence, flag rule -- just
+normalized per target code instead of per ICD-9-CM code (see
+`get_similarity_scores_from_sheets_reverse` etc. in `pipeline_lib.R`). It
+reuses each track/model's already-chosen best forward parameters rather
+than an independent reverse grid search, to keep runtime reasonable; this
+means the reverse numbers below are not independently grid-optimized the
+way the forward numbers are.
+
+Round-trip consistency: for each ICD-9-CM code the forward pipeline maps to
+some target code, does the reverse pipeline map that target code back to
+the same ICD-9-CM code? This is a self-consistency signal independent of
+the manual crosswalk.
+
+```{r roundtrip-table, eval=have_roundtrip}
+roundtrip %>%
+  mutate(track = recode(track, `10_9` = "ICD-9-CM <-> ICD-10-CA", `8_9` = "ICD-9-CM <-> ICDA-8")) %>%
+  select(Track = track, Model = model,
+         `Fwd F1` = fwd_f1, `Fwd Acc` = fwd_accuracy,
+         `Rev F1` = rev_f1, `Rev Acc` = rev_accuracy,
+         `Round-trip rate` = roundtrip_rate,
+         `Consistent / Total` = roundtrip_n_total) %>%
+  kable(digits = 3)
+```
+
+```{r roundtrip-missing, eval=!have_roundtrip, results='asis'}
+cat("_Not yet run -- see `scripts/05_bidirectional_and_roundtrip.R`._")
+```
+
+## Not implemented -- flagged for the PI
+
+Two items from the task list are intentionally not implemented; see
+`PI_QUESTIONS.md` for full detail:
+
+- **Removing codes because "cosine similarity drops"** -- which codes, and
+  the exact mechanism, weren't specified. Not guessed at, per instructions.
+- **Expanded validation dataset** -- no additional verified crosswalk pairs
+  beyond the existing 937 (ICD-9/10) and 331 (ICD-9/ICDA-8) were found
+  anywhere in this repository. If Dr. Lix has more, point the pipeline at
+  them and re-run; a drop in F1/accuracy as the validation set grows would
+  be expected (an easier-subset effect), not a bug.

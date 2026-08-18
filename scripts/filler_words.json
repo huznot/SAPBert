@@ -1,0 +1,21 @@
+{
+  "_comment": "Low-content filler words stripped from ICD label text before embedding (task 1, PI request). Edit this list to adjust what gets stripped; both the R pipeline (pipeline_lib.R::strip_filler_words) and the Python embedding generator (generate_embeddings.py) read this same file so the two stay in sync.",
+  "filler_words": [
+    "and",
+    "or",
+    "with",
+    "without",
+    "unspecified",
+    "other",
+    "others",
+    "nos",
+    "nec",
+    "not otherwise specified",
+    "not elsewhere classified",
+    "of",
+    "the",
+    "in",
+    "due to",
+    "type"
+  ]
+}

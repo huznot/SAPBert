@@ -5,11 +5,21 @@ SAPBERT_BASE <- "../data/sapbert"
 OUT_DIR      <- "../results"
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
-thresholds <- c(0.95, 0.99, 0.995, 0.999)
-top_ns     <- c(3, 5, 10, 15)
-flags      <- 1:4
+thresholds  <- c(0.95, 0.99, 0.995, 0.999)
+# ICD-9-CM -> ICDA-8 keeps the original range. ICD-9-CM -> ICD-10-CA is
+# widened to {5,10,15,20,25,30}: {3,5,10,15} was too narrow and was
+# cutting off the actual best combination for that track (see report.Rmd).
+# NOTE: prior to this fix, report.Rmd and results/best_by_model.csv
+# described/contained numbers from this wider range, but this script still
+# ran the narrow range for both tracks -- the checked-in "corrected" F1
+# 0.427/0.530 numbers weren't actually reproducible by any committed code.
+# This top_ns_10_9 change is what makes them (or their real equivalent)
+# reproducible again.
+top_ns_8_9  <- c(3, 5, 10, 15)
+top_ns_10_9 <- c(5, 10, 15, 20, 25, 30)
+flags       <- 1:4
 
-grid <- expand.grid(similarity_threshold = thresholds, top_n = top_ns,
+grid <- expand.grid(similarity_threshold = thresholds, top_n = top_ns_10_9,
                      flag_combination = flags, KEEP.OUT.ATTRS = FALSE)
 
 cat("Loading shared reference data...\n")
@@ -34,9 +44,10 @@ sheets_sap_8_9  <- load_similarity_sheets(file.path(SAPBERT_BASE, "cosine_simila
 
 run_grid <- function(track, model_name, sheets, cooc_df, manual_df, valid_excluding_df,
                       target_col_name, icd9_col, target_col,
-                      find_target_chapter_fn, chapter_alignment, manual_target_col) {
+                      find_target_chapter_fn, chapter_alignment, manual_target_col, top_ns) {
+  n_combinations <- length(thresholds) * length(top_ns) * length(flags)
   cat(sprintf("\n--- Running grid: track=%s model=%s (%d combinations) ---\n",
-              track, model_name, nrow(grid)))
+              track, model_name, n_combinations))
   rows <- list()
   i <- 0L
 
@@ -66,7 +77,7 @@ run_grid <- function(track, model_name, sheets, cooc_df, manual_df, valid_exclud
         )
       }
     }
-    cat(sprintf("  threshold %.3f done (%d/%d combinations)\n", thr, i, nrow(grid)))
+    cat(sprintf("  threshold %.3f done (%d/%d combinations)\n", thr, i, n_combinations))
   }
   bind_rows(rows)
 }
@@ -74,19 +85,19 @@ run_grid <- function(track, model_name, sheets, cooc_df, manual_df, valid_exclud
 res_clin_10_9 <- run_grid("10_9", "ClinicalBERT", sheets_clin_10_9, cooc_10_9, manual_10_9, excl_10_9,
                            target_col_name = "ICD_10_CA", icd9_col = "ICD_9_CM_Code3", target_col = "ICD_10_CA_Code3",
                            find_target_chapter_fn = find_icd10ca_chapter, chapter_alignment = chapter_alignment_10,
-                           manual_target_col = "ICD-10-CA")
+                           manual_target_col = "ICD-10-CA", top_ns = top_ns_10_9)
 res_sap_10_9  <- run_grid("10_9", "SapBERT", sheets_sap_10_9, cooc_10_9, manual_10_9, excl_10_9,
                            target_col_name = "ICD_10_CA", icd9_col = "ICD_9_CM_Code3", target_col = "ICD_10_CA_Code3",
                            find_target_chapter_fn = find_icd10ca_chapter, chapter_alignment = chapter_alignment_10,
-                           manual_target_col = "ICD-10-CA")
+                           manual_target_col = "ICD-10-CA", top_ns = top_ns_10_9)
 res_clin_8_9  <- run_grid("8_9", "ClinicalBERT", sheets_clin_8_9, cooc_8_9, manual_8_9, excl_8_9,
                            target_col_name = "ICDA_8", icd9_col = "ICD_9_CM_Code", target_col = "ICDA_8_Code",
                            find_target_chapter_fn = find_icda8_chapter, chapter_alignment = chapter_alignment_8,
-                           manual_target_col = "ICDA-8")
+                           manual_target_col = "ICDA-8", top_ns = top_ns_8_9)
 res_sap_8_9   <- run_grid("8_9", "SapBERT", sheets_sap_8_9, cooc_8_9, manual_8_9, excl_8_9,
                            target_col_name = "ICDA_8", icd9_col = "ICD_9_CM_Code", target_col = "ICDA_8_Code",
                            find_target_chapter_fn = find_icda8_chapter, chapter_alignment = chapter_alignment_8,
-                           manual_target_col = "ICDA-8")
+                           manual_target_col = "ICDA-8", top_ns = top_ns_8_9)
 
 grid_10_9 <- bind_rows(res_clin_10_9, res_sap_10_9)
 grid_8_9  <- bind_rows(res_clin_8_9, res_sap_8_9)

@@ -4,6 +4,26 @@ library(readxl)
 library(stringr)
 library(purrr)
 
+# --- Task 1: filler-word stripping -------------------------------------
+# Config-driven list of low-content words stripped from ICD label text
+# before embedding. Kept in filler_words.json so the R pipeline and the
+# Python embedding generator (generate_embeddings.py) share one source.
+load_filler_words <- function(path = "filler_words.json") {
+  cfg <- jsonlite::fromJSON(path)
+  cfg$filler_words
+}
+
+strip_filler_words <- function(text, filler_words) {
+  text <- tolower(as.character(text))
+  # longest phrases first so e.g. "due to" is removed before its parts
+  words <- filler_words[order(-nchar(filler_words))]
+  for (w in words) {
+    pattern <- paste0("\\b", str_replace_all(w, " ", "\\\\s+"), "\\b")
+    text <- str_replace_all(text, pattern, " ")
+  }
+  str_squish(text)
+}
+
 icd9cm_chapters <- tribble(
   ~chapter, ~start, ~end,
   1,  "001", "139",
@@ -274,7 +294,7 @@ run_pipeline_10_9_cached <- function(sheets_dict, cooc_df, manual_df, ccs_df, va
   final_valid_df <- validate_mapping(manual_df, auto_df, ccs_df, valid_excluding_df,
                                       manual_target_col = "ICD-10-CA", target_col_name = target_col_name)
   metrics <- calculate_performance_metrics(final_valid_df)
-  list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df)
+  list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df, auto_df = auto_df)
 }
 
 run_pipeline_8_9_cached <- function(sheets_dict, cooc_df, manual_df, ccs_df, valid_excluding_df,
@@ -291,5 +311,190 @@ run_pipeline_8_9_cached <- function(sheets_dict, cooc_df, manual_df, ccs_df, val
   final_valid_df <- validate_mapping(manual_df, auto_df, ccs_df, valid_excluding_df,
                                       manual_target_col = "ICDA-8", target_col_name = target_col_name)
   metrics <- calculate_performance_metrics(final_valid_df)
-  list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df)
+  list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df, auto_df = auto_df)
+}
+
+# --- Task 3: bidirectional mapping (target -> ICD-9-CM) -----------------
+# Mirrors the forward (ICD-9-CM -> target) pipeline above, but normalizes
+# similarity/co-occurrence per TARGET row instead of per ICD-9-CM column,
+# and uses an inverted chapter-alignment table. Cosine similarity itself
+# is symmetric, so the same similarity sheets are reused -- only the
+# normalization/grouping direction changes, which is what "same
+# methodology, reverse direction" means here.
+
+invert_alignment <- function(alignment) {
+  rev <- list()
+  for (src_chapter in names(alignment)) {
+    for (tgt_chapter in alignment[[src_chapter]]) {
+      key <- as.character(tgt_chapter)
+      rev[[key]] <- unique(c(rev[[key]], as.integer(src_chapter)))
+    }
+  }
+  rev
+}
+
+chapter_alignment_10_rev <- invert_alignment(chapter_alignment_10)
+chapter_alignment_8_rev  <- invert_alignment(chapter_alignment_8)
+
+get_similarity_scores_from_sheets_reverse <- function(sheets_list, threshold, target_col_name) {
+  long_df <- purrr::map_dfr(sheets_list, function(df) {
+    id_col <- names(df)[1]
+    icd9_cols <- setdiff(names(df), id_col)
+    purrr::map_dfr(icd9_cols, function(col) {
+      tibble(ICD_9_CM = as.character(col),
+             !!target_col_name := as.character(df[[id_col]]),
+             Similarity = df[[col]])
+    })
+  })
+  long_df %>%
+    group_by(.data[[target_col_name]]) %>%
+    mutate(max_sim = suppressWarnings(max(Similarity, na.rm = TRUE))) %>%
+    filter(is.finite(max_sim), Similarity >= threshold * max_sim) %>%
+    ungroup() %>%
+    select(-max_sim)
+}
+
+get_cooccurrence_codes_from_df_reverse <- function(df, top_n, icd9_col, target_col, target_col_name) {
+  df <- as.data.frame(df)
+  names(df)[names(df) == icd9_col]  <- ".icd9"
+  names(df)[names(df) == target_col] <- ".target"
+
+  out <- df %>%
+    group_by(.target) %>%
+    slice_max(order_by = Co_Occurrence_Frequency, n = top_n, with_ties = FALSE) %>%
+    ungroup() %>%
+    transmute(
+      ICD_9_CM = as.character(.icd9),
+      .target = as.character(.target),
+      Co_Occurrence_Frequency = Co_Occurrence_Frequency
+    )
+  names(out)[names(out) == ".target"] <- target_col_name
+  out
+}
+
+merge_and_flag_reverse <- function(similarity_df, cooccurrence_df, target_col_name,
+                                    find_target_chapter_fn, chapter_alignment_rev) {
+  merged <- full_join(
+    similarity_df %>% mutate(ICD_9_CM = as.character(ICD_9_CM),
+                              !!target_col_name := as.character(.data[[target_col_name]])),
+    cooccurrence_df %>% mutate(ICD_9_CM = as.character(ICD_9_CM),
+                                !!target_col_name := as.character(.data[[target_col_name]])),
+    by = c("ICD_9_CM", target_col_name)
+  )
+
+  merged <- merged %>%
+    rowwise() %>%
+    mutate(
+      chapter_icd9cm = find_icd9cm_chapter(ICD_9_CM),
+      chapter_target = find_target_chapter_fn(.data[[target_col_name]]),
+      # note the swapped argument order vs. the forward direction: distance
+      # is looked up from the target chapter's allowed set, via the
+      # inverted alignment table
+      chapter_distance = compute_chapter_distance(chapter_target, chapter_icd9cm, chapter_alignment_rev)
+    ) %>%
+    ungroup() %>%
+    filter(!is.na(chapter_distance), chapter_distance < 1)
+
+  safe_max <- function(x) if (all(is.na(x))) NA_real_ else max(x, na.rm = TRUE)
+
+  merged <- merged %>%
+    group_by(.data[[target_col_name]]) %>%
+    mutate(
+      highest_similarity_flag   = as.integer(!is.na(Similarity) & Similarity == safe_max(Similarity)),
+      highest_cooccurrence_flag = as.integer(!is.na(Co_Occurrence_Frequency) &
+                                                Co_Occurrence_Frequency == safe_max(Co_Occurrence_Frequency)),
+      exists_in_both_flag       = as.integer(!is.na(Similarity) & !is.na(Co_Occurrence_Frequency))
+    ) %>%
+    ungroup()
+
+  merged
+}
+
+validate_mapping_reverse <- function(manual_df, auto_df, ccs_df, valid_excluding_df,
+                                      manual_target_col, target_col_name) {
+  manual_long <- manual_df %>%
+    transmute(TargetCode = as.character(.data[[manual_target_col]]),
+              ManualICD9 = as.character(`ICD-9-CM`))
+  auto_long <- auto_df %>%
+    transmute(TargetCode = as.character(.data[[target_col_name]]),
+              AutoICD9 = as.character(ICD_9_CM))
+
+  valid_df <- full_join(manual_long, auto_long, by = "TargetCode", relationship = "many-to-many")
+  valid_df <- valid_df %>% mutate(icd9_for_ccs = coalesce(ManualICD9, AutoICD9))
+
+  ccs_df <- ccs_df %>% mutate(ICD_9_CM = as.character(ICD_9_CM))
+  valid_df <- left_join(valid_df, ccs_df %>% select(ICD_9_CM, CCS_ID),
+                         by = c("icd9_for_ccs" = "ICD_9_CM"))
+
+  excluded <- as.character(valid_excluding_df$`ICD-9-CM`)
+  valid_df <- valid_df %>% filter(!(icd9_for_ccs %in% excluded))
+
+  valid_df %>%
+    mutate(
+      `True Positive`  = as.integer(!is.na(ManualICD9) & !is.na(AutoICD9) & ManualICD9 == AutoICD9),
+      `False Negative` = as.integer(!is.na(ManualICD9) & is.na(AutoICD9)),
+      `False Positive` = as.integer(is.na(ManualICD9) & !is.na(AutoICD9))
+    )
+}
+
+run_pipeline_10_9_reverse_cached <- function(sheets_dict, cooc_df, manual_df, ccs_df, valid_excluding_df,
+                                              similarity_threshold, top_n, flag_combination) {
+  target_col_name <- "ICD_10_CA"
+  similarity_df <- get_similarity_scores_from_sheets_reverse(sheets_dict, similarity_threshold, target_col_name)
+  cooccurrence_df <- get_cooccurrence_codes_from_df_reverse(cooc_df, top_n,
+                                                             icd9_col = "ICD_9_CM_Code3",
+                                                             target_col = "ICD_10_CA_Code3",
+                                                             target_col_name = target_col_name)
+  merged_df <- merge_and_flag_reverse(similarity_df, cooccurrence_df, target_col_name,
+                                       find_icd10ca_chapter, chapter_alignment_10_rev)
+  auto_df <- select_rows_by_flags(merged_df, flag_combination)
+  final_valid_df <- validate_mapping_reverse(manual_df, auto_df, ccs_df, valid_excluding_df,
+                                              manual_target_col = "ICD-10-CA", target_col_name = target_col_name)
+  metrics <- calculate_performance_metrics(final_valid_df)
+  list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df, auto_df = auto_df)
+}
+
+run_pipeline_8_9_reverse_cached <- function(sheets_dict, cooc_df, manual_df, ccs_df, valid_excluding_df,
+                                             similarity_threshold, top_n, flag_combination) {
+  target_col_name <- "ICDA_8"
+  similarity_df <- get_similarity_scores_from_sheets_reverse(sheets_dict, similarity_threshold, target_col_name)
+  cooccurrence_df <- get_cooccurrence_codes_from_df_reverse(cooc_df, top_n,
+                                                             icd9_col = "ICD_9_CM_Code",
+                                                             target_col = "ICDA_8_Code",
+                                                             target_col_name = target_col_name)
+  merged_df <- merge_and_flag_reverse(similarity_df, cooccurrence_df, target_col_name,
+                                       find_icda8_chapter, chapter_alignment_8_rev)
+  auto_df <- select_rows_by_flags(merged_df, flag_combination)
+  final_valid_df <- validate_mapping_reverse(manual_df, auto_df, ccs_df, valid_excluding_df,
+                                              manual_target_col = "ICDA-8", target_col_name = target_col_name)
+  metrics <- calculate_performance_metrics(final_valid_df)
+  list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df, auto_df = auto_df)
+}
+
+# Round-trip consistency: for each ICD-9-CM code that maps forward to some
+# target code (under the forward auto_df), check whether that target code
+# maps back to the same ICD-9-CM code under the reverse auto_df. This is a
+# self-consistency signal independent of the manual crosswalk / F1.
+compute_roundtrip_consistency <- function(forward_auto_df, reverse_auto_df, target_col_name) {
+  fwd <- forward_auto_df %>%
+    select(ICD_9_CM, !!target_col_name) %>%
+    distinct()
+  rev <- reverse_auto_df %>%
+    select(ICD_9_CM, !!target_col_name) %>%
+    distinct() %>%
+    rename(ICD_9_CM_back = ICD_9_CM)
+
+  joined <- fwd %>%
+    left_join(rev, by = target_col_name, relationship = "many-to-many") %>%
+    mutate(consistent = !is.na(ICD_9_CM_back) & ICD_9_CM_back == ICD_9_CM)
+
+  n_total <- nrow(joined)
+  n_consistent <- sum(joined$consistent, na.rm = TRUE)
+
+  list(
+    rate = if (n_total > 0) round(n_consistent / n_total, 3) else NA_real_,
+    n_total = n_total,
+    n_consistent = n_consistent,
+    detail = joined
+  )
 }
