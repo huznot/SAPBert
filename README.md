@@ -43,7 +43,7 @@ Two stages.
 
 **1. Retrieve.** For each old code, gather plausible new codes from three
 embedding models (SapBERT, mpnet, ClinicalBERT) plus historical co-occurrence.
-This stage is tuned for recall — a correct answer missed here can never be
+This stage is tuned for recall, a correct answer missed here can never be
 recovered later.
 
 **2. Rerank.** Score every candidate with a gradient-boosted model and keep the
@@ -58,7 +58,7 @@ auto-accept / review split possible.
 ### Why two stages
 
 The original pipeline kept a candidate only if its similarity was within 5% of
-the best match for that code. That sounds reasonable and is not — it threw away
+the best match for that code. That sounds reasonable and is not, it threw away
 63% of correct answers before ranking even started. Since a dropped candidate
 can never be recovered, this capped the best possible F1 at **0.77**, no matter
 what model or ranker you put downstream.
@@ -122,7 +122,7 @@ To point this at a different migration you need, per code system:
 - code labels (code → text description)
 - co-occurrence counts between old and new codes, from records coded both ways
 - a chapter/category grouping, if one exists
-- some manually verified mappings for training — a few hundred is enough
+- some manually verified mappings for training, a few hundred is enough
 
 Then swap the paths in the `TRACKS` list at the top of `11_rerank_features.R`.
 
