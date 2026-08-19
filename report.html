@@ -2107,6 +2107,22 @@ and should not be attributed to filler stripping.</p>
 <div id="filler-word-stripping-task-1-helps-clinicalbert-hurts-sapbert-model-dependent" class="section level4">
 <h4>Filler-word stripping (task 1): helps ClinicalBERT, hurts SapBERT,
 model-dependent</h4>
+<p><strong>These numbers use an older word list.</strong> The results
+below were produced with a 16-word list that included “other”, “others”,
+“unspecified”, “with” and “without”. Those five were later removed,
+because they were collapsing pairs of genuinely different codes into
+identical text: “other abdominal hernia” and “unspecified abdominal
+hernia” (K45/K46) both became “abdominal hernia”, and likewise for
+appendicitis (K36/K37). Ten codes were affected across ICD-10-CA.
+<code>scripts/15_stopword_collision_check.R</code> now checks for this
+and fails if the list in use merges any code.</p>
+<p>The <code>data/generated/*_stripped.xlsx</code> matrices have not
+been regenerated with the corrected list, so this section reflects the
+old one. Since stripping was not adopted (see the recommendation below)
+and the two-stage system in the next section does not use it, this has
+no effect on any other result in this report. Re-running
+<code>generate_embeddings.py --clean stripped</code> followed by
+<code>07_full_grid_comparison.R</code> would refresh it.</p>
 <table>
 <caption>Filler-word stripping: best-point and whole-grid
 means</caption>
