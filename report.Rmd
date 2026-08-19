@@ -258,7 +258,7 @@ every comparison here is apples-to-apples. The conditions are:
 - **ClinicalBERT-original** / **SapBERT-base** -- the two arms the existing
   baseline was built on. ClinicalBERT-original's matrices came from an
   external pipeline not present in this repo, whose generation method is
-  undocumented (still flagged in `PI_QUESTIONS.md`); SapBERT-base's
+  undocumented; SapBERT-base's
   generation is documented and validated here.
 - **ClinicalBERT-base**, **SapBERT-base-regen**, **mpnet-base** and their
   **-stripped** counterparts -- all regenerated with the same script and
@@ -704,8 +704,7 @@ the system never saw during training or tuning.
 
 ## Not implemented -- flagged for the PI
 
-Two items from the task list are intentionally not implemented; see
-`PI_QUESTIONS.md` for full detail:
+Two items from the task list are intentionally not implemented:
 
 - **Removing codes because "cosine similarity drops"** -- which codes, and
   the exact mechanism, weren't specified. Not guessed at, per instructions.

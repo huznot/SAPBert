@@ -135,7 +135,6 @@ data/generated/   regenerated / filler-stripped / mpnet matrices
 scripts/          pipeline code
 results/          csv output and charts
 report.Rmd        full write-up with methodology and caveats
-PI_QUESTIONS.md   open questions
 ```
 
 ## Limitations
