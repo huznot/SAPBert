@@ -1,0 +1,9 @@
+"reason","n","track","model","pct_of_true"
+"below similarity threshold AND outside top-N co-occurrence",302,"10_9","SapBERT",32.2
+"killed by chapter filter",48,"10_9","SapBERT",5.1
+"below similarity threshold AND outside top-N co-occurrence",291,"10_9","mpnet",31.1
+"killed by chapter filter",48,"10_9","mpnet",5.1
+"below similarity threshold AND outside top-N co-occurrence",46,"8_9","SapBERT",13.9
+"killed by chapter filter",3,"8_9","SapBERT",0.9
+"below similarity threshold AND outside top-N co-occurrence",58,"8_9","mpnet",17.5
+"killed by chapter filter",3,"8_9","mpnet",0.9

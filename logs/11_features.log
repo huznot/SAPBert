@@ -1,0 +1,35 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+######## building features for track 10_9 ########
+  loading similarity: sapbert
+  loading similarity: mpnet
+  loading similarity: clinicalbert
+  maximal pool: 54526 pairs over 354 ICD-9 codes (154.0 per code)
+  computing lexical features...
+  feature table: 53114 rows, 889 positives
+  recall ceiling of maximal pool: 0.9488 (889 / 937 true pairs)
+  positives per code: 2.58 | candidates per code: 154.0
+  wrote ../results/rerank_features_10_9.rds
+
+######## building features for track 8_9 ########
+  loading similarity: sapbert
+  loading similarity: mpnet
+  loading similarity: clinicalbert
+  maximal pool: 42978 pairs over 354 ICD-9 codes (121.4 per code)
+  computing lexical features...
+  feature table: 37219 rows, 329 positives
+  recall ceiling of maximal pool: 0.9940 (329 / 331 true pairs)
+  positives per code: 1.09 | candidates per code: 123.2
+  wrote ../results/rerank_features_8_9.rds
+
+Done.

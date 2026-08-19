@@ -1,0 +1,76 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Loading similarity matrices (once)...
+  10_9 / SapBERT: 721452 cells
+  10_9 / mpnet: 721452 cells
+  8_9 / SapBERT: 303732 cells
+  8_9 / mpnet: 303732 cells
+
+######## track 10_9 (937 true pairs) ########
+  SapBERT done
+  mpnet done
+
+######## track 8_9 (331 true pairs) ########
+  SapBERT done
+  mpnet done
+
+=== Best recall ceiling per track x model x chapter_filter ===
+  track   model chapter_filter sim_mode sim_param top_n recall_ceiling
+1  10_9 SapBERT          FALSE     topk        50    50         0.8762
+2  10_9 SapBERT           TRUE     topk        50    50         0.8442
+3  10_9   mpnet          FALSE     topk        50    50         0.9274
+4  10_9   mpnet           TRUE     topk        50    50         0.8922
+5   8_9 SapBERT          FALSE     topk        50     3         0.9758
+6   8_9 SapBERT           TRUE     topk        50     3         0.9668
+7   8_9   mpnet          FALSE     topk        50     3         0.9698
+8   8_9   mpnet           TRUE     topk        50     3         0.9607
+  pool_per_code
+1         89.15
+2         23.66
+3         87.60
+4         32.36
+5         50.64
+6         21.60
+7         50.57
+8         25.66
+
+=== Cost of the chapter filter (matched designs) ===
+  track   model mean_recall_lost mean_pool_saved_pct
+1  10_9 SapBERT           0.0209                62.4
+2  10_9   mpnet           0.0218                56.6
+3   8_9 SapBERT           0.0091                50.0
+4   8_9   mpnet           0.0091                48.8
+
+=== True pairs destroyed by the chapter filter: 51 ===
+   track chapter_icd9 chapter_target allowed_target_chapters n
+1   10_9            3              3                       4 8
+2   10_9            7              6                       9 4
+3   10_9            7             13                       9 4
+4   10_9            3             13                       4 3
+5   10_9            4              2                       3 3
+6   10_9            3              2                       4 2
+7   10_9            3             18                       4 2
+8   10_9            5              6                       5 2
+9   10_9            7             18                       9 2
+10  10_9           13             18                      13 2
+11  10_9            2             17                       2 1
+12  10_9            3              7                       4 1
+13  10_9            4              9                       3 1
+14  10_9            4             18                       3 1
+15  10_9            5             18                       5 1
+16  10_9            6              4                   6,7,8 1
+17  10_9            6              5                   6,7,8 1
+18  10_9            6             17                   6,7,8 1
+19  10_9            7              1                       9 1
+20  10_9            8             21                      10 1
+
+Written to results/candidate_generation_study.csv, results/chapter_filter_casualties.csv

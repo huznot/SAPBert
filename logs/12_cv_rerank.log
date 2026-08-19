@@ -1,0 +1,19 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+################ TRACK 10_9 ################
+53114 candidates, 345 codes, 889 positives (pool ceiling 0.9488 of 937 true pairs)
+Precomputing baseline pipeline emissions...
+  SapBERT done
+  ClinicalBERT done
+
+--- outer fold 1/5 (276 train codes, 69 test codes) ---
