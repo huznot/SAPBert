@@ -36,10 +36,9 @@ MODEL_IDS = {
     "mpnet": "sentence-transformers/all-mpnet-base-v2",
 }
 
-# clinicalbert/sapbert: raw transformers + CLS token, matching the
-# methodology already validated in 01_generate_sapbert_embeddings.R
-# (report.Rmd flags that going through reticulate for this silently
-# gives wrong numbers -- running pure Python side-steps that entirely).
+# clinicalbert/sapbert: raw transformers + CLS token, same as
+# 01_generate_sapbert_embeddings.R. Kept in pure Python because reticulate
+# returns wrong numbers for this.
 CLS_MODELS = {"clinicalbert", "sapbert"}
 
 

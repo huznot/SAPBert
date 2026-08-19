@@ -8,7 +8,7 @@
 # precision and how much of the crosswalk it builds there, and a triage split
 # of auto-accept / review / no candidate.
 #
-# Runs off the out-of-fold predictions from 12_, so these are honest.
+# Uses the out-of-fold predictions from 12_.
 source("pipeline_lib.R")
 
 OUT_DIR <- "../results"

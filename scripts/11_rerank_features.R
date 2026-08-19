@@ -154,9 +154,8 @@ for (tr in names(TRACKS)) {
   for (m in names(sims)) feat <- feat %>% left_join(sims[[m]], by = c("ICD_9_CM", "target"))
   feat <- feat %>% left_join(cooc, by = c("ICD_9_CM", "target"))
 
-  # a candidate present in the co-occurrence table but absent from the
-  # similarity matrix (or vice versa) is informative, so record presence
-  # explicitly and give the missing numeric a neutral floor rather than NA
+  # a candidate in one source but not the other is informative, so flag it and
+  # floor the missing numbers instead of leaving NA
   feat <- feat %>%
     mutate(has_cooc = as.integer(!is.na(cooc_freq)),
            cooc_freq  = ifelse(is.na(cooc_freq), 0, cooc_freq),
@@ -172,10 +171,9 @@ for (tr in names(TRACKS)) {
     }
   }
 
-  # --- ensemble features ("mix the models") ----------------------------
-  # Rank fusion rather than raw-score averaging: cosine scales differ between
-  # models, ranks do not, so reciprocal rank fusion combines them without
-  # needing calibration.
+  # --- ensemble across models ------------------------------------------
+  # Fuse ranks, not raw scores: cosine scales differ between models, ranks do
+  # not, so no calibration needed.
   rank_cols    <- paste0("simrank_",    names(sims))
   rel_cols     <- paste0("simrel_",     names(sims))
   rankrev_cols <- paste0("simrankrev_", names(sims))
@@ -242,7 +240,7 @@ for (tr in names(TRACKS)) {
            target_is_best_here = as.integer(target_rank_here == 1)) %>%
     ungroup()
 
-  # --- label (target variable only; never used as a feature) ------------
+  # --- label ------------------------------------------------------------
   manual <- read_excel(VAL_XLSX, sheet = tk$manual_sheet)
   excl   <- read_excel(VAL_XLSX, sheet = tk$excl_sheet)
   excluded <- as.character(excl$`ICD-9-CM`)

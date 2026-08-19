@@ -185,10 +185,10 @@ for (tr in SELECTED_TRACKS) {
     #
     # Train once per inner fold on the full pool, then test every config by
     # filtering the scored rows. Retrieval only decides which candidates are
-    # eligible, not what they look like, so retraining per config (54 fits per
-    # outer fold) was wasted work. Now 3 fits.
+    # eligible, not what they look like, so retraining per config was wasted
+    # work: 54 fits per outer fold down to 3.
     #
-    # Note this changes the procedure, not just the speed: the ranker trains on
+    # This does change the procedure, not just the speed. The ranker trains on
     # the full pool and retrieval becomes an inference-time filter.
     inner_folds <- make_folds(train_codes, N_INNER)
     fcols <- c(FEATURE_COLS, "chapter_rate")
@@ -223,7 +223,7 @@ for (tr in SELECTED_TRACKS) {
     cat(sprintf("  inner-CV pick: K=%d N=%d chapter=%s tau=%.2f rho=%.2f (inner F1 %.3f)\n",
                 best$cfg$K, best$cfg$N, best$cfg$chapter, best$tau, best$rho, best$f1))
 
-    # ===== fit on full training set, predict the untouched test fold =====
+    # fit on the full training set, predict the test fold
     tr_df <- train_full
     te_df <- feat %>% filter(ICD_9_CM %in% test_codes)
     ce <- fit_chapter_encoding(tr_df)
@@ -237,7 +237,7 @@ for (tr in SELECTED_TRACKS) {
     m_rr <- score_pairs(em, truth, test_codes)
     oof_pred[[fi]] <- te_df %>% mutate(.tau = best$tau, .rho = best$rho, fold = fi)
 
-    # ===== baseline under the SAME protocol =====
+    # baseline, same protocol
     best_key <- NULL; best_bf1 <- -1
     for (k in base_keys) {
       mm <- score_pairs(base_emit[[k]], truth, train_codes)
@@ -280,7 +280,7 @@ for (tr in SELECTED_TRACKS) {
 
   # in-sample baseline: best config scored on everything
   # index by position: score_pairs returns a named vector, so sapply names come
-  # out as "SapBERT|0.95|3|1.f1" and the lookup silently returns NULL
+  # out as "SapBERT|0.95|3|1.f1" and the lookup returns NULL
   in_sample <- vapply(base_keys,
                       function(k) unname(score_pairs(base_emit[[k]], truth, codes)["f1"]),
                       numeric(1))

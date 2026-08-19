@@ -1,14 +1,8 @@
 source("pipeline_lib.R")
 
-# Task 3: reverse-direction mapping (target -> ICD-9-CM) plus round-trip
-# consistency. Uses the SAME (similarity_threshold, top_n, flag_combination)
-# already found best for the forward direction in 02_run_comparison.R
-# (results/best_by_model.csv) rather than an independent reverse grid
-# search -- the pipeline "methodology" (chapter filtering + similarity
-# threshold + top-N co-occurrence + flag rule) is identical in both
-# directions, only the forward-vs-reverse grid search would double an
-# already expensive sweep for a number the task doesn't ask for. Flagged
-# here for the record rather than silently assumed.
+# Reverse mapping (target -> ICD-9-CM) and round-trip consistency.
+# Reuses the forward parameters from best_by_model.csv instead of running a
+# separate reverse grid search.
 
 ORIG_BASE    <- "../data/original"
 SAPBERT_BASE <- "../data/sapbert"
