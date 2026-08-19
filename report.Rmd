@@ -58,12 +58,14 @@ clustering methodology is not used here, only cited as motivation.
    (`scripts/pipeline_lib.R`): chapter-distance filtering, similarity
    threshold cutoff, top-N co-occurrence selection, one of four
    flag-combination rules, and validation against the manual crosswalk.
-3. **Parameter grid.** Similarity threshold in {0.95, 0.99, 0.995,
-   0.999} and flag rule in {1, 2, 3, 4} for both tracks. Top-N
-   co-occurrence is {3, 5, 10, 15} for ICD-9-CM -> ICDA-8. For
-   ICD-9-CM -> ICD-10-CA it's {5, 10, 15, 20, 25, 30}: the original
-   {3, 5, 10, 15} range was too narrow and was cutting off the actual
-   best combination for that track.
+3. **Parameter grid.** Similarity threshold in {0.95, 0.99, 0.995, 0.999},
+   top-N co-occurrence in {3, 5, 10, 15, 20, 25, 30}, and flag rule in
+   {1, 2, 3, 4} -- the same grid on both tracks. That top-N range is a
+   strict superset of the two ranges used historically ({3, 5, 10, 15}
+   originally, {5, 10, 15, 20, 25, 30} in a first attempt at a fix), so no
+   earlier result can be lost. The original range was too narrow: the true
+   optimum on ICD-9-CM -> ICD-10-CA sits at top_n = 30 for both models,
+   outside it. See the verification section.
 4. **Comparison.** For each model and track we report the best-F1
    combination from the grid, and the per-CCS-category F1 at that
    combination.
@@ -451,6 +453,254 @@ users receive), so this report implements the metric-only version by
 default. Please confirm with Dr. Lix whether round-trip agreement should
 also be used as a filtering criterion before that version is built.
 ```
+
+## Where the accuracy ceiling actually comes from
+
+Everything above compares embedding models against each other. That framing
+quietly assumes the embedding is what limits accuracy. It is worth testing
+that assumption directly, because it turns out to be false, and the real
+constraint is somewhere else entirely.
+
+```{r ceiling-setup, include=FALSE}
+have_ceiling <- file.exists(file.path(RESULTS, "error_analysis_summary.csv"))
+if (have_ceiling) ea <- read.csv(file.path(RESULTS, "error_analysis_summary.csv"))
+have_candgen <- file.exists(file.path(RESULTS, "candidate_generation_study.csv"))
+if (have_candgen) cg <- read.csv(file.path(RESULTS, "candidate_generation_study.csv"))
+```
+
+The pipeline has two stages that fail in different ways. **Candidate
+generation** (similarity threshold + top-N co-occurrence + chapter filter)
+decides which (ICD-9, target) pairs are even considered. **Selection** (the
+flag rules) picks which of those to emit. The asymmetry matters: a true pair
+missing from the candidate pool is *unrecoverable*, because no selection rule
+downstream can retrieve something that was never a candidate. That makes the
+pool's recall an absolute ceiling on the whole system.
+
+`scripts/09_error_analysis.R` measures it, including an **oracle**: the F1 a
+*perfect* selector would achieve if it picked exactly the true pairs out of
+the pool and nothing else.
+
+```{r ceiling-table, eval=have_ceiling}
+ea %>%
+  mutate(Track = recode(track, `10_9` = "ICD-9 -> ICD-10-CA", `8_9` = "ICD-9 -> ICDA-8")) %>%
+  select(Track, Model = model,
+         `% reachable in matrix` = pct_in_universe,
+         `% pass threshold` = pct_pass_threshold,
+         `% in candidate pool` = pct_in_pool,
+         `% emitted` = pct_emitted,
+         `Actual F1` = actual_f1, `Oracle F1` = oracle_f1,
+         `Headroom` = headroom_f1) %>%
+  kable(digits = 3, caption = "Where true pairs are lost, and the resulting ceiling")
+```
+
+Three things follow, and they reframe the project:
+
+1. **100% of true target codes are present in the similarity matrix.** The
+   embeddings already "know" every correct answer. Nothing is missing at the
+   representation level, for any model tested.
+2. **Only 62.6% of them survive into the candidate pool** on ICD-10-CA. The
+   single biggest loss is the similarity cut: the threshold is applied
+   *relative to each code's own maximum* (keep `sim >= 0.95 * max_sim`),
+   which admits just 37% of true pairs. A further 5.1% are destroyed by the
+   chapter filter.
+3. **Therefore oracle F1 is 0.770 (ICD-10-CA) and 0.920 (ICDA-8).** Every
+   model comparison earlier in this report was competing for a share of that
+   fixed budget. No embedding model, ensemble, or reranker could have
+   exceeded 0.770 while candidate generation stayed as it was. The observed
+   differences between ClinicalBERT, SapBERT and mpnet are real, but they
+   were never the thing holding the system back.
+
+The pipeline also emits about 1.7 targets per code while the manual
+crosswalk averages 2.7, so it systematically under-predicts: 63% of ICD-9
+codes map to more than one target (up to 13), which a rule tuned to emit a
+single best match cannot represent.
+
+### Raising the ceiling
+
+`scripts/10_candidate_generation_study.R` sweeps candidate generation
+itself. Replacing the relative-threshold rule with plain **top-K retrieval**
+changes the picture completely:
+
+| Track | Old recall ceiling | Top-K ceiling | Oracle F1 |
+|---|---|---|---|
+| ICD-9 -> ICD-10-CA | 0.626 | **0.927** | 0.770 -> **0.96** |
+| ICD-9 -> ICDA-8 | 0.852 | **0.976** | 0.920 -> **0.99** |
+
+The cost is a much larger pool (~90 candidates per code rather than ~8), so
+precision has to be *earned back by ranking* instead of by refusing to
+retrieve. That trade is the right way round: recall lost at retrieval is
+gone forever, precision lost at retrieval is recoverable later.
+
+The study also quantifies the chapter filter: it removes ~2% of true pairs
+in exchange for cutting the pool roughly in half. Inspecting the casualties
+(`results/chapter_filter_casualties.csv`) shows the hand-written alignment
+table is genuinely incomplete rather than merely strict -- for example ICD-9
+chapter 3 is "endocrine, nutritional, metabolic **and immunity**" but is
+never permitted to map to ICD-10 D80-D89 (immunity disorders), which costs 8
+true pairs on its own. The table is deliberately **not** hand-patched here:
+editing it until it covers the validation answers would be fitting it to the
+test set. Instead chapter-pair compatibility is learned from training folds
+only (below).
+
+## A two-stage retrieve-and-rerank system, evaluated held-out
+
+```{r cv-setup, include=FALSE}
+have_cv <- file.exists(file.path(RESULTS, "cv_rerank_results.csv"))
+if (have_cv) {
+  cvr <- read.csv(file.path(RESULTS, "cv_rerank_results.csv"), check.names = FALSE)
+  # 12_cv_rerank.R writes each method's four metrics into its own block of
+  # columns, so exactly four values are non-NA per row, in the order
+  # precision, recall, f1, accuracy. Collapse them back to a tidy table.
+  vals <- t(apply(cvr[, -(1:2), drop = FALSE], 1, function(r) as.numeric(r[!is.na(r)])))
+  colnames(vals) <- c("precision", "recall", "f1", "accuracy")
+  cv_tidy <- bind_cols(cvr[, 1:2], as.data.frame(vals))
+  cv_folds <- read.csv(file.path(RESULTS, "cv_rerank_folds.csv"))
+  cv_imp   <- read.csv(file.path(RESULTS, "cv_rerank_importance.csv"))
+}
+have_pc <- file.exists(file.path(RESULTS, "precision_coverage_operating_points.csv"))
+if (have_pc) {
+  pc_ops    <- read.csv(file.path(RESULTS, "precision_coverage_operating_points.csv"))
+  pc_triage <- read.csv(file.path(RESULTS, "precision_coverage_triage.csv"))
+}
+```
+
+### Methodology, and why the earlier numbers are not generalization estimates
+
+Every figure reported before this section was produced by sweeping
+parameters and reporting the maximum, scored on the same 937 / 331 manual
+pairs the sweep was searching over. That is selection on the test set. Those
+numbers are fine for *comparing* arms that all received the same treatment,
+but they are not estimates of behaviour on unseen codes and must not be
+presented as such.
+
+This section fixes that:
+
+- **Outer 5-fold cross-validation, grouped by ICD-9 code.** A code and all
+  of its candidates live entirely within one fold. Grouping is essential:
+  a random split over *pairs* would place some of a code's true targets in
+  training and others in test, effectively revealing the answer.
+- **Everything fitted inside the training folds** -- the reranker, the
+  retrieval setting (K, N, chapter on/off), the decision rule, and the
+  chapter-compatibility encoding. Each test fold is touched once, to predict.
+- **The baseline is evaluated under the identical protocol**: its
+  (threshold, top_n, flag) are tuned on each fold's training codes and
+  applied to that fold's test codes. So the comparison below is held-out
+  versus held-out, not held-out versus tuned-on-everything.
+
+Stage 1 retrieves a high-recall pool (ceiling 0.949 / 0.994). Stage 2 is an
+xgboost reranker over features spanning per-model similarity and rank,
+reciprocal-rank fusion across SapBERT/mpnet/ClinicalBERT, inter-model
+disagreement, mutual (forward-and-reverse) agreement, co-occurrence,
+learned chapter compatibility, and deliberately non-neural lexical signals
+(IDF-weighted token overlap, Jaccard, edit distance).
+
+### Results
+
+```{r cv-table, eval=have_cv}
+cv_tidy %>%
+  mutate(Track = recode(track, `10_9` = "ICD-9 -> ICD-10-CA", `8_9` = "ICD-9 -> ICDA-8"),
+         Method = recode(method,
+           baseline_in_sample  = "Baseline (in-sample, old method)",
+           baseline_heldout_cv = "Baseline (held-out CV)",
+           rerank_heldout_cv   = "Two-stage reranker (held-out CV)")) %>%
+  select(Track, Method, Precision = precision, Recall = recall,
+         F1 = f1, Accuracy = accuracy) %>%
+  kable(digits = 3, caption = "Held-out performance, grouped 5-fold CV")
+```
+
+Two observations matter more than the headline F1:
+
+**The old pipeline was capped, not overfitted.** Its in-sample and held-out
+F1 are nearly identical on ICD-10-CA (0.547 vs 0.546). The
+selection-on-test concern flagged in the Caveats turns out to be minor in
+practice -- the parameter sweep was not buying itself much illusory
+performance. What was limiting it was the retrieval ceiling, exactly as the
+oracle analysis predicted.
+
+**The gain is recall, at roughly constant precision.** On ICD-10-CA recall
+moves 0.451 -> 0.567 while precision moves 0.691 -> 0.668. That is the
+signature of fixing candidate generation rather than of a cleverer
+classifier, which is the result the ceiling analysis predicted and is the
+main evidence that the diagnosis was correct.
+
+Being straightforward about the size of the effect: the ICD-10-CA
+improvement is substantial (+0.068 F1 held-out), the ICDA-8 improvement is
+small (+0.014). ICDA-8 was already close to its ceiling, so there was far
+less to recover.
+
+```{r cv-folds, eval=have_cv}
+cv_folds %>%
+  mutate(Track = recode(track, `10_9` = "ICD-9 -> ICD-10-CA", `8_9` = "ICD-9 -> ICDA-8")) %>%
+  select(Track, Fold = fold, `Test codes` = n_test_codes,
+         `Baseline F1` = baseline_f1, `Reranker F1` = rerank_f1,
+         K, N, chapter, tau, rho) %>%
+  kable(digits = 3, caption = "Per-fold detail, including the retrieval and decision settings each fold chose on its own training data")
+```
+
+```{r cv-importance, eval=have_cv}
+cv_imp %>% group_by(track) %>% slice_max(gain, n = 8) %>% ungroup() %>%
+  mutate(Track = recode(track, `10_9` = "ICD-9 -> ICD-10-CA", `8_9` = "ICD-9 -> ICDA-8")) %>%
+  select(Track, Feature, `Mean gain` = gain) %>%
+  kable(digits = 4, caption = "Most informative reranker features (mean xgboost gain across folds)")
+```
+
+## Deployment view: precision at coverage
+
+F1 answers "how good is the system if it must answer everything?", which is
+the wrong question for a crosswalk that would actually be used. Some ICD-9
+codes genuinely have no counterpart, because terminology was added or
+restructured between revisions. A usable tool does not have to be right
+about every code -- it has to **know which codes it is right about**, so a
+coder can accept those without checking and spend their time on the rest.
+
+So the operationally meaningful question is: *if we insist on being right
+95% of the time, how much of the crosswalk can we build automatically?*
+All figures below are computed from out-of-fold predictions.
+
+```{r pc-ops, eval=have_pc}
+pc_ops %>%
+  mutate(Track = recode(track, `10_9` = "ICD-9 -> ICD-10-CA", `8_9` = "ICD-9 -> ICDA-8")) %>%
+  select(Track, `Precision target` = precision_target, Threshold = tau,
+         `Mappings emitted` = n_emitted, `Code coverage` = code_coverage,
+         `Actual precision` = precision, Recall = recall) %>%
+  kable(digits = 3, caption = "Operating points at target precision (out-of-fold)")
+```
+
+```{r pc-triage, eval=have_pc}
+pc_triage %>%
+  mutate(Track = recode(track, `10_9` = "ICD-9 -> ICD-10-CA", `8_9` = "ICD-9 -> ICDA-8")) %>%
+  select(Track, Bucket = bucket, Codes = n, `%` = pct) %>%
+  kable(digits = 1, caption = "Triage at the 95%-precision operating point")
+```
+
+At ~95% precision the system builds **76.6% of the ICDA-8 crosswalk** and
+**38.5% of the ICD-10-CA crosswalk** with no human involvement, leaving
+13.9% and 20.3% of codes respectively for review, and only 1.0% / 0.6% with
+no plausible candidate at all. Requiring ~99% precision still auto-builds
+57.5% of ICDA-8.
+
+For a deployment, that is the number that matters: three-quarters of the
+ICDA-8 crosswalk needs no human at all at 95% precision, measured on codes
+the system never saw during training or tuning.
+
+![Precision-recall behaviour of the reranker, out-of-fold](results/plot_precision_coverage.png)
+
+### Honest limits
+
+- **Near-perfect accuracy on ICD-10-CA is not attainable and is not being
+  claimed.** 63% of codes map to multiple targets, the boundaries are
+  genuine clinical judgement calls, and human coders disagree on them. The
+  reranker currently recovers roughly a third of the available headroom
+  (0.614 against a ~0.97 oracle); the remaining gap is a ranking problem,
+  not a retrieval one.
+- **Do not compare 0.614 / 0.833 against the earlier 0.530 / 0.821.** Those
+  earlier figures are in-sample. The like-for-like comparison is against the
+  held-out baseline, 0.546 / 0.819.
+- The validation set remains small (937 and 331 pairs, 345 and 302 distinct
+  ICD-9 codes). Fold-to-fold variation is visible in the per-fold table and
+  the pooled figures should be read with that in mind.
+- Results are reported for two specific target classifications; nothing here
+  establishes that the approach transfers to other crosswalks.
 
 ## Not implemented -- flagged for the PI
 

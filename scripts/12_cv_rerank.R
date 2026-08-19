@@ -81,7 +81,17 @@ make_folds <- function(codes, k) {
 
 all_rows <- list(); fold_rows <- list(); imp_rows <- list(); pred_rows <- list()
 
-for (tr in names(TRACKS)) {
+# Optional track filter, so the two tracks can be run as parallel background
+# processes:  Rscript 12_cv_rerank.R 10_9   /   Rscript 12_cv_rerank.R 8_9
+# With no argument both run sequentially, as before. Each track writes its
+# own *_<track>.rds pieces; the combined CSVs are written by whichever
+# invocation runs last, so 12b_merge_cv_results.R exists to stitch parallel
+# runs back together.
+.args <- commandArgs(trailingOnly = TRUE)
+SELECTED_TRACKS <- if (length(.args)) .args else names(TRACKS)
+stopifnot(all(SELECTED_TRACKS %in% names(TRACKS)))
+
+for (tr in SELECTED_TRACKS) {
   tk <- TRACKS[[tr]]
   cat(sprintf("\n################ TRACK %s ################\n", tr))
 
@@ -96,26 +106,36 @@ for (tr in names(TRACKS)) {
     c("ICD_9_CM","target","y","icd9_label","target_label","chapter_pair","CCS_ID",
       "chapter_icd9","chapter_target"))
 
-  # ---- baseline emissions for every (thr, top_n, flag), computed once ----
-  cat("Precomputing baseline pipeline emissions...\n")
-  cooc_df <- load_cooccurrence_df(file.path(ORIG_BASE, tk$cooc_file))
-  base_emit <- list()
-  for (mdl in names(tk$sim)) {
-    sheets <- load_similarity_sheets(tk$sim[[mdl]])
-    for (thr in c(0.95, 0.99, 0.995, 0.999)) {
-      sim_df <- get_similarity_scores_from_sheets(sheets, thr, tk$tcn)
-      for (tn in c(3,5,10,15,20,25,30)) {
-        cdf <- get_cooccurrence_codes_from_df(cooc_df, tn, tk$icd9_col, tk$target_col, tk$tcn)
-        merged <- merge_and_flag(sim_df, cdf, tk$tcn, tk$find_fn, tk$align)
-        for (fc in 1:4) {
-          key <- sprintf("%s|%s|%s|%s", mdl, thr, tn, fc)
-          base_emit[[key]] <- select_rows_by_flags(merged, fc) %>%
-            transmute(ICD_9_CM = as.character(ICD_9_CM), target = as.character(.data[[tk$tcn]])) %>%
-            distinct()
+  # ---- baseline emissions for every (thr, top_n, flag) ----
+  # These depend only on the input data, never on the CV split, so they are
+  # cached to disk: recomputing 224 merge_and_flag passes on every run was
+  # pure waste. Delete results/base_emit_<track>.rds to force a rebuild.
+  base_cache <- file.path(OUT_DIR, sprintf("base_emit_%s.rds", tr))
+  if (file.exists(base_cache)) {
+    cat("Loading cached baseline emissions...\n")
+    base_emit <- readRDS(base_cache)
+  } else {
+    cat("Precomputing baseline pipeline emissions (first run only)...\n")
+    cooc_df <- load_cooccurrence_df(file.path(ORIG_BASE, tk$cooc_file))
+    base_emit <- list()
+    for (mdl in names(tk$sim)) {
+      sheets <- load_similarity_sheets(tk$sim[[mdl]])
+      for (thr in c(0.95, 0.99, 0.995, 0.999)) {
+        sim_df <- get_similarity_scores_from_sheets(sheets, thr, tk$tcn)
+        for (tn in c(3,5,10,15,20,25,30)) {
+          cdf <- get_cooccurrence_codes_from_df(cooc_df, tn, tk$icd9_col, tk$target_col, tk$tcn)
+          merged <- merge_and_flag(sim_df, cdf, tk$tcn, tk$find_fn, tk$align)
+          for (fc in 1:4) {
+            key <- sprintf("%s|%s|%s|%s", mdl, thr, tn, fc)
+            base_emit[[key]] <- select_rows_by_flags(merged, fc) %>%
+              transmute(ICD_9_CM = as.character(ICD_9_CM), target = as.character(.data[[tk$tcn]])) %>%
+              distinct()
+          }
         }
       }
+      cat(sprintf("  %s done\n", mdl))
     }
-    cat(sprintf("  %s done\n", mdl))
+    saveRDS(base_emit, base_cache)
   }
   base_keys <- names(base_emit)
 
@@ -153,10 +173,10 @@ for (tr in names(TRACKS)) {
   train_ranker <- function(train_df, feature_cols) {
     dtrain <- xgb.DMatrix(as.matrix(train_df[, feature_cols]), label = train_df$y)
     xgb.train(params = list(objective = "binary:logistic", eval_metric = "logloss",
-                            max_depth = 6, eta = 0.05, subsample = 0.8,
+                            max_depth = 6, eta = 0.1, subsample = 0.8,
                             colsample_bytree = 0.8, min_child_weight = 5,
-                            nthread = 4),
-              data = dtrain, nrounds = 400, verbose = 0)
+                            nthread = parallel::detectCores()),
+              data = dtrain, nrounds = 200, verbose = 0)
   }
 
   # EMISSION RULE. A single global probability threshold fits this task badly:
@@ -190,28 +210,46 @@ for (tr in names(TRACKS)) {
 
     train_full <- feat %>% filter(ICD_9_CM %in% train_codes)
 
-    # ===== inner CV: choose retrieval config + decision threshold =====
+    # ===== inner CV: choose retrieval config + decision rule =====
+    #
+    # PERFORMANCE NOTE. The obvious implementation retrains the ranker once
+    # per retrieval config, which is 18 configs x 3 inner folds = 54 fits per
+    # outer fold (540 per track). That is almost entirely wasted work: the
+    # retrieval config only decides WHICH CANDIDATES ARE ELIGIBLE, it does
+    # not change what a candidate looks like. So train ONCE per inner fold on
+    # the full maximal pool, then evaluate every config by filtering the
+    # already-scored rows. 54 fits -> 3 fits per outer fold, ~18x less compute
+    # for the same search.
+    #
+    # This is a deliberate design choice, not just an optimization: the
+    # ranker now sees the full pool during training (more data, and more
+    # informative negatives), and retrieval acts purely as an inference-time
+    # candidate restriction. That is the standard retrieve-then-rerank
+    # arrangement. It is a genuinely different procedure from the
+    # train-on-filtered-pool version, so it is stated here rather than
+    # presented as an identical refactor.
     inner_folds <- make_folds(train_codes, N_INNER)
+    fcols <- c(FEATURE_COLS, "chapter_rate")
+
+    inner_scored <- list()
+    for (ii in seq_along(inner_folds)) {
+      va_codes <- inner_folds[[ii]]
+      tr_codes <- setdiff(train_codes, va_codes)
+      tr_df <- train_full %>% filter(ICD_9_CM %in% tr_codes)
+      va_df <- train_full %>% filter(ICD_9_CM %in% va_codes)
+      if (nrow(tr_df) == 0 || nrow(va_df) == 0 || sum(tr_df$y) == 0) next
+      ce <- fit_chapter_encoding(tr_df)
+      tr_df <- apply_chapter_encoding(tr_df, ce); va_df <- apply_chapter_encoding(va_df, ce)
+      bst_i <- train_ranker(tr_df, fcols)
+      va_df$.p_score <- predict(bst_i, as.matrix(va_df[, fcols]))
+      inner_scored[[length(inner_scored)+1]] <- va_df
+    }
+    isc_all <- bind_rows(inner_scored)
+
     best <- list(f1 = -1)
-    for (cfg_i in seq_along(RETRIEVAL)) {
-      cfg <- RETRIEVAL[[cfg_i]]
-      inner_scored <- list()
-      for (ii in seq_along(inner_folds)) {
-        va_codes <- inner_folds[[ii]]
-        tr_codes <- setdiff(train_codes, va_codes)
-        tr_df <- apply_retrieval(train_full %>% filter(ICD_9_CM %in% tr_codes), cfg)
-        va_df <- apply_retrieval(train_full %>% filter(ICD_9_CM %in% va_codes), cfg)
-        if (nrow(tr_df) == 0 || nrow(va_df) == 0 || sum(tr_df$y) == 0) next
-        ce <- fit_chapter_encoding(tr_df)
-        tr_df <- apply_chapter_encoding(tr_df, ce); va_df <- apply_chapter_encoding(va_df, ce)
-        fcols <- c(FEATURE_COLS, "chapter_rate")
-        bst <- train_ranker(tr_df, fcols)
-        va_df$.p_score <- predict(bst, as.matrix(va_df[, fcols]))
-        inner_scored[[length(inner_scored)+1]] <- va_df
-      }
-      if (!length(inner_scored)) next
-      isc <- bind_rows(inner_scored)
-      # sweep the emission rule on the inner out-of-fold predictions only
+    for (cfg in RETRIEVAL) {
+      isc <- apply_retrieval(isc_all, cfg)
+      if (nrow(isc) == 0) next
       for (tau in seq(0.05, 0.95, by = 0.05)) {
         for (rho in c(0.3, 0.5, 0.7, 0.85, 1.0)) {
           em <- emit_from_scores(isc, tau, rho)
@@ -224,13 +262,14 @@ for (tr in names(TRACKS)) {
                 best$cfg$K, best$cfg$N, best$cfg$chapter, best$tau, best$rho, best$f1))
 
     # ===== fit on full training set, predict the untouched test fold =====
-    tr_df <- apply_retrieval(train_full, best$cfg)
-    te_df <- apply_retrieval(feat %>% filter(ICD_9_CM %in% test_codes), best$cfg)
+    tr_df <- train_full
+    te_df <- feat %>% filter(ICD_9_CM %in% test_codes)
     ce <- fit_chapter_encoding(tr_df)
     tr_df <- apply_chapter_encoding(tr_df, ce); te_df <- apply_chapter_encoding(te_df, ce)
-    fcols <- c(FEATURE_COLS, "chapter_rate")
     bst <- train_ranker(tr_df, fcols)
     te_df$.p_score <- predict(bst, as.matrix(te_df[, fcols]))
+    # retrieval applied at inference, as an eligibility filter
+    te_df <- apply_retrieval(te_df, best$cfg)
 
     em <- emit_from_scores(te_df, best$tau, best$rho)
     m_rr <- score_pairs(em, truth, test_codes)
@@ -308,6 +347,16 @@ for (tr in names(TRACKS)) {
 }
 
 results <- bind_rows(all_rows)
+
+# per-track artifacts, so parallel invocations never clobber each other
+for (tr in SELECTED_TRACKS) {
+  saveRDS(list(results = results %>% filter(track == tr),
+               folds   = bind_rows(fold_rows) %>% filter(track == tr),
+               imp     = bind_rows(imp_rows) %>% filter(track == tr),
+               preds   = bind_rows(pred_rows) %>% filter(track == tr)),
+          file.path(OUT_DIR, sprintf("cv_rerank_part_%s.rds", tr)))
+}
+
 write.csv(results, file.path(OUT_DIR, "cv_rerank_results.csv"), row.names = FALSE)
 write.csv(bind_rows(fold_rows), file.path(OUT_DIR, "cv_rerank_folds.csv"), row.names = FALSE)
 saveRDS(bind_rows(pred_rows), file.path(OUT_DIR, "cv_rerank_predictions.rds"))

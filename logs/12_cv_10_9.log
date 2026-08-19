@@ -1,0 +1,83 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+################ TRACK 10_9 ################
+53114 candidates, 345 codes, 889 positives (pool ceiling 0.9488 of 937 true pairs)
+Precomputing baseline pipeline emissions (first run only)...
+  SapBERT done
+  ClinicalBERT done
+
+--- outer fold 1/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=10 chapter=FALSE tau=0.35 rho=0.85 (inner F1 0.635)
+  baseline pick on train: SapBERT|0.95|30|4 (train F1 0.537)
+  TEST FOLD  baseline F1 0.586 | reranker F1 0.732
+
+--- outer fold 2/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=50 N=50 chapter=FALSE tau=0.45 rho=0.70 (inner F1 0.662)
+  baseline pick on train: SapBERT|0.95|25|4 (train F1 0.538)
+  TEST FOLD  baseline F1 0.581 | reranker F1 0.637
+
+--- outer fold 3/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=50 chapter=FALSE tau=0.30 rho=0.85 (inner F1 0.648)
+  baseline pick on train: SapBERT|0.95|30|4 (train F1 0.541)
+  TEST FOLD  baseline F1 0.574 | reranker F1 0.675
+
+--- outer fold 4/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=50 chapter=FALSE tau=0.35 rho=0.85 (inner F1 0.683)
+  baseline pick on train: SapBERT|0.95|30|4 (train F1 0.570)
+  TEST FOLD  baseline F1 0.467 | reranker F1 0.634
+
+--- outer fold 5/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=50 chapter=FALSE tau=0.30 rho=0.70 (inner F1 0.656)
+  baseline pick on train: SapBERT|0.95|30|4 (train F1 0.549)
+  TEST FOLD  baseline F1 0.537 | reranker F1 0.665
+
+===== TRACK 10_9 POOLED RESULTS =====
+  baseline, IN-SAMPLE (old method)   : P 0.692 R 0.452 F1 0.547 Acc 0.376
+  baseline, held-out CV              : P 0.691 R 0.451 F1 0.546 Acc 0.375
+  RERANKER, held-out CV              : P 0.742 R 0.607 F1 0.668 Acc 0.501
+
+
+================ FINAL ================
+  track              method t(m_bl_insample).precision t(m_bl_insample).recall
+1  10_9  baseline_in_sample                      0.692                   0.452
+2  10_9 baseline_heldout_cv                         NA                      NA
+3  10_9   rerank_heldout_cv                         NA                      NA
+  t(m_bl_insample).f1 t(m_bl_insample).accuracy t(m_bl_all).precision
+1               0.547                     0.376                    NA
+2                  NA                        NA                 0.691
+3                  NA                        NA                    NA
+  t(m_bl_all).recall t(m_bl_all).f1 t(m_bl_all).accuracy t(m_rr_all).precision
+1                 NA             NA                   NA                    NA
+2              0.451          0.546                0.375                    NA
+3                 NA             NA                   NA                 0.742
+  t(m_rr_all).recall t(m_rr_all).f1 t(m_rr_all).accuracy
+1                 NA             NA                   NA
+2                 NA             NA                   NA
+3              0.607          0.668                0.501
+
+--- top features by mean gain ---
+   track           Feature       gain
+1   10_9    ens_mutual_rel 0.38880252
+2   10_9      chapter_rate 0.13122371
+3   10_9          cooc_rel 0.05264034
+4   10_9  target_n_suitors 0.02291154
+5   10_9         cooc_freq 0.02124830
+6   10_9      lex_idf_rank 0.01853271
+7   10_9   ens_mean_relrev 0.01794621
+8   10_9  target_rank_here 0.01592539
+9   10_9         cooc_rank 0.01568437
+10  10_9  chapter_distance 0.01412111
+11  10_9      n_candidates 0.01299292
+12  10_9 ens_direction_gap 0.01280342
+
+Written to results/cv_rerank_*.csv

@@ -1,7 +1,7 @@
 "track","method","t(m_bl_insample).1","t(m_bl_insample).2","t(m_bl_insample).3","t(m_bl_insample).4","t(m_bl_all).1","t(m_bl_all).2","t(m_bl_all).3","t(m_bl_all).4","t(m_rr_all).1","t(m_rr_all).2","t(m_rr_all).3","t(m_rr_all).4"
 "10_9","baseline_in_sample",0.6919105,0.4521935,0.5469388,0.3764045,NA,NA,NA,NA,NA,NA,NA,NA
 "10_9","baseline_heldout_cv",NA,NA,NA,NA,0.6913793,0.4510686,0.5459496,0.3754682,NA,NA,NA,NA
-"10_9","rerank_heldout_cv",NA,NA,NA,NA,NA,NA,NA,NA,0.6684350,0.5669291,0.6135119,0.4424934
+"10_9","rerank_heldout_cv",NA,NA,NA,NA,NA,NA,NA,NA,0.7417582,0.6074241,0.6679035,0.5013928
 "8_9","baseline_in_sample",0.8609272,0.7902736,0.8240887,0.7008086,NA,NA,NA,NA,NA,NA,NA,NA
-"8_9","baseline_heldout_cv",NA,NA,NA,NA,0.8496732,0.7902736,0.8188976,0.6933333,NA,NA,NA,NA
-"8_9","rerank_heldout_cv",NA,NA,NA,NA,NA,NA,NA,NA,0.8655738,0.8024316,0.8328076,0.7135135
+"8_9","baseline_heldout_cv",NA,NA,NA,NA,0.8609272,0.7902736,0.8240887,0.7008086,NA,NA,NA,NA
+"8_9","rerank_heldout_cv",NA,NA,NA,NA,NA,NA,NA,NA,0.8673139,0.8145897,0.8401254,0.7243243

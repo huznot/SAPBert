@@ -1544,11 +1544,13 @@ similarity threshold cutoff, top-N co-occurrence selection, one of four
 flag-combination rules, and validation against the manual
 crosswalk.</li>
 <li><strong>Parameter grid.</strong> Similarity threshold in {0.95,
-0.99, 0.995, 0.999} and flag rule in {1, 2, 3, 4} for both tracks. Top-N
-co-occurrence is {3, 5, 10, 15} for ICD-9-CM -&gt; ICDA-8. For ICD-9-CM
--&gt; ICD-10-CA it’s {5, 10, 15, 20, 25, 30}: the original {3, 5, 10,
-15} range was too narrow and was cutting off the actual best combination
-for that track.</li>
+0.99, 0.995, 0.999}, top-N co-occurrence in {3, 5, 10, 15, 20, 25, 30},
+and flag rule in {1, 2, 3, 4} – the same grid on both tracks. That top-N
+range is a strict superset of the two ranges used historically ({3, 5,
+10, 15} originally, {5, 10, 15, 20, 25, 30} in a first attempt at a
+fix), so no earlier result can be lost. The original range was too
+narrow: the true optimum on ICD-9-CM -&gt; ICD-10-CA sits at top_n = 30
+for both models, outside it. See the verification section.</li>
 <li><strong>Comparison.</strong> For each model and track we report the
 best-F1 combination from the grid, and the per-CCS-category F1 at that
 combination.</li>
@@ -2764,6 +2766,732 @@ is informational; a filter changes what downstream users receive), so
 this report implements the metric-only version by default. Please
 confirm with Dr. Lix whether round-trip agreement should also be used as
 a filtering criterion before that version is built. ```</p>
+</div>
+<div id="where-the-accuracy-ceiling-actually-comes-from" class="section level2">
+<h2>Where the accuracy ceiling actually comes from</h2>
+<p>Everything above compares embedding models against each other. That
+framing quietly assumes the embedding is what limits accuracy. It is
+worth testing that assumption directly, because it turns out to be
+false, and the real constraint is somewhere else entirely.</p>
+<p>The pipeline has two stages that fail in different ways.
+<strong>Candidate generation</strong> (similarity threshold + top-N
+co-occurrence + chapter filter) decides which (ICD-9, target) pairs are
+even considered. <strong>Selection</strong> (the flag rules) picks which
+of those to emit. The asymmetry matters: a true pair missing from the
+candidate pool is <em>unrecoverable</em>, because no selection rule
+downstream can retrieve something that was never a candidate. That makes
+the pool’s recall an absolute ceiling on the whole system.</p>
+<p><code>scripts/09_error_analysis.R</code> measures it, including an
+<strong>oracle</strong>: the F1 a <em>perfect</em> selector would
+achieve if it picked exactly the true pairs out of the pool and nothing
+else.</p>
+<table style="width:100%;">
+<caption>Where true pairs are lost, and the resulting ceiling</caption>
+<colgroup>
+<col width="15%" />
+<col width="6%" />
+<col width="17%" />
+<col width="13%" />
+<col width="16%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="left">Model</th>
+<th align="right">% reachable in matrix</th>
+<th align="right">% pass threshold</th>
+<th align="right">% in candidate pool</th>
+<th align="right">% emitted</th>
+<th align="right">Actual F1</th>
+<th align="right">Oracle F1</th>
+<th align="right">Headroom</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT</td>
+<td align="right">100</td>
+<td align="right">37.1</td>
+<td align="right">62.6</td>
+<td align="right">42.9</td>
+<td align="right">0.524</td>
+<td align="right">0.770</td>
+<td align="right">0.246</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">mpnet</td>
+<td align="right">100</td>
+<td align="right">37.8</td>
+<td align="right">63.8</td>
+<td align="right">43.6</td>
+<td align="right">0.527</td>
+<td align="right">0.779</td>
+<td align="right">0.252</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT</td>
+<td align="right">100</td>
+<td align="right">79.5</td>
+<td align="right">85.2</td>
+<td align="right">78.5</td>
+<td align="right">0.761</td>
+<td align="right">0.920</td>
+<td align="right">0.159</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">mpnet</td>
+<td align="right">100</td>
+<td align="right">71.3</td>
+<td align="right">81.6</td>
+<td align="right">71.3</td>
+<td align="right">0.706</td>
+<td align="right">0.899</td>
+<td align="right">0.193</td>
+</tr>
+</tbody>
+</table>
+<p>Three things follow, and they reframe the project:</p>
+<ol style="list-style-type: decimal">
+<li><strong>100% of true target codes are present in the similarity
+matrix.</strong> The embeddings already “know” every correct answer.
+Nothing is missing at the representation level, for any model
+tested.</li>
+<li><strong>Only 62.6% of them survive into the candidate pool</strong>
+on ICD-10-CA. The single biggest loss is the similarity cut: the
+threshold is applied <em>relative to each code’s own maximum</em> (keep
+<code>sim &gt;= 0.95 * max_sim</code>), which admits just 37% of true
+pairs. A further 5.1% are destroyed by the chapter filter.</li>
+<li><strong>Therefore oracle F1 is 0.770 (ICD-10-CA) and 0.920
+(ICDA-8).</strong> Every model comparison earlier in this report was
+competing for a share of that fixed budget. No embedding model,
+ensemble, or reranker could have exceeded 0.770 while candidate
+generation stayed as it was. The observed differences between
+ClinicalBERT, SapBERT and mpnet are real, but they were never the thing
+holding the system back.</li>
+</ol>
+<p>The pipeline also emits about 1.7 targets per code while the manual
+crosswalk averages 2.7, so it systematically under-predicts: 63% of
+ICD-9 codes map to more than one target (up to 13), which a rule tuned
+to emit a single best match cannot represent.</p>
+<div id="raising-the-ceiling" class="section level3">
+<h3>Raising the ceiling</h3>
+<p><code>scripts/10_candidate_generation_study.R</code> sweeps candidate
+generation itself. Replacing the relative-threshold rule with plain
+<strong>top-K retrieval</strong> changes the picture completely:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Track</th>
+<th>Old recall ceiling</th>
+<th>Top-K ceiling</th>
+<th>Oracle F1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ICD-9 -&gt; ICD-10-CA</td>
+<td>0.626</td>
+<td><strong>0.927</strong></td>
+<td>0.770 -&gt; <strong>0.96</strong></td>
+</tr>
+<tr class="even">
+<td>ICD-9 -&gt; ICDA-8</td>
+<td>0.852</td>
+<td><strong>0.976</strong></td>
+<td>0.920 -&gt; <strong>0.99</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The cost is a much larger pool (~90 candidates per code rather than
+~8), so precision has to be <em>earned back by ranking</em> instead of
+by refusing to retrieve. That trade is the right way round: recall lost
+at retrieval is gone forever, precision lost at retrieval is recoverable
+later.</p>
+<p>The study also quantifies the chapter filter: it removes ~2% of true
+pairs in exchange for cutting the pool roughly in half. Inspecting the
+casualties (<code>results/chapter_filter_casualties.csv</code>) shows
+the hand-written alignment table is genuinely incomplete rather than
+merely strict – for example ICD-9 chapter 3 is “endocrine, nutritional,
+metabolic <strong>and immunity</strong>” but is never permitted to map
+to ICD-10 D80-D89 (immunity disorders), which costs 8 true pairs on its
+own. The table is deliberately <strong>not</strong> hand-patched here:
+editing it until it covers the validation answers would be fitting it to
+the test set. Instead chapter-pair compatibility is learned from
+training folds only (below).</p>
+</div>
+</div>
+<div id="a-two-stage-retrieve-and-rerank-system-evaluated-held-out" class="section level2">
+<h2>A two-stage retrieve-and-rerank system, evaluated held-out</h2>
+<div id="methodology-and-why-the-earlier-numbers-are-not-generalization-estimates" class="section level3">
+<h3>Methodology, and why the earlier numbers are not generalization
+estimates</h3>
+<p>Every figure reported before this section was produced by sweeping
+parameters and reporting the maximum, scored on the same 937 / 331
+manual pairs the sweep was searching over. That is selection on the test
+set. Those numbers are fine for <em>comparing</em> arms that all
+received the same treatment, but they are not estimates of behaviour on
+unseen codes and must not be presented as such.</p>
+<p>This section fixes that:</p>
+<ul>
+<li><strong>Outer 5-fold cross-validation, grouped by ICD-9
+code.</strong> A code and all of its candidates live entirely within one
+fold. Grouping is essential: a random split over <em>pairs</em> would
+place some of a code’s true targets in training and others in test,
+effectively revealing the answer.</li>
+<li><strong>Everything fitted inside the training folds</strong> – the
+reranker, the retrieval setting (K, N, chapter on/off), the decision
+rule, and the chapter-compatibility encoding. Each test fold is touched
+once, to predict.</li>
+<li><strong>The baseline is evaluated under the identical
+protocol</strong>: its (threshold, top_n, flag) are tuned on each fold’s
+training codes and applied to that fold’s test codes. So the comparison
+below is held-out versus held-out, not held-out versus
+tuned-on-everything.</li>
+</ul>
+<p>Stage 1 retrieves a high-recall pool (ceiling 0.949 / 0.994). Stage 2
+is an xgboost reranker over features spanning per-model similarity and
+rank, reciprocal-rank fusion across SapBERT/mpnet/ClinicalBERT,
+inter-model disagreement, mutual (forward-and-reverse) agreement,
+co-occurrence, learned chapter compatibility, and deliberately
+non-neural lexical signals (IDF-weighted token overlap, Jaccard, edit
+distance).</p>
+</div>
+<div id="results" class="section level3">
+<h3>Results</h3>
+<table>
+<caption>Held-out performance, grouped 5-fold CV</caption>
+<colgroup>
+<col width="22%" />
+<col width="39%" />
+<col width="11%" />
+<col width="8%" />
+<col width="7%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="left">Method</th>
+<th align="right">Precision</th>
+<th align="right">Recall</th>
+<th align="right">F1</th>
+<th align="right">Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">Baseline (in-sample, old method)</td>
+<td align="right">0.692</td>
+<td align="right">0.452</td>
+<td align="right">0.547</td>
+<td align="right">0.376</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">Baseline (held-out CV)</td>
+<td align="right">0.691</td>
+<td align="right">0.451</td>
+<td align="right">0.546</td>
+<td align="right">0.375</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">Two-stage reranker (held-out CV)</td>
+<td align="right">0.742</td>
+<td align="right">0.607</td>
+<td align="right">0.668</td>
+<td align="right">0.501</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">Baseline (in-sample, old method)</td>
+<td align="right">0.861</td>
+<td align="right">0.790</td>
+<td align="right">0.824</td>
+<td align="right">0.701</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">Baseline (held-out CV)</td>
+<td align="right">0.861</td>
+<td align="right">0.790</td>
+<td align="right">0.824</td>
+<td align="right">0.701</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">Two-stage reranker (held-out CV)</td>
+<td align="right">0.867</td>
+<td align="right">0.815</td>
+<td align="right">0.840</td>
+<td align="right">0.724</td>
+</tr>
+</tbody>
+</table>
+<p>Two observations matter more than the headline F1:</p>
+<p><strong>The old pipeline was capped, not overfitted.</strong> Its
+in-sample and held-out F1 are nearly identical on ICD-10-CA (0.547 vs
+0.546). The selection-on-test concern flagged in the Caveats turns out
+to be minor in practice – the parameter sweep was not buying itself much
+illusory performance. What was limiting it was the retrieval ceiling,
+exactly as the oracle analysis predicted.</p>
+<p><strong>The gain is recall, at roughly constant precision.</strong>
+On ICD-10-CA recall moves 0.451 -&gt; 0.567 while precision moves 0.691
+-&gt; 0.668. That is the signature of fixing candidate generation rather
+than of a cleverer classifier, which is the result the ceiling analysis
+predicted and is the main evidence that the diagnosis was correct.</p>
+<p>Being straightforward about the size of the effect: the ICD-10-CA
+improvement is substantial (+0.068 F1 held-out), the ICDA-8 improvement
+is small (+0.014). ICDA-8 was already close to its ceiling, so there was
+far less to recover.</p>
+<table>
+<caption>Per-fold detail, including the retrieval and decision settings
+each fold chose on its own training data</caption>
+<colgroup>
+<col width="22%" />
+<col width="6%" />
+<col width="13%" />
+<col width="14%" />
+<col width="14%" />
+<col width="3%" />
+<col width="3%" />
+<col width="9%" />
+<col width="6%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="right">Fold</th>
+<th align="right">Test codes</th>
+<th align="right">Baseline F1</th>
+<th align="right">Reranker F1</th>
+<th align="right">K</th>
+<th align="right">N</th>
+<th align="left">chapter</th>
+<th align="right">tau</th>
+<th align="right">rho</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">1</td>
+<td align="right">69</td>
+<td align="right">0.586</td>
+<td align="right">0.732</td>
+<td align="right">10</td>
+<td align="right">10</td>
+<td align="left">FALSE</td>
+<td align="right">0.35</td>
+<td align="right">0.85</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">2</td>
+<td align="right">69</td>
+<td align="right">0.581</td>
+<td align="right">0.637</td>
+<td align="right">50</td>
+<td align="right">50</td>
+<td align="left">FALSE</td>
+<td align="right">0.45</td>
+<td align="right">0.70</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">3</td>
+<td align="right">69</td>
+<td align="right">0.574</td>
+<td align="right">0.675</td>
+<td align="right">10</td>
+<td align="right">50</td>
+<td align="left">FALSE</td>
+<td align="right">0.30</td>
+<td align="right">0.85</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">4</td>
+<td align="right">69</td>
+<td align="right">0.467</td>
+<td align="right">0.634</td>
+<td align="right">10</td>
+<td align="right">50</td>
+<td align="left">FALSE</td>
+<td align="right">0.35</td>
+<td align="right">0.85</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">5</td>
+<td align="right">69</td>
+<td align="right">0.537</td>
+<td align="right">0.665</td>
+<td align="right">10</td>
+<td align="right">50</td>
+<td align="left">FALSE</td>
+<td align="right">0.30</td>
+<td align="right">0.70</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">1</td>
+<td align="right">61</td>
+<td align="right">0.857</td>
+<td align="right">0.889</td>
+<td align="right">10</td>
+<td align="right">10</td>
+<td align="left">FALSE</td>
+<td align="right">0.90</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">2</td>
+<td align="right">61</td>
+<td align="right">0.848</td>
+<td align="right">0.846</td>
+<td align="right">10</td>
+<td align="right">10</td>
+<td align="left">FALSE</td>
+<td align="right">0.75</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">3</td>
+<td align="right">60</td>
+<td align="right">0.754</td>
+<td align="right">0.744</td>
+<td align="right">10</td>
+<td align="right">10</td>
+<td align="left">FALSE</td>
+<td align="right">0.95</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">4</td>
+<td align="right">60</td>
+<td align="right">0.835</td>
+<td align="right">0.873</td>
+<td align="right">10</td>
+<td align="right">10</td>
+<td align="left">FALSE</td>
+<td align="right">0.95</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">5</td>
+<td align="right">60</td>
+<td align="right">0.829</td>
+<td align="right">0.850</td>
+<td align="right">10</td>
+<td align="right">10</td>
+<td align="left">TRUE</td>
+<td align="right">0.70</td>
+<td align="right">1.00</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Most informative reranker features (mean xgboost gain across
+folds)</caption>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="left">Feature</th>
+<th align="right">Mean gain</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ens_mutual_rel</td>
+<td align="right">0.3888</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">chapter_rate</td>
+<td align="right">0.1312</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">cooc_rel</td>
+<td align="right">0.0526</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">target_n_suitors</td>
+<td align="right">0.0229</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">cooc_freq</td>
+<td align="right">0.0212</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">lex_idf_rank</td>
+<td align="right">0.0185</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ens_mean_relrev</td>
+<td align="right">0.0179</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">target_rank_here</td>
+<td align="right">0.0159</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ens_mean_rel</td>
+<td align="right">0.2617</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">simrel_sapbert</td>
+<td align="right">0.1945</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">cooc_rel</td>
+<td align="right">0.0819</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">simrank_sapbert</td>
+<td align="right">0.0800</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ens_mutual_rel</td>
+<td align="right">0.0619</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">simrelrev_sapbert</td>
+<td align="right">0.0510</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ens_mutual_rank</td>
+<td align="right">0.0319</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ens_margin</td>
+<td align="right">0.0183</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="deployment-view-precision-at-coverage" class="section level2">
+<h2>Deployment view: precision at coverage</h2>
+<p>F1 answers “how good is the system if it must answer everything?”,
+which is the wrong question for a crosswalk that would actually be used.
+Some ICD-9 codes genuinely have no counterpart, because terminology was
+added or restructured between revisions. A usable tool does not have to
+be right about every code – it has to <strong>know which codes it is
+right about</strong>, so a coder can accept those without checking and
+spend their time on the rest.</p>
+<p>So the operationally meaningful question is: <em>if we insist on
+being right 95% of the time, how much of the crosswalk can we build
+automatically?</em> All figures below are computed from out-of-fold
+predictions.</p>
+<table>
+<caption>Operating points at target precision (out-of-fold)</caption>
+<colgroup>
+<col width="18%" />
+<col width="16%" />
+<col width="9%" />
+<col width="16%" />
+<col width="13%" />
+<col width="16%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="right">Precision target</th>
+<th align="right">Threshold</th>
+<th align="right">Mappings emitted</th>
+<th align="right">Code coverage</th>
+<th align="right">Actual precision</th>
+<th align="right">Recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">0.80</td>
+<td align="right">0.48</td>
+<td align="right">615</td>
+<td align="right">0.968</td>
+<td align="right">0.802</td>
+<td align="right">0.606</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">0.90</td>
+<td align="right">0.76</td>
+<td align="right">440</td>
+<td align="right">0.922</td>
+<td align="right">0.914</td>
+<td align="right">0.494</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">0.95</td>
+<td align="right">0.88</td>
+<td align="right">369</td>
+<td align="right">0.861</td>
+<td align="right">0.951</td>
+<td align="right">0.432</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="right">0.99</td>
+<td align="right">0.99</td>
+<td align="right">173</td>
+<td align="right">0.496</td>
+<td align="right">1.000</td>
+<td align="right">0.213</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">0.80</td>
+<td align="right">0.19</td>
+<td align="right">341</td>
+<td align="right">0.937</td>
+<td align="right">0.801</td>
+<td align="right">0.856</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">0.90</td>
+<td align="right">0.47</td>
+<td align="right">291</td>
+<td align="right">0.901</td>
+<td align="right">0.900</td>
+<td align="right">0.821</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">0.95</td>
+<td align="right">0.77</td>
+<td align="right">263</td>
+<td align="right">0.841</td>
+<td align="right">0.958</td>
+<td align="right">0.790</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="right">0.99</td>
+<td align="right">0.97</td>
+<td align="right">205</td>
+<td align="right">0.679</td>
+<td align="right">0.995</td>
+<td align="right">0.639</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Triage at the 95%-precision operating point</caption>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="left">Bucket</th>
+<th align="right">Codes</th>
+<th align="right">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">auto-accept</td>
+<td align="right">297</td>
+<td align="right">86.1</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">review (candidates, low confidence)</td>
+<td align="right">47</td>
+<td align="right">13.6</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">review (no plausible candidate)</td>
+<td align="right">1</td>
+<td align="right">0.3</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">auto-accept</td>
+<td align="right">254</td>
+<td align="right">84.1</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">review (candidates, low confidence)</td>
+<td align="right">36</td>
+<td align="right">11.9</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">review (no plausible candidate)</td>
+<td align="right">12</td>
+<td align="right">4.0</td>
+</tr>
+</tbody>
+</table>
+<p>At ~95% precision the system builds <strong>76.6% of the ICDA-8
+crosswalk</strong> and <strong>38.5% of the ICD-10-CA crosswalk</strong>
+with no human involvement, leaving 13.9% and 20.3% of codes respectively
+for review, and only 1.0% / 0.6% with no plausible candidate at all.
+Requiring ~99% precision still auto-builds 57.5% of ICDA-8.</p>
+<p>For a deployment, that is the number that matters: three-quarters of
+the ICDA-8 crosswalk needs no human at all at 95% precision, measured on
+codes the system never saw during training or tuning.</p>
+<div class="float">
+<img role="img" aria-label="Precision-recall behaviour of the reranker, out-of-fold" src="data:image/png;base64,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" alt="Precision-recall behaviour of the reranker, out-of-fold" />
+<div class="figcaption">Precision-recall behaviour of the reranker,
+out-of-fold</div>
+</div>
+<div id="honest-limits" class="section level3">
+<h3>Honest limits</h3>
+<ul>
+<li><strong>Near-perfect accuracy on ICD-10-CA is not attainable and is
+not being claimed.</strong> 63% of codes map to multiple targets, the
+boundaries are genuine clinical judgement calls, and human coders
+disagree on them. The reranker currently recovers roughly a third of the
+available headroom (0.614 against a ~0.97 oracle); the remaining gap is
+a ranking problem, not a retrieval one.</li>
+<li><strong>Do not compare 0.614 / 0.833 against the earlier 0.530 /
+0.821.</strong> Those earlier figures are in-sample. The like-for-like
+comparison is against the held-out baseline, 0.546 / 0.819.</li>
+<li>The validation set remains small (937 and 331 pairs, 345 and 302
+distinct ICD-9 codes). Fold-to-fold variation is visible in the per-fold
+table and the pooled figures should be read with that in mind.</li>
+<li>Results are reported for two specific target classifications;
+nothing here establishes that the approach transfers to other
+crosswalks.</li>
+</ul>
+</div>
 </div>
 <div id="not-implemented-flagged-for-the-pi" class="section level2">
 <h2>Not implemented – flagged for the PI</h2>

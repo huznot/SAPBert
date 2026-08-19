@@ -132,15 +132,36 @@ for (tr in names(TRACKS)) {
   for (mdl in names(tk$sim)) {
     cat(sprintf("  loading similarity: %s\n", mdl))
     s <- long_similarity(tk$sim[[mdl]])
+    # FORWARD stats, normalized within each ICD-9 code: "how good is this
+    # target, among the targets this code could map to?"
     s <- s %>% group_by(ICD_9_CM) %>%
       mutate(sim_rank = rank(-sim, ties.method = "first"),
              sim_rel  = sim / max(sim, na.rm = TRUE),
              sim_z    = (sim - mean(sim, na.rm = TRUE)) / (sd(sim, na.rm = TRUE) + 1e-9)) %>%
       ungroup()
-    names(s)[names(s) == "sim"]      <- paste0("sim_", mdl)
-    names(s)[names(s) == "sim_rank"] <- paste0("simrank_", mdl)
-    names(s)[names(s) == "sim_rel"]  <- paste0("simrel_", mdl)
-    names(s)[names(s) == "sim_z"]    <- paste0("simz_", mdl)
+
+    # REVERSE stats, normalized within each TARGET code: "how good is this
+    # ICD-9 code, among the codes competing for this target?"
+    #
+    # This is the mutual-nearest-neighbour signal and it is the single most
+    # important thing the earlier feature set was missing. A target that is
+    # every code's plausible match (e.g. a generic "other/unspecified"
+    # bucket) is weak evidence even when its forward similarity is high;
+    # a target whose best suitor IS this code is strong evidence even when
+    # the absolute cosine is mediocre. Forward-only features cannot express
+    # either case. Task 3's round-trip analysis already showed the reverse
+    # direction carries real information -- this puts it where it can act.
+    s <- s %>% group_by(target) %>%
+      mutate(sim_rank_rev = rank(-sim, ties.method = "first"),
+             sim_rel_rev  = sim / max(sim, na.rm = TRUE)) %>%
+      ungroup()
+
+    names(s)[names(s) == "sim"]          <- paste0("sim_", mdl)
+    names(s)[names(s) == "sim_rank"]     <- paste0("simrank_", mdl)
+    names(s)[names(s) == "sim_rel"]      <- paste0("simrel_", mdl)
+    names(s)[names(s) == "sim_z"]        <- paste0("simz_", mdl)
+    names(s)[names(s) == "sim_rank_rev"] <- paste0("simrankrev_", mdl)
+    names(s)[names(s) == "sim_rel_rev"]  <- paste0("simrelrev_", mdl)
     sims[[mdl]] <- s
   }
 
@@ -180,8 +201,10 @@ for (tr in names(TRACKS)) {
            cooc_rel   = ifelse(is.na(cooc_rel), 0, cooc_rel),
            cooc_rank  = ifelse(is.na(cooc_rank), 999, cooc_rank))
   for (m in names(sims)) {
-    feat[[paste0("simrank_", m)]] <- ifelse(is.na(feat[[paste0("simrank_", m)]]), 999, feat[[paste0("simrank_", m)]])
-    for (p in c("sim_", "simrel_", "simz_")) {
+    for (p in c("simrank_", "simrankrev_")) {
+      col <- paste0(p, m); feat[[col]] <- ifelse(is.na(feat[[col]]), 999, feat[[col]])
+    }
+    for (p in c("sim_", "simrel_", "simz_", "simrelrev_")) {
       col <- paste0(p, m); feat[[col]] <- ifelse(is.na(feat[[col]]), 0, feat[[col]])
     }
   }
@@ -190,8 +213,10 @@ for (tr in names(TRACKS)) {
   # Rank fusion rather than raw-score averaging: cosine scales differ between
   # models, ranks do not, so reciprocal rank fusion combines them without
   # needing calibration.
-  rank_cols <- paste0("simrank_", names(sims))
-  rel_cols  <- paste0("simrel_",  names(sims))
+  rank_cols    <- paste0("simrank_",    names(sims))
+  rel_cols     <- paste0("simrel_",     names(sims))
+  rankrev_cols <- paste0("simrankrev_", names(sims))
+  relrev_cols  <- paste0("simrelrev_",  names(sims))
   feat <- feat %>%
     mutate(ens_rrf       = rowSums(1 / (60 + as.matrix(across(all_of(rank_cols))))),
            ens_mean_rel  = rowMeans(across(all_of(rel_cols))),
@@ -200,7 +225,28 @@ for (tr in names(TRACKS)) {
            ens_best_rank = do.call(pmin, c(across(all_of(rank_cols)), na.rm = TRUE)),
            # disagreement between models is itself a signal: candidates all
            # models like are safer than ones only one model likes
-           ens_rel_sd    = apply(across(all_of(rel_cols)), 1, sd))
+           ens_rel_sd    = apply(across(all_of(rel_cols)), 1, sd),
+
+           # --- reverse-direction ensemble ---
+           ens_mean_relrev  = rowMeans(across(all_of(relrev_cols))),
+           ens_best_rankrev = do.call(pmin, c(across(all_of(rankrev_cols)), na.rm = TRUE)),
+           ens_rrf_rev      = rowSums(1 / (60 + as.matrix(across(all_of(rankrev_cols))))),
+
+           # --- MUTUAL agreement ---
+           # geometric mean of the two directions: high only when the code
+           # likes the target AND the target likes the code back. This is
+           # the discriminative form -- a plain sum lets one strong
+           # direction mask a weak one, the product does not.
+           ens_mutual_rel  = sqrt(ens_mean_rel * ens_mean_relrev),
+           # symmetric rank score; small is good in both directions at once
+           ens_mutual_rank = ens_best_rank + ens_best_rankrev,
+           # is this an actual mutual nearest neighbour? cheap, very strong
+           # when true
+           is_mutual_top1  = as.integer(ens_best_rank == 1 & ens_best_rankrev == 1),
+           # asymmetry: positive when the target wants this code more than
+           # the code wants the target, which flags generic "catch-all"
+           # targets that attract many codes
+           ens_direction_gap = ens_mean_rel - ens_mean_relrev)
 
   # --- chapter features ------------------------------------------------
   ch9  <- find_icd9cm_chapter(feat$ICD_9_CM)
@@ -230,7 +276,22 @@ for (tr in names(TRACKS)) {
     mutate(n_candidates = n(),
            ens_rrf_rank = rank(-ens_rrf, ties.method = "first"),
            ens_rrf_rel  = ens_rrf / max(ens_rrf, na.rm = TRUE),
-           lex_idf_rank = rank(-lex_idf_overlap, ties.method = "first")) %>%
+           lex_idf_rank = rank(-lex_idf_overlap, ties.method = "first"),
+           # gap to this code's runner-up: a candidate that clearly beats the
+           # next best is a different proposition from one in a crowded tie,
+           # even at identical absolute score
+           ens_margin   = ens_mean_rel - max(ens_mean_rel[ens_mean_rel < max(ens_mean_rel)], -1)) %>%
+    ungroup()
+
+  # TARGET-side competition, computed within the pool. A target contested by
+  # many ICD-9 codes is weaker evidence for any one of them; a target this
+  # code is the front-runner for is stronger evidence. Complements the
+  # reverse-similarity features above, which are computed over the full
+  # matrix rather than over the retrieved pool.
+  feat <- feat %>% group_by(target) %>%
+    mutate(target_n_suitors    = n(),
+           target_rank_here    = rank(-ens_mean_rel, ties.method = "first"),
+           target_is_best_here = as.integer(target_rank_here == 1)) %>%
     ungroup()
 
   # --- label (target variable only; never used as a feature) ------------
