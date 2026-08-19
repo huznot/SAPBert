@@ -35,6 +35,20 @@ ClinicalBERT (the original) and SapBERT
 of the embeddings stays the same between the two runs, so any difference
 in the metrics comes from the embedding model itself.
 
+**Background.** Combining co-occurrence-based similarity with text-embedding
+similarity, which is this pipeline's core approach, is a recognized open
+question in the medical coding literature, not a novel combination invented
+for this project. Zhang et al. (2019), "Automated grouping of medical codes
+via multiview banded spectral clustering" (*J Biomed Inform*), group
+synonymous ICD codes using Word2Vec embeddings trained on co-occurrence data
+plus a GEM-crosswalk-based distance metric, validated against PheWAS
+gold-standard groupings, and explicitly flag combining co-occurrence
+similarity with text-embedding similarity as "warrants further research."
+Note that Zhang et al. address a different task -- grouping synonymous
+codes *within* one coding system -- rather than this project's task of
+mapping *between* two coding systems (ICD-9-CM to ICD-10-CA/ICDA-8); their
+clustering methodology is not used here, only cited as motivation.
+
 ## Methodology
 
 1. **Embeddings.** ClinicalBERT matrices are the original, validated
@@ -137,20 +151,40 @@ regression_summary %>%
 
 | Track | Model | Reference F1 / Acc | This report's F1 / Acc |
 |---|---|---|---|
-| ICD-9 -> ICD-10-CA | ClinicalBERT | 0.427 / 0.271 | 0.427 / 0.271 (match) |
-| ICD-9 -> ICD-10-CA | SapBERT | 0.510 / 0.342 | 0.530 / 0.360 (higher, see note) |
-| ICD-9 -> ICDA-8 | ClinicalBERT | 0.716 / 0.557 | see table above |
-| ICD-9 -> ICDA-8 | SapBERT | 0.821 / 0.697 | see table above |
+| ICD-9 -> ICD-10-CA | ClinicalBERT | 0.427 / 0.271 | 0.423 / 0.268 (does not match) |
+| ICD-9 -> ICD-10-CA | SapBERT | 0.510 / 0.342 | 0.523 / 0.355 (does not match) |
+| ICD-9 -> ICDA-8 | ClinicalBERT | 0.716 / 0.557 | 0.716 / 0.557 (match) |
+| ICD-9 -> ICDA-8 | SapBERT | 0.821 / 0.697 | 0.821 / 0.697 (match) |
 
-The ICD-9-CM -> ICD-10-CA reference numbers were originally reproduced
-using a top-N co-occurrence range of {3, 5, 10, 15}, which excluded the
-actual best combination for that track. Widening the range to include
-top-N up to 30 confirms ClinicalBERT's number exactly and finds a better
-combination for SapBERT (F1 0.530 vs. the reference's 0.510). Since
-precision holds steady and recall goes up, this looks like a genuine
-improvement from searching a wider range rather than noise, so the
-higher SapBERT number is what's reported above. The ICDA-8 track is
-unaffected and still matches its reference exactly.
+**Flagged discrepancy, not silently resolved.** The checked-in "corrected"
+ICD-9-CM -> ICD-10-CA numbers (`results/best_by_model.csv` as committed at
+143b1ff, and the narrative in this file) claimed F1 0.427/Acc 0.271
+(ClinicalBERT) and F1 0.530/Acc 0.360 (SapBERT), described as coming from a
+widened top-N co-occurrence range of up to 30. Re-deriving those numbers
+from `scripts/02_run_comparison.R` as originally committed reproduced
+F1 0.423/0.268 and F1 0.523/0.355 instead -- because the script still used
+top-N {3, 5, 10, 15} for both tracks despite the narrative describing a
+wider range. `scripts/02_run_comparison.R` was fixed to actually sweep
+top-N {5, 10, 15, 20, 25, 30} for the ICD-9-CM -> ICD-10-CA track (see the
+comment block at the top of that script), and the full grid was re-run to
+check whether the wider range reproduces the claimed 0.427/0.530.
+
+**It does not.** The best combination under the widened grid is still
+top_n=15 (ClinicalBERT, F1 0.423) and top_n=10 (SapBERT, F1 0.523) -- the
+same combinations, and the same F1/accuracy, as the narrow grid. None of
+the added top-N values (20, 25, 30) beat the existing best. So the
+0.427/0.271 and 0.510-0.530/0.342-0.360 reference numbers are **not
+reproducible by any code currently in this repository**, under either the
+narrow or the widened grid. `results/best_by_model.csv` now reflects the
+honest, reproducible numbers (0.423/0.268 and 0.523/0.355) rather than the
+unreproducible hand-edited ones. The ICDA-8 track is unaffected and
+matches its reference exactly.
+
+This is now a genuine open question for the PI, not a bug we can fix in
+code: either the reference numbers came from a run/parameter combination
+that isn't in this repo (a different top-N range, a different flag rule,
+a different embedding generation, etc.), or the reference numbers
+themselves were mistaken. See `PI_QUESTIONS.md`.
 
 ## Task 1 + 2: filler-word stripping and a general-purpose embedding model
 
@@ -206,6 +240,47 @@ choices, not this task's change -- don't attribute it to filler stripping.
 directly (no regeneration needed, since that generation method already
 matches).
 
+### Findings
+
+**Filler-word stripping (task 1).** Within `extended_reduced_grid`, effect
+is small and inconsistent in direction:
+
+- ICD-9-CM -> ICD-10-CA: stripping helps every model slightly --
+  ClinicalBERT F1 0.427 -> 0.437, SapBERT F1 0.508 -> 0.520, mpnet F1
+  0.518 -> 0.514 (flat/marginally lower).
+- ICD-9-CM -> ICDA-8: stripping helps ClinicalBERT slightly (F1 0.711 ->
+  0.713) but **hurts SapBERT** (F1 0.820 -> 0.792) and is roughly flat for
+  mpnet (F1 0.758 -> 0.759).
+
+So filler-word stripping is not a clear win -- it's close to a wash, and
+actively worse for SapBERT on the ICDA-8 track. Given this, and that the
+task didn't specify exactly which filler words to strip (see
+`scripts/filler_words.json` for the list used), this doesn't look like a
+change worth adopting by default without checking per-CCS-category effects
+first, since an aggregate F1 change this small can hide larger
+category-level swings in either direction.
+
+**General-purpose embedding model (task 2).** mpnet-base is competitive
+with, and on one track slightly ahead of, the domain-specific models on
+this reduced grid: F1 0.518 vs. SapBERT-base's 0.508 on ICD-9-CM ->
+ICD-10-CA (mpnet ahead), but F1 0.758 vs. SapBERT-base's 0.820 on ICD-9-CM
+-> ICDA-8 (SapBERT clearly ahead). So domain-specific medical pretraining
+still generally helps, but the margin is much smaller than the original
+ClinicalBERT-vs-SapBERT comparison suggested, and on the ICD-10-CA track a
+general-purpose sentence embedding model does about as well. This is worth
+noting given Zhang et al. (2019)'s point (see Background above) that this
+exact combination of co-occurrence and embedding similarity is still an
+open research question -- the embedding source may matter less than the overall
+architecture (co-occurrence + chapter filtering + flag rules) for this
+particular task.
+
+**Caveat that applies to both findings above:** these numbers come from a
+single fixed (threshold, top_n) operating point per track (see the grid
+note at the top of `06_extended_comparison.R`), not an independently
+grid-searched optimum per condition, for runtime reasons. A wider sweep
+per condition could shift these comparisons; treat differences under ~0.02
+F1 as within the noise of that limitation rather than a confirmed effect.
+
 ## Task 3: bidirectional mapping and round-trip consistency
 
 ```{r roundtrip-setup, include=FALSE}
@@ -243,6 +318,19 @@ roundtrip %>%
 
 ```{r roundtrip-missing, eval=!have_roundtrip, results='asis'}
 cat("_Not yet run -- see `scripts/05_bidirectional_and_roundtrip.R`._")
+```
+
+**Flagged for the PI, not guessed at.** Round-trip agreement is reported
+here purely as a metric -- an extra column alongside F1/precision/recall/
+accuracy -- and does **not** change which mappings the pipeline outputs. It
+would also be possible to use round-trip agreement actively, e.g. only
+accepting a forward mapping if the reverse pipeline agrees, which would
+change the actual mapping output rather than just how it's scored. The task
+didn't specify which is wanted, and the two have materially different
+consequences (a metric is informational; a filter changes what downstream
+users receive), so this report implements the metric-only version by
+default. Please confirm with Dr. Lix whether round-trip agreement should
+also be used as a filtering criterion before that version is built.
 ```
 
 ## Not implemented -- flagged for the PI

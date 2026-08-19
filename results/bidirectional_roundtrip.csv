@@ -1,0 +1,5 @@
+"track","model","fwd_precision","fwd_recall","fwd_f1","fwd_accuracy","rev_precision","rev_recall","rev_f1","rev_accuracy","roundtrip_rate","roundtrip_n_consistent","roundtrip_n_total"
+"10_9","ClinicalBERT",0.584,0.331,0.423,0.268,0.623,0.87,0.726,0.57,0.345,308,893
+"10_9","SapBERT",0.7,0.418,0.523,0.355,0.645,0.935,0.763,0.617,0.461,414,898
+"8_9","ClinicalBERT",0.759,0.677,0.716,0.557,0.667,0.919,0.773,0.63,0.694,225,324
+"8_9","SapBERT",0.861,0.785,0.821,0.697,0.684,0.981,0.806,0.675,0.76,269,354

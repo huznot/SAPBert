@@ -1,0 +1,45 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Loading similarity sheets...
+
+=== 10_9 / ClinicalBERT (threshold=0.995, top_n=15, flag=4) ===
+Forward (ICD-9 -> ICD_10_CA):  P0.584 R0.331 F1 0.423 Acc 0.268
+Reverse (ICD_10_CA -> ICD-9):  P0.623 R0.870 F1 0.726 Acc 0.570
+Round-trip consistency: 308/893 = 0.345
+
+=== 10_9 / SapBERT (threshold=0.950, top_n=10, flag=4) ===
+Forward (ICD-9 -> ICD_10_CA):  P0.700 R0.418 F1 0.523 Acc 0.355
+Reverse (ICD_10_CA -> ICD-9):  P0.645 R0.935 F1 0.763 Acc 0.617
+Round-trip consistency: 414/898 = 0.461
+
+=== 8_9 / ClinicalBERT (threshold=0.999, top_n=5, flag=3) ===
+Forward (ICD-9 -> ICDA_8):  P0.759 R0.677 F1 0.716 Acc 0.557
+Reverse (ICDA_8 -> ICD-9):  P0.667 R0.919 F1 0.773 Acc 0.630
+Round-trip consistency: 225/324 = 0.694
+
+=== 8_9 / SapBERT (threshold=0.990, top_n=3, flag=2) ===
+Forward (ICD-9 -> ICDA_8):  P0.861 R0.785 F1 0.821 Acc 0.697
+Reverse (ICDA_8 -> ICD-9):  P0.684 R0.981 F1 0.806 Acc 0.675
+Round-trip consistency: 269/354 = 0.760
+
+=== Summary ===
+# A tibble: 4 × 13
+  track model        fwd_precision fwd_recall fwd_f1 fwd_accuracy rev_precision
+  <chr> <chr>                <dbl>      <dbl>  <dbl>        <dbl>         <dbl>
+1 10_9  ClinicalBERT         0.584      0.331  0.423        0.268         0.623
+2 10_9  SapBERT              0.7        0.418  0.523        0.355         0.645
+3 8_9   ClinicalBERT         0.759      0.677  0.716        0.557         0.667
+4 8_9   SapBERT              0.861      0.785  0.821        0.697         0.684
+# ℹ 6 more variables: rev_recall <dbl>, rev_f1 <dbl>, rev_accuracy <dbl>,
+#   roundtrip_rate <dbl>, roundtrip_n_consistent <int>, roundtrip_n_total <int>
+
+Wrote results/bidirectional_roundtrip.csv

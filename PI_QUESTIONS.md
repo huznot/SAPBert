@@ -1,8 +1,47 @@
 # Open questions for Dr. Lix
 
-Two items from the task list are **not implemented** because implementing
-them would require guessing at specifics the PI didn't give. Flagging both
-here rather than picking an interpretation.
+Three items need PI input before they can be resolved: two task-list items
+that would require guessing at specifics the PI didn't give, and one data
+discrepancy discovered while verifying the stated baseline. Flagging all
+three rather than picking an interpretation.
+
+## 0. Baseline ICD-9-CM -> ICD-10-CA numbers are not reproducible by any code in this repo
+
+The task's stated baseline was F1 0.427/Acc 0.271 (ClinicalBERT) and
+F1 0.510-0.530/Acc 0.342-0.360 (SapBERT). The repo's most recent commit
+before this work (143b1ff) hand-edited `results/best_by_model.csv` to show
+F1 0.427/0.530 and updated `report.Rmd`'s narrative to describe a widened
+top-N co-occurrence range ({5,10,15,20,25,30}) as the source -- but
+`scripts/02_run_comparison.R` itself was never changed to actually sweep
+that wider range; it still used {3,5,10,15} for both tracks.
+
+I fixed the script to actually sweep top-N up to 30 for that track and
+re-ran the full grid to check. **The wider range does not reproduce the
+claimed numbers.** The best combination is unchanged (F1 0.423/0.268
+ClinicalBERT at top_n=15, F1 0.523/0.355 SapBERT at top_n=10) -- none of
+the added top-N values (20, 25, 30) beat what {3,5,10,15} already found.
+So 0.427/0.271 and 0.510-0.530/0.342-0.360 are not reproducible by any
+code currently in this repository, under either grid.
+
+`results/best_by_model.csv` and `report.Rmd` now report the honest,
+reproducible numbers (0.423/0.268 and 0.523/0.355) instead of forcing a
+match to the unreproducible hand-edited ones, per instruction. This needs
+Dr. Lix's input: either the original 0.427/0.530 numbers came from a run
+that used different parameters/data not present in this repo (a different
+flag rule, a different embedding source, a different validation subset),
+or they were a mistake in the earlier hand-edit. Worth asking directly
+rather than guessing further.
+
+## 0.5. Should round-trip consistency filter mappings, or just be reported?
+
+`scripts/05_bidirectional_and_roundtrip.R` / `report.Rmd` currently use
+round-trip agreement (does a target code that an ICD-9-CM code maps to, map
+back to that same ICD-9-CM code?) as a **reported metric only** -- it does
+not change which mappings the pipeline outputs. An alternative is to use it
+as an active filter (only accept a forward mapping when the reverse
+direction agrees), which would change the actual mapping output, not just
+its score. Not guessed at since the two options have materially different
+consequences. Please confirm which is wanted with Dr. Lix.
 
 ## 1. "Removing certain codes because cosine similarity drops"
 

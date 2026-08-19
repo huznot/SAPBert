@@ -71,3 +71,43 @@ Embedding with cambridgeltl/SapBERT-from-PubMedBERT-fulltext (clean=base)...
   1664/2038
   1696/2038
   1728/2038
+  1760/2038
+  1792/2038
+  1824/2038
+  1856/2038
+  1888/2038
+  1920/2038
+  1952/2038
+  1984/2038
+  2016/2038
+  2038/2038
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3949.27it/s]
+  32/858
+  64/858
+  96/858
+  128/858
+  160/858
+  192/858
+  224/858
+  256/858
+  288/858
+  320/858
+  352/858
+  384/858
+  416/858
+  448/858
+  480/858
+  512/858
+  544/858
+  576/858
+  608/858
+  640/858
+  672/858
+  704/858
+  736/858
+  768/858
+  800/858
+  832/858
+  858/858
+Wrote C:\Users\IRFANM\Downloads\icd_crosswalk_r\data\generated\cosine_similarity_matrices_10_9_sapbert_base.xlsx
+Wrote C:\Users\IRFANM\Downloads\icd_crosswalk_r\data\generated\cosine_similarity_matrices_8_9_sapbert_base.xlsx
