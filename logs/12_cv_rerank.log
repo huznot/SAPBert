@@ -27,3 +27,117 @@ Precomputing baseline pipeline emissions...
   TEST FOLD  baseline F1 0.581 | reranker F1 0.588
 
 --- outer fold 3/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=50 chapter=FALSE tau=0.30 rho=0.30 (inner F1 0.625)
+  baseline pick on train: SapBERT|0.95|30|4 (train F1 0.541)
+  TEST FOLD  baseline F1 0.574 | reranker F1 0.614
+
+--- outer fold 4/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=10 chapter=TRUE tau=0.20 rho=0.70 (inner F1 0.620)
+  baseline pick on train: SapBERT|0.95|30|4 (train F1 0.570)
+  TEST FOLD  baseline F1 0.467 | reranker F1 0.582
+
+--- outer fold 5/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=30 chapter=FALSE tau=0.25 rho=0.70 (inner F1 0.626)
+  baseline pick on train: SapBERT|0.95|30|4 (train F1 0.549)
+  TEST FOLD  baseline F1 0.537 | reranker F1 0.612
+
+===== TRACK 10_9 POOLED RESULTS =====
+  baseline, IN-SAMPLE (old method)   : P 0.692 R 0.452 F1 0.547 Acc 0.376
+  baseline, held-out CV              : P 0.691 R 0.451 F1 0.546 Acc 0.375
+  RERANKER, held-out CV              : P 0.668 R 0.567 F1 0.614 Acc 0.442
+
+################ TRACK 8_9 ################
+37219 candidates, 302 codes, 329 positives (pool ceiling 0.9940 of 331 true pairs)
+Precomputing baseline pipeline emissions...
+  SapBERT done
+  ClinicalBERT done
+
+--- outer fold 1/5 (241 train codes, 61 test codes) ---
+  inner-CV pick: K=25 N=10 chapter=TRUE tau=0.80 rho=1.00 (inner F1 0.844)
+  baseline pick on train: SapBERT|0.99|3|2 (train F1 0.821)
+  TEST FOLD  baseline F1 0.835 | reranker F1 0.866
+
+--- outer fold 2/5 (241 train codes, 61 test codes) ---
+  inner-CV pick: K=25 N=10 chapter=FALSE tau=0.95 rho=1.00 (inner F1 0.852)
+  baseline pick on train: SapBERT|0.99|3|2 (train F1 0.832)
+  TEST FOLD  baseline F1 0.790 | reranker F1 0.790
+
+--- outer fold 3/5 (242 train codes, 60 test codes) ---
+  inner-CV pick: K=25 N=10 chapter=FALSE tau=0.60 rho=1.00 (inner F1 0.862)
+  baseline pick on train: SapBERT|0.99|3|2 (train F1 0.832)
+  TEST FOLD  baseline F1 0.794 | reranker F1 0.788
+
+--- outer fold 4/5 (242 train codes, 60 test codes) ---
+  inner-CV pick: K=25 N=30 chapter=TRUE tau=0.85 rho=1.00 (inner F1 0.851)
+  baseline pick on train: SapBERT|0.99|3|2 (train F1 0.824)
+  TEST FOLD  baseline F1 0.825 | reranker F1 0.844
+
+--- outer fold 5/5 (242 train codes, 60 test codes) ---
+  inner-CV pick: K=10 N=30 chapter=FALSE tau=0.90 rho=1.00 (inner F1 0.839)
+  baseline pick on train: SapBERT|0.95|15|2 (train F1 0.812)
+  TEST FOLD  baseline F1 0.850 | reranker F1 0.878
+
+===== TRACK 8_9 POOLED RESULTS =====
+  baseline, IN-SAMPLE (old method)   : P 0.861 R 0.790 F1 0.824 Acc 0.701
+  baseline, held-out CV              : P 0.850 R 0.790 F1 0.819 Acc 0.693
+  RERANKER, held-out CV              : P 0.866 R 0.802 F1 0.833 Acc 0.714
+
+
+================ FINAL ================
+  track              method t(m_bl_insample).1 t(m_bl_insample).2
+1  10_9  baseline_in_sample              0.692              0.452
+2  10_9 baseline_heldout_cv                 NA                 NA
+3  10_9   rerank_heldout_cv                 NA                 NA
+4   8_9  baseline_in_sample              0.861              0.790
+5   8_9 baseline_heldout_cv                 NA                 NA
+6   8_9   rerank_heldout_cv                 NA                 NA
+  t(m_bl_insample).3 t(m_bl_insample).4 t(m_bl_all).1 t(m_bl_all).2
+1              0.547              0.376            NA            NA
+2                 NA                 NA         0.691         0.451
+3                 NA                 NA            NA            NA
+4              0.824              0.701            NA            NA
+5                 NA                 NA         0.850         0.790
+6                 NA                 NA            NA            NA
+  t(m_bl_all).3 t(m_bl_all).4 t(m_rr_all).1 t(m_rr_all).2 t(m_rr_all).3
+1            NA            NA            NA            NA            NA
+2         0.546         0.375            NA            NA            NA
+3            NA            NA         0.668         0.567         0.614
+4            NA            NA            NA            NA            NA
+5         0.819         0.693            NA            NA            NA
+6            NA            NA         0.866         0.802         0.833
+  t(m_rr_all).4
+1            NA
+2            NA
+3         0.442
+4            NA
+5            NA
+6         0.714
+
+--- top features by mean gain ---
+   track          Feature       gain
+1   10_9     ens_mean_rel 0.23323639
+2   10_9     chapter_rate 0.14541989
+3   10_9      ens_min_rel 0.07225615
+4   10_9         cooc_rel 0.04424497
+5   10_9       ens_rel_sd 0.03674839
+6   10_9     lex_idf_rank 0.03570587
+7   10_9        sim_mpnet 0.03094863
+8   10_9        cooc_freq 0.02821764
+9   10_9    simrank_mpnet 0.02562283
+10  10_9     simrel_mpnet 0.02491415
+11  10_9        cooc_rank 0.02460590
+12  10_9   simrel_sapbert 0.02414855
+13   8_9   simrel_sapbert 0.37948389
+14   8_9     ens_mean_rel 0.12460219
+15   8_9  simrank_sapbert 0.11718178
+16   8_9         cooc_rel 0.07208164
+17   8_9      ens_min_rel 0.04755920
+18   8_9      ens_max_rel 0.02185880
+19   8_9       ens_rel_sd 0.01788613
+20   8_9      sim_sapbert 0.01614611
+21   8_9       cooc_share 0.01581699
+22   8_9     simrel_mpnet 0.01571083
+23   8_9 sim_clinicalbert 0.01435876
+24   8_9    ens_best_rank 0.01356342
+
+Written to results/cv_rerank_*.csv

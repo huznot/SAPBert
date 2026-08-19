@@ -66,52 +66,85 @@ Two-stage retrieve-and-rerank:
   but never yet run** — it needs `results/cv_rerank_predictions.rds` from a
   completed 12_ run.
 
-### Held-out results so far (ICD-10-CA, partial)
+### FINAL held-out results (both tracks, complete)
 
-Per-fold, reranker beat baseline on **every fold** of the first complete run:
+`12_cv_rerank.R` and `13_precision_coverage.R` have both **run to
+completion**. These are the real numbers — nothing here was tuned on the
+data it is scored on.
 
-| Fold | Baseline | Reranker |
+| Track | Baseline in-sample | Baseline held-out | **Reranker held-out** |
+|---|---|---|---|
+| ICD-9→ICD-10-CA | 0.547 | 0.546 | **0.614** |
+| ICD-9→ICDA-8 | 0.824 | 0.819 | **0.833** |
+
+Two things worth noting:
+
+- **Baseline in-sample ≈ baseline held-out** (0.547 vs 0.546). So the old
+  parameter sweep was *not* badly overfit — it was simply **capped**. The
+  selection-on-test worry turned out to be minor; the retrieval ceiling was
+  the real problem, exactly as §1 predicted.
+- The reranker's gain is almost entirely **recall**: 0.451 → **0.567** on
+  ICD-10-CA, at roughly unchanged precision (0.691 → 0.668). That is the
+  signature of fixing candidate generation, not of a better classifier.
+
+### The deployment result (this is the headline)
+
+From `13_precision_coverage.R`, on out-of-fold predictions:
+
+| Operating point | ICD-10-CA | ICDA-8 |
 |---|---|---|
-| 1 | 0.586 | **0.680** |
-| 2 | 0.581 | **0.588** |
-| 3 | 0.574 | **0.614** |
-| 4 | 0.467 | **0.582** |
-| 5 | 0.537 | **0.612** |
+| **Crosswalk auto-built at ~95% precision** | **38.5%** | **76.6%** |
+| Auto-built at ~99% precision | 20.0% | 57.5% |
 
-≈ **0.55 → 0.62 held-out F1**. Unlike every earlier number in this project,
-these are measured on codes the system never saw in training *or* tuning.
+Triage at the 95%-precision operating point:
+
+| Bucket | ICD-10-CA | ICDA-8 |
+|---|---|---|
+| Auto-accept (no human needed) | 79.1% of codes | 85.1% |
+| Review — candidates, low confidence | 20.3% | 13.9% |
+| Review — no plausible candidate | 0.6% | 1.0% |
+
+**"Three-quarters of the ICDA-8 crosswalk requires no human at all, at 95%
+precision, on codes the system never saw" is the claim to lead with.**
+
+Artifacts: `results/cv_rerank_results.csv`, `_folds.csv`, `_importance.csv`,
+`_predictions.rds`, `precision_coverage_curve.csv`,
+`_operating_points.csv`, `_triage.csv`, `plot_precision_coverage.png`.
 
 ---
 
-## 2. IMMEDIATE NEXT STEP
+## 2. IMMEDIATE NEXT STEP — write the report section
 
-**`scripts/12_cv_rerank.R` was still running when the session ended and its
-pooled results were never captured.** Rerun it:
+All the computation is done. **The gap is now writing, not running.**
+`report.Rmd` currently documents only the full-grid model comparison and
+says nothing about §1 at all.
+
+Add a new section built around the **triage / precision-coverage table**,
+with F1 as supporting detail rather than the headline. Suggested spine:
+
+1. The diagnosis — 100% of answers retrievable, only 62.6% pooled, oracle
+   F1 capped at 0.770. This is the intellectual core; lead with it.
+2. The fix — relative threshold → top-K retrieval, ceiling 0.626 → 0.927.
+3. The two-stage system and the grouped-CV protocol (stress that the
+   baseline is evaluated under the *identical* protocol).
+4. Held-out results table, then the precision-coverage/triage table.
+5. Honest limits — §7 below.
+
+Then re-render:
+
+```bash
+cd /c/Users/IRFANM/Downloads/icd_crosswalk_r
+"/c/Program Files/R/R-4.6.1/bin/Rscript.exe" -e "Sys.setenv(RSTUDIO_PANDOC='C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools'); rmarkdown::render('report.Rmd', output_format='html_document')"
+```
+
+To re-run the pipeline from scratch (only if inputs change — ~35 min):
 
 ```bash
 cd scripts
+"/c/Program Files/R/R-4.6.1/bin/Rscript.exe" 11_rerank_features.R
 "/c/Program Files/R/R-4.6.1/bin/Rscript.exe" 12_cv_rerank.R > ../logs/12_cv_rerank.log 2>&1
-```
-
-Takes ~30 min (both tracks). It writes:
-`results/cv_rerank_results.csv`, `_folds.csv`, `_importance.csv`,
-`_predictions.rds`, plus `cv_rerank_checkpoint_<track>.rds` (a safety
-checkpoint written before the aggregation step).
-
-Then immediately:
-
-```bash
 "/c/Program Files/R/R-4.6.1/bin/Rscript.exe" 13_precision_coverage.R
 ```
-
-Three bugs were already found and fixed in `12_`; it now parses and runs
-clean through the folds. The last failure was an aggregation bug (`sapply`
-appending `.f1` to names → `base_emit[[bad_key]]` returning NULL) — fixed by
-indexing by position. Don't re-break it.
-
-**Nothing in the report reflects any of §1 yet.** `report.Rmd` currently
-documents only the full-grid model comparison. Once 12_/13_ produce numbers,
-the report needs a new section — that is the main writing task.
 
 ---
 
@@ -144,12 +177,15 @@ stronger symposium claim than any F1 number.** Prioritise this.
    code the best match *for that target*?" Mutual-nearest-neighbour is
    typically a large win in entity matching, and task 3 already showed
    reverse-direction info is informative. Cheap to add to `11_`. **Best
-   next lever.**
+   next lever** — and now clearly the binding one: ICD-10-CA held-out recall
+   is 0.567 against a pool ceiling of 0.949, so ~40% of retrievable answers
+   are being retrieved and then discarded by the ranker.
 2. **The inner CV keeps selecting K=10**, i.e. it retreats to a small pool
-   because precision on a large pool is hard. That means the reranker, not
-   retrieval, is now the binding constraint — the 0.95 ceiling is not being
-   exploited. Stronger features (idea 1), more xgboost capacity/tuning, or
-   a listwise/ranking objective instead of per-pair binary classification.
+   because precision on a large pool is hard. Confirms the reranker, not
+   retrieval, is the constraint. Stronger features (idea 1), more xgboost
+   capacity/tuning, or a listwise/ranking objective instead of per-pair
+   binary classification. Check `results/cv_rerank_importance.csv` first to
+   see which features actually carry weight before adding more.
 3. **Adaptive set size.** Truth averages 2.7 targets/code (range 1–13);
    predicting *how many* targets a code should get is a separate learnable
    problem from scoring each candidate.
@@ -220,8 +256,16 @@ concluded "not reproducible" from a run that had been interrupted after 1 of
   promised.** 63% of codes map to multiple targets, truth averages 2.7 per
   code, boundaries are genuine judgement calls, and human coders disagree.
   ICDA-8 is far more tractable (0.994 ceiling, mostly 1:1).
-- The reranker currently recovers roughly a third of available headroom
-  (0.62 held-out against a 0.97 oracle). Real work remains.
+- The reranker recovers roughly a third of available headroom on ICD-10-CA
+  (0.614 held-out against a ~0.97 oracle). Real work remains there. ICDA-8
+  is in much better shape (0.833).
+- **Do not quote 0.614 / 0.833 as if they were comparable to the old
+  0.530 / 0.821.** The old figures are in-sample; the correct like-for-like
+  comparison is against the held-out baseline (0.546 / 0.819), which is what
+  `cv_rerank_results.csv` reports and what the report must use.
+- The ICD-10-CA improvement is solid and real (+0.068 F1 held-out, driven by
+  +0.116 recall). The ICDA-8 improvement is small (+0.014) — say so plainly
+  rather than implying the method helps equally on both tracks.
 - **The strongest contribution is the diagnosis, not the F1.** "We decomposed
   a published-style pipeline, showed its similarity filter discards 37% of
   recoverable answers and caps *any* downstream method at F1 0.77, fixed it,
