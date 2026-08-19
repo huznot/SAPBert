@@ -1,36 +1,20 @@
-# Task 1 + 2, FULL parameter grid.
+# Full parameter grid for every embedding condition.
 #
-# scripts/06_extended_comparison.R could only afford ONE (threshold, top_n)
-# operating point per track per embedding condition, because merge_and_flag()
-# cost ~10-12s per point under the old rowwise() implementation. Picking a
-# single arbitrary operating point is a weak basis for the headline claim
-# ("does a general-purpose embedding model beat a domain-specific one?"):
-# each condition has a different similarity distribution, so the point that
-# is optimal for one model need not be optimal for another, and a comparison
-# at one shared point can rank models by an artifact of that choice.
+# 06_ only had budget for one (threshold, top_n) point per track, which is a
+# weak basis for comparing models: each one has a different similarity
+# distribution, so the best point for one need not be the best for another.
+# merge_and_flag is ~130x faster now (vectorized chapter lookup), so this runs
+# the whole grid for all of them:
 #
-# find_chapter()/compute_chapter_distance() in pipeline_lib.R are now
-# vectorized (bit-identical output, verified by
-# scripts/verify_vectorized_equivalence.R), which makes merge_and_flag()
-# ~130x faster and the full sweep affordable for every condition. This
-# script therefore runs the SAME full grid for all of them:
+#   thresholds {0.95, 0.99, 0.995, 0.999} x top_n {3,5,10,15,20,25,30}
+#   x flags 1:4  = 112 points per condition per track
 #
-#   thresholds {0.95, 0.99, 0.995, 0.999}
-#   x top_n    {3, 5, 10, 15, 20, 25, 30}  (superset of every range used before)
-#   x flags    {1, 2, 3, 4}                = 112 points per condition per track
+# That top_n range covers every range used before, so nothing can be lost.
 #
-# The top_n range is a strict superset of both ranges previously used
-# ({3,5,10,15} originally, {5,10,15,20,25,30} after the widening in
-# 02_run_comparison.R), so no earlier result can be lost by using it, and the
-# widened tail is now searched for BOTH tracks rather than just one.
-#
-# Usage (from scripts/):
-#   Rscript 07_full_grid_comparison.R                 # every condition, sequentially
-#   Rscript 07_full_grid_comparison.R mpnet_base ...  # named conditions only
-# Each condition writes its own results/full_grid/<tag>.csv, so several can be
-# run as parallel background processes without colliding. Assemble the pieces
-# with scripts/08_assemble_full_grid.R.
-
+# Usage:  Rscript 07_full_grid_comparison.R              all conditions
+#         Rscript 07_full_grid_comparison.R mpnet_base   named ones only
+# Each condition writes its own results/full_grid/<tag>.csv so they can run in
+# parallel. Combine with 08_assemble_full_grid.R.
 source("pipeline_lib.R")
 
 ORIG_BASE    <- "../data/original"
@@ -43,22 +27,12 @@ thresholds <- c(0.95, 0.99, 0.995, 0.999)
 top_ns     <- c(3, 5, 10, 15, 20, 25, 30)
 flags      <- 1:4
 
-# Each condition names the embedding matrices to score. "family" and
-# "stripping" are carried into the output so the two questions this grid is
-# meant to answer (which model family wins; does filler-word stripping help)
-# can be read off directly.
-# NOTE ON TAG NAMING: tags become output FILENAMES, and this pipeline runs on
-# Windows, where the filesystem is case-insensitive. Two tags differing only
-# by case ("SapBERT_base" vs "sapbert_base") are distinct R list names but the
-# SAME file on disk, so parallel background runs silently overwrite each
-# other's results -- which happened once and produced a results file whose
-# "model" column did not match its filename. Tags must therefore be unique
-# case-INSENSITIVELY; the check below enforces it.
+# Tags become filenames. Windows is case-insensitive, so two tags differing
+# only by case are the same file and parallel runs clobber each other. The
+# check below stops that.
 CONDITIONS <- list(
-  # The two arms the existing baseline was built on. clinicalbert_original
-  # matrices came from an external pipeline not present in this repo (its
-  # generation method is undocumented -- flagged for the PI); sapbert_original
-  # generation IS documented and validated here.
+  # the two arms the baseline was built on. clinicalbert_original came from an
+  # external pipeline we do not have; sapbert_original is generated here.
   clinicalbert_original = list(
     model = "ClinicalBERT-original", family = "ClinicalBERT", stripping = "base",
     path_10_9 = file.path(ORIG_BASE, "Cosine_Similarity_Matrices/cosine_similarity_matrices_10_9_ClinicalBERT.xlsx"),
@@ -67,11 +41,9 @@ CONDITIONS <- list(
     model = "SapBERT-base", family = "SapBERT", stripping = "base",
     path_10_9 = file.path(SAPBERT_BASE, "cosine_similarity_matrices_10_9_SapBERT.xlsx"),
     path_8_9  = file.path(SAPBERT_BASE, "cosine_similarity_matrices_8_9_SapBERT.xlsx")),
-  # Regenerated arms: all produced by the same generation script and pooling
-  # (scripts/generate_embeddings.py), so base-vs-stripped and
-  # family-vs-family are controlled comparisons. SapBERT-base-regen doubles
-  # as a control on the regeneration itself: it should land on top of
-  # SapBERT-base if the regeneration reproduces data/sapbert.
+  # regenerated arms, all from generate_embeddings.py, so base vs stripped and
+  # family vs family are controlled. sapbert_base doubles as a check that the
+  # regeneration reproduces data/sapbert.
   clinicalbert_base     = list(model = "ClinicalBERT-base",     family = "ClinicalBERT", stripping = "base"),
   clinicalbert_stripped = list(model = "ClinicalBERT-stripped", family = "ClinicalBERT", stripping = "stripped"),
   sapbert_base          = list(model = "SapBERT-base-regen",    family = "SapBERT",      stripping = "base"),

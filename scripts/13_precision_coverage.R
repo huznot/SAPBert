@@ -1,28 +1,14 @@
-# Deployment view: precision at coverage, and a human-review triage queue.
+# Precision at coverage, and a review queue.
 #
-# WHY THIS FRAMING. Maximising F1 answers "how good is the system if it must
-# answer everything?" That is the wrong question for a crosswalk that would
-# actually be used. Some ICD-9 codes have a clean counterpart, some map to a
-# set of targets, and some genuinely have no good counterpart at all
-# (terminology added or restructured between revisions). A usable tool does
-# not need to be right about all of them -- it needs to KNOW WHICH ONES IT IS
-# RIGHT ABOUT, so a coder can accept those without checking and spend their
-# time only on the rest.
+# F1 assumes the system has to answer everything. It does not - some codes
+# have no counterpart at all, and what matters in practice is knowing which
+# mappings are safe to accept without checking.
 #
-# So instead of one F1, this reports the curve a deployment decision actually
-# needs:
-#   * precision as a function of how much we choose to emit (coverage)
-#   * the operating point that hits a target precision (95%, 99%, ...) and
-#     what fraction of the work it automates at that precision
-#   * a triage split: auto-accept / review / no-confident-candidate
+# So this reports precision vs coverage, the threshold that hits a target
+# precision and how much of the crosswalk it builds there, and a triage split
+# of auto-accept / review / no candidate.
 #
-# All of it is computed from the OUT-OF-FOLD predictions produced by
-# 12_cv_rerank.R -- i.e. every probability used here was produced by a model
-# that never saw that code during training or tuning. These are honest
-# operating characteristics, not in-sample ones.
-#
-# Run from scripts/:  Rscript 13_precision_coverage.R
-
+# Runs off the out-of-fold predictions from 12_, so these are honest.
 source("pipeline_lib.R")
 
 OUT_DIR <- "../results"

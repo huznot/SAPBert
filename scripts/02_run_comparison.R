@@ -6,23 +6,10 @@ OUT_DIR      <- "../results"
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 thresholds  <- c(0.95, 0.99, 0.995, 0.999)
-# Both tracks sweep top-N {3,5,10,15,20,25,30}, a strict SUPERSET of the two
-# ranges this script has used historically ({3,5,10,15} originally, and
-# {5,10,15,20,25,30} in the first attempt at a fix). Using the superset for
-# both tracks means no earlier result can be lost, and the widened tail is
-# actually searched on both tracks rather than just one.
-#
-# WHY THIS MATTERS: the original range {3,5,10,15} was too narrow and cut off
-# the real optimum on the ICD-9-CM -> ICD-10-CA track. Under it, the best
-# reachable numbers were F1 0.423 (ClinicalBERT) and 0.523 (SapBERT), which is
-# why the reference numbers F1 0.427/Acc 0.271 and F1 0.530/Acc 0.360 looked
-# unreproducible and were flagged as a discrepancy. They are NOT wrong: with
-# the widened range they reproduce exactly, at top_n=30 (ClinicalBERT,
-# threshold 0.995) and top_n=30 (SapBERT, threshold 0.95). See report.Rmd.
-#
-# Sweeping the same range on both tracks is affordable because
-# merge_and_flag() is now ~130x faster (vectorized chapter lookup in
-# pipeline_lib.R, verified bit-identical by verify_vectorized_equivalence.R).
+# Both tracks sweep top-N {3,5,10,15,20,25,30}. The original {3,5,10,15} was
+# too narrow and cut off the real optimum on ICD-9 -> ICD-10-CA, which sits at
+# top_n=30 for both models -- that is why the reference numbers looked
+# unreproducible. They reproduce exactly with this range.
 top_ns_8_9  <- c(3, 5, 10, 15, 20, 25, 30)
 top_ns_10_9 <- c(3, 5, 10, 15, 20, 25, 30)
 flags       <- 1:4

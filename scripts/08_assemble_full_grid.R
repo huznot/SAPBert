@@ -1,19 +1,13 @@
-# Assembles the per-condition full-grid CSVs written by
-# scripts/07_full_grid_comparison.R into the summary tables the report reads.
+# Combines the per-condition grids from 07_ into summary tables.
 #
-# Outputs (all in results/):
-#   full_grid_all.csv          every (condition, track, threshold, top_n, flag) point
-#   full_grid_best.csv         best point per condition x track, by F1
-#   full_grid_stripping.csv    base vs stripped, paired within family x track (task 1)
-#   full_grid_family.csv       best per model family x track (task 2)
+#   full_grid_all.csv          every point
+#   full_grid_best.csv         best per condition x track
+#   full_grid_stripping.csv    base vs stripped (task 1)
+#   full_grid_family.csv       best per model family (task 2)
 #   full_grid_sensitivity.csv  how much the ranking depends on the operating point
 #
-# The sensitivity table is the reason this exists at all: the earlier
-# single-operating-point comparison could not distinguish "model A is better"
-# from "model A happens to be better at the one point we scored", so alongside
-# each condition best F1 it records that condition F1 spread across the grid,
-# and how it ranks when every condition is scored at one shared point instead.
-
+# The sensitivity table is the point: comparing models at one arbitrary
+# operating point cannot tell "A is better" from "A wins at this one spot".
 source("pipeline_lib.R")
 
 GRID_DIR <- "../results/full_grid"
@@ -27,9 +21,8 @@ cat(sprintf("Assembling %d condition file(s): %s\n", length(files),
 
 all_grid <- bind_rows(lapply(files, read.csv, stringsAsFactors = FALSE))
 
-# Guard against assembling a partial set: every condition must have run the
-# identical grid, otherwise "best F1 per condition" is comparing different
-# amounts of search and the comparison is not fair.
+# every condition must have run the same grid, or best-F1 is comparing
+# different amounts of search
 pts <- all_grid %>% count(model, track, name = "n_points")
 if (length(unique(pts$n_points)) != 1) {
   cat("\nWARNING: conditions did not all run the same number of grid points --\n")
@@ -49,9 +42,8 @@ best <- all_grid %>%
   arrange(track, desc(f1))
 write.csv(best, file.path(OUT_DIR, "full_grid_best.csv"), row.names = FALSE)
 
-# --- task 1: does filler-word stripping help? -------------------------
-# Paired within family and track, using only the regenerated arms, where base
-# and stripped share a generation method and so differ ONLY by the stripping.
+# task 1: paired within family and track, regenerated arms only, so base and
+# stripped differ only by the stripping
 paired <- all_grid %>%
   filter(model %in% c("ClinicalBERT-base", "ClinicalBERT-stripped",
                       "SapBERT-base-regen", "SapBERT-stripped",
@@ -67,10 +59,8 @@ stripping <- paired %>%
   arrange(track, family)
 write.csv(stripping, file.path(OUT_DIR, "full_grid_stripping.csv"), row.names = FALSE)
 
-# Point-by-point win rate: whether stripping helps at a matched
-# (threshold, top_n, flag) point, not just at each arm own best point. This
-# is the more honest read on a change whose effect is small -- one arm can
-# win on best-F1 purely by finding a slightly luckier corner of the grid.
+# win rate at matched points. Better read than best-F1 for a small effect,
+# since one arm can win just by finding a luckier corner of the grid.
 paired_points <- paired %>%
   select(track, family, stripping, similarity_threshold, top_n, flag_combination, f1) %>%
   tidyr::pivot_wider(names_from = stripping, values_from = f1) %>%
@@ -94,10 +84,8 @@ family_best <- all_grid %>%
   arrange(track, desc(f1))
 write.csv(family_best, file.path(OUT_DIR, "full_grid_family.csv"), row.names = FALSE)
 
-# --- how operating-point-dependent is the ranking? --------------------
-# For each track, rank conditions by best-over-grid F1, and separately by F1
-# at the single shared point 06_extended_comparison.R used. If the two
-# rankings disagree, the single-point comparison was measuring the point.
+# rank by best-over-grid F1 vs F1 at the single point 06_ used. If they
+# disagree, the single-point comparison was measuring the point.
 SHARED_POINT <- list(`10_9` = list(thr = 0.995, tn = 30),
                      `8_9`  = list(thr = 0.99,  tn = 5))
 

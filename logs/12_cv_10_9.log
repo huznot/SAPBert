@@ -12,9 +12,7 @@ The following objects are masked from 'package:base':
 
 ################ TRACK 10_9 ################
 53114 candidates, 345 codes, 889 positives (pool ceiling 0.9488 of 937 true pairs)
-Precomputing baseline pipeline emissions (first run only)...
-  SapBERT done
-  ClinicalBERT done
+Loading cached baseline emissions...
 
 --- outer fold 1/5 (276 train codes, 69 test codes) ---
   inner-CV pick: K=10 N=10 chapter=FALSE tau=0.35 rho=0.85 (inner F1 0.635)

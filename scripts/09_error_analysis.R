@@ -1,29 +1,13 @@
-# Diagnostic: WHERE does the pipeline lose points?
+# Works out where the pipeline loses points.
 #
-# Before trying to raise accuracy it is worth knowing what is actually
-# capping it. The pipeline has two distinct stages and they fail differently:
+# Two stages fail differently. Candidate generation (threshold + top-N
+# co-occurrence + chapter filter) decides what gets considered at all, and
+# anything it drops is gone for good. Selection then picks what to emit, and
+# whatever it emits that is wrong costs precision.
 #
-#   1. CANDIDATE GENERATION -- similarity threshold + top-N co-occurrence +
-#      chapter filter produce a pool of (ICD-9, target) candidate pairs.
-#      Any true pair missing from this pool is unrecoverable: no selection
-#      rule downstream can ever get it back. This sets the RECALL CEILING.
-#   2. SELECTION -- the flag rules pick a subset of the pool to emit. Every
-#      emitted pair that is not in the manual crosswalk is a false positive.
-#      This sets the achievable PRECISION.
-#
-# This script measures both, plus an ORACLE: the F1 you would get if a
-# perfect selector picked exactly the true pairs out of the candidate pool.
-# The oracle is the honest upper bound for any amount of reranking,
-# ensembling or model-swapping that keeps this candidate generator. If the
-# oracle is low, the candidate generator is the problem and no amount of
-# better ranking will help. If the oracle is high, the ranking is the
-# problem and it is worth working on.
-#
-# It also decomposes WHERE lost true pairs die (similarity cut vs. chapter
-# filter vs. absent from both signals), which says which knob to turn.
-#
-# Run from scripts/:  Rscript 09_error_analysis.R
-
+# So this measures both, plus an oracle: the F1 a perfect selector would get
+# on the current pool. That is the hard ceiling for any amount of reranking or
+# model swapping. It also breaks down where the lost pairs died.
 source("pipeline_lib.R")
 
 ORIG_BASE    <- "../data/original"
@@ -101,9 +85,8 @@ for (tr in names(TRACKS)) {
       transmute(ICD_9_CM = as.character(ICD_9_CM), target = as.character(.data[[tcn]]),
                 Co_Occurrence_Frequency)
 
-    # the FULL universe the similarity matrix could ever offer for this
-    # ICD-9 code (no threshold at all) -- distinguishes "the threshold cut
-    # it" from "the embedding never had it"
+    # everything the matrix could offer, unthresholded. Separates "threshold
+    # cut it" from "embedding never had it".
     universe <- get_similarity_scores_from_sheets(sheets, 0, tcn) %>%
       transmute(ICD_9_CM = as.character(ICD_9_CM), target = as.character(.data[[tcn]])) %>%
       distinct()

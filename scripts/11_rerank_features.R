@@ -1,34 +1,14 @@
-# Stage 1 of the two-stage crosswalk system: build the candidate pool and its
-# feature table.
+# Builds the candidate pool and feature table for the reranker.
 #
-# WHY THIS EXISTS (see 09_error_analysis.R / 10_candidate_generation_study.R):
-# the original pipeline selects candidates with a similarity threshold that is
-# RELATIVE to each code's own maximum (keep sim >= 0.95 * max_sim). That is a
-# very aggressive cut: it admitted only ~37% of true pairs, and the resulting
-# pool contained just 62.6% of them, so the best conceivable reranker was
-# capped at F1 0.770 on ICD-10-CA. Replacing the relative threshold with
-# straightforward top-K retrieval lifts the pool's recall ceiling to ~0.93
-# (oracle F1 ~0.96). The cost is a much larger pool (~90 candidates per code
-# instead of ~8), i.e. precision has to be recovered by a reranker rather
-# than by refusing to retrieve. That is the standard retrieve-then-rerank
-# split, and it is the right shape for this problem because the expensive
-# thing (recall) is unrecoverable while the cheap thing (precision) is not.
+# Takes top-50 similarity per model plus top-50 co-occurrence, no chapter
+# filter, and attaches all features. Narrower retrieval settings are just row
+# filters on this (sim_rank <= K, cooc_rank <= N, chapter_ok), so 12_ can
+# sweep them without rebuilding anything.
 #
-# This script builds the MAXIMAL pool once (top-50 similarity per model UNION
-# top-50 co-occurrence, no chapter filter) and attaches every feature the
-# reranker might use. Narrower retrieval settings are then just row filters on
-# this table (sim_rank <= K, cooc_rank <= N, chapter flag), so the expensive
-# work happens once and the cross-validation in 12_* can sweep retrieval
-# settings cheaply.
+# The manual crosswalk is only joined at the end as the label y. Nothing here
+# is fitted.
 #
-# IMPORTANT -- no label information is used anywhere in this file. Features
-# are functions of the embeddings, the co-occurrence counts, the code strings
-# and the code labels only. The manual crosswalk is attached at the very end
-# purely as the training target `y`, and all fitting/tuning happens inside
-# cross-validation folds in 12_*.
-#
-# Output: results/rerank_features_<track>.rds
-# Run from scripts/:  Rscript 11_rerank_features.R
+# Writes results/rerank_features_<track>.rds
 
 source("pipeline_lib.R")
 
@@ -85,12 +65,9 @@ long_similarity <- function(path) {
   }) %>% filter(!is.na(sim))
 }
 
-# --- lexical features -------------------------------------------------
-# Deliberately NON-neural signals. Embeddings capture semantic similarity but
-# systematically miss exact lexical agreement -- two labels sharing a rare
-# specific word ("mesothelioma") are near-certainly the same concept, which a
-# cosine score smooths over. These are cheap and give the reranker a signal
-# that is genuinely independent of every embedding model in the ensemble.
+# Non-neural label features. Embeddings smooth over exact word matches, so
+# two labels sharing a rare word ("mesothelioma") look no better than ones
+# sharing "other". These catch that.
 tokenize <- function(x) strsplit(gsub("[^a-z0-9 ]", " ", x), "\\s+")
 
 lexical_features <- function(a, b, idf) {
@@ -103,16 +80,12 @@ lexical_features <- function(a, b, idf) {
     inter <- intersect(x, y)
     jac[i] <- length(inter) / length(union(x, y))
     ovl[i] <- length(inter) / min(length(x), length(y))
-    # IDF-weighted overlap: matching a rare word counts for far more than
-    # matching "other" or "disease"
+    # rare words count more than "other"/"disease"
     idf_ovl[i] <- if (length(inter)) sum(idf[inter], na.rm = TRUE) / sum(idf[union(x, y)], na.rm = TRUE) else 0
     first_tok[i] <- as.numeric(x[1] == y[1])
   }
-  # Normalized edit distance on the whole label string. NOTE: adist(a, b)
-  # builds the full length(a) x length(b) cross matrix, which on a pool this
-  # size is tens of billions of cells and segfaults. Compute it pairwise, and
-  # only once per DISTINCT label pair (labels repeat heavily across
-  # candidates, so this is a large saving on top).
+  # Edit distance, pairwise on distinct label pairs only.
+  # adist(a, b) builds the full a x b matrix and segfaults at this size.
   key <- paste(a, b, sep = "\r")
   uk <- !duplicated(key)
   ua <- a[uk]; ub <- b[uk]
@@ -132,25 +105,15 @@ for (tr in names(TRACKS)) {
   for (mdl in names(tk$sim)) {
     cat(sprintf("  loading similarity: %s\n", mdl))
     s <- long_similarity(tk$sim[[mdl]])
-    # FORWARD stats, normalized within each ICD-9 code: "how good is this
-    # target, among the targets this code could map to?"
+    # forward: rank each target within its ICD-9 code
     s <- s %>% group_by(ICD_9_CM) %>%
       mutate(sim_rank = rank(-sim, ties.method = "first"),
              sim_rel  = sim / max(sim, na.rm = TRUE),
              sim_z    = (sim - mean(sim, na.rm = TRUE)) / (sd(sim, na.rm = TRUE) + 1e-9)) %>%
       ungroup()
 
-    # REVERSE stats, normalized within each TARGET code: "how good is this
-    # ICD-9 code, among the codes competing for this target?"
-    #
-    # This is the mutual-nearest-neighbour signal and it is the single most
-    # important thing the earlier feature set was missing. A target that is
-    # every code's plausible match (e.g. a generic "other/unspecified"
-    # bucket) is weak evidence even when its forward similarity is high;
-    # a target whose best suitor IS this code is strong evidence even when
-    # the absolute cosine is mediocre. Forward-only features cannot express
-    # either case. Task 3's round-trip analysis already showed the reverse
-    # direction carries real information -- this puts it where it can act.
+    # reverse: rank each ICD-9 code within its target. Catches generic
+    # "other/unspecified" targets that look good to everyone.
     s <- s %>% group_by(target) %>%
       mutate(sim_rank_rev = rank(-sim, ties.method = "first"),
              sim_rel_rev  = sim / max(sim, na.rm = TRUE)) %>%
@@ -223,29 +186,20 @@ for (tr in names(TRACKS)) {
            ens_max_rel   = do.call(pmax, c(across(all_of(rel_cols)), na.rm = TRUE)),
            ens_min_rel   = do.call(pmin, c(across(all_of(rel_cols)), na.rm = TRUE)),
            ens_best_rank = do.call(pmin, c(across(all_of(rank_cols)), na.rm = TRUE)),
-           # disagreement between models is itself a signal: candidates all
-           # models like are safer than ones only one model likes
+           # models disagreeing is itself informative
            ens_rel_sd    = apply(across(all_of(rel_cols)), 1, sd),
 
-           # --- reverse-direction ensemble ---
+           # reverse direction
            ens_mean_relrev  = rowMeans(across(all_of(relrev_cols))),
            ens_best_rankrev = do.call(pmin, c(across(all_of(rankrev_cols)), na.rm = TRUE)),
            ens_rrf_rev      = rowSums(1 / (60 + as.matrix(across(all_of(rankrev_cols))))),
 
-           # --- MUTUAL agreement ---
-           # geometric mean of the two directions: high only when the code
-           # likes the target AND the target likes the code back. This is
-           # the discriminative form -- a plain sum lets one strong
-           # direction mask a weak one, the product does not.
+           # mutual agreement. geometric mean, so one strong direction can't
+           # mask a weak one the way a sum would
            ens_mutual_rel  = sqrt(ens_mean_rel * ens_mean_relrev),
-           # symmetric rank score; small is good in both directions at once
            ens_mutual_rank = ens_best_rank + ens_best_rankrev,
-           # is this an actual mutual nearest neighbour? cheap, very strong
-           # when true
            is_mutual_top1  = as.integer(ens_best_rank == 1 & ens_best_rankrev == 1),
-           # asymmetry: positive when the target wants this code more than
-           # the code wants the target, which flags generic "catch-all"
-           # targets that attract many codes
+           # positive when the target wants this code more than vice versa
            ens_direction_gap = ens_mean_rel - ens_mean_relrev)
 
   # --- chapter features ------------------------------------------------
@@ -277,17 +231,11 @@ for (tr in names(TRACKS)) {
            ens_rrf_rank = rank(-ens_rrf, ties.method = "first"),
            ens_rrf_rel  = ens_rrf / max(ens_rrf, na.rm = TRUE),
            lex_idf_rank = rank(-lex_idf_overlap, ties.method = "first"),
-           # gap to this code's runner-up: a candidate that clearly beats the
-           # next best is a different proposition from one in a crowded tie,
-           # even at identical absolute score
+           # gap to the runner-up: clear winner vs crowded tie
            ens_margin   = ens_mean_rel - max(ens_mean_rel[ens_mean_rel < max(ens_mean_rel)], -1)) %>%
     ungroup()
 
-  # TARGET-side competition, computed within the pool. A target contested by
-  # many ICD-9 codes is weaker evidence for any one of them; a target this
-  # code is the front-runner for is stronger evidence. Complements the
-  # reverse-similarity features above, which are computed over the full
-  # matrix rather than over the retrieved pool.
+  # how contested each target is within the pool
   feat <- feat %>% group_by(target) %>%
     mutate(target_n_suitors    = n(),
            target_rank_here    = rank(-ens_mean_rel, ties.method = "first"),
@@ -302,21 +250,25 @@ for (tr in names(TRACKS)) {
     transmute(ICD_9_CM = as.character(`ICD-9-CM`), target = as.character(.data[[tk$manual_target_col]])) %>%
     filter(!(ICD_9_CM %in% excluded)) %>% distinct() %>% mutate(y = 1L)
 
-  # scoring is restricted to ICD-9 codes that appear in the manual crosswalk
-  # and are not on the exclusion list -- exactly the population the original
-  # pipeline is scored on, so the comparison in 12_* stays like-for-like
+  # Keep every code, including ones with no known answer. has_truth marks
+  # which codes can be scored; codes without it are what the finished tool
+  # actually has to map. Codes on the exclusion list are dropped.
   eval_codes <- unique(tp_df$ICD_9_CM)
   feat <- feat %>%
-    filter(ICD_9_CM %in% eval_codes) %>%
+    filter(!(ICD_9_CM %in% excluded)) %>%
     left_join(tp_df, by = c("ICD_9_CM", "target")) %>%
-    mutate(y = ifelse(is.na(y), 0L, 1L))
+    mutate(y = ifelse(is.na(y), 0L, 1L),
+           has_truth = as.integer(ICD_9_CM %in% eval_codes))
+
+  n_unl <- n_distinct(feat$ICD_9_CM[feat$has_truth == 0])
+  cat(sprintf("  codes with truth: %d | without truth (to be predicted): %d\n",
+              length(eval_codes), n_unl))
 
   hit <- feat %>% filter(y == 1) %>% nrow()
   cat(sprintf("  feature table: %d rows, %d positives\n", nrow(feat), hit))
   cat(sprintf("  recall ceiling of maximal pool: %.4f (%d / %d true pairs)\n",
               hit / nrow(tp_df), hit, nrow(tp_df)))
-  cat(sprintf("  positives per code: %.2f | candidates per code: %.1f\n",
-              hit / n_distinct(feat$ICD_9_CM), nrow(feat) / n_distinct(feat$ICD_9_CM)))
+  cat(sprintf("  candidates per code: %.1f\n", nrow(feat) / n_distinct(feat$ICD_9_CM)))
 
   attr(feat, "n_true_pairs") <- nrow(tp_df)
   saveRDS(feat, file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))

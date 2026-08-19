@@ -4,10 +4,8 @@ library(readxl)
 library(stringr)
 library(purrr)
 
-# --- Task 1: filler-word stripping -------------------------------------
-# Config-driven list of low-content words stripped from ICD label text
-# before embedding. Kept in filler_words.json so the R pipeline and the
-# Python embedding generator (generate_embeddings.py) share one source.
+# Low-content words stripped from label text before embedding. Kept in
+# filler_words.json so R and generate_embeddings.py use the same list.
 load_filler_words <- function(path = "filler_words.json") {
   cfg <- jsonlite::fromJSON(path)
   cfg$filler_words
@@ -100,17 +98,11 @@ chapter_alignment_10 <- list(
 
 chapter_alignment_8 <- setNames(as.list(1:17), as.character(1:17))
 
-# find_chapter()/compute_chapter_distance() are VECTORIZED (they accept and
-# return whole vectors, and are still correct for length-1 input, so every
-# existing scalar call site keeps working unchanged). This matters for
-# runtime, not for results: merge_and_flag() used to call these row-by-row
-# under dplyr::rowwise(), i.e. one small dplyr::filter() per candidate row,
-# which cost ~20-30s per (threshold, top_n) grid point and made a full
-# parameter sweep per embedding condition impractical. Both functions are
-# pure lookups over a <=22-row table, so they are computed once per DISTINCT
-# code / chapter pair and recycled by match(). Output is bit-identical to
-# the previous scalar implementation -- verified over the full candidate set
-# of both tracks by scripts/verify_vectorized_equivalence.R.
+# Vectorized, but still fine for length-1 input so existing scalar calls work.
+# These used to run per-row under rowwise() -- one dplyr::filter() per candidate
+# -- which cost ~20-30s per grid point. Both are lookups over a <=22-row table,
+# so compute once per distinct code and recycle with match(). Output is
+# identical to the old version; verify_vectorized_equivalence.R checks it.
 find_chapter <- function(code, chapter_table, pad_width = 3, alpha = FALSE) {
   code <- as.character(code)
   uniq <- unique(code)
@@ -346,13 +338,9 @@ run_pipeline_8_9_cached <- function(sheets_dict, cooc_df, manual_df, ccs_df, val
   list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df, auto_df = auto_df)
 }
 
-# --- Task 3: bidirectional mapping (target -> ICD-9-CM) -----------------
-# Mirrors the forward (ICD-9-CM -> target) pipeline above, but normalizes
-# similarity/co-occurrence per TARGET row instead of per ICD-9-CM column,
-# and uses an inverted chapter-alignment table. Cosine similarity itself
-# is symmetric, so the same similarity sheets are reused -- only the
-# normalization/grouping direction changes, which is what "same
-# methodology, reverse direction" means here.
+# --- reverse direction (target -> ICD-9-CM) ---
+# Same pipeline, but normalized per target instead of per ICD-9 code, with an
+# inverted chapter table. Cosine is symmetric so the same sheets are reused.
 
 invert_alignment <- function(alignment) {
   rev <- list()
@@ -502,10 +490,8 @@ run_pipeline_8_9_reverse_cached <- function(sheets_dict, cooc_df, manual_df, ccs
   list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df, auto_df = auto_df)
 }
 
-# Round-trip consistency: for each ICD-9-CM code that maps forward to some
-# target code (under the forward auto_df), check whether that target code
-# maps back to the same ICD-9-CM code under the reverse auto_df. This is a
-# self-consistency signal independent of the manual crosswalk / F1.
+# Round-trip: does a target a code maps to map back to that same code?
+# Independent of the manual crosswalk.
 compute_roundtrip_consistency <- function(forward_auto_df, reverse_auto_df, target_col_name) {
   fwd <- forward_auto_df %>%
     select(ICD_9_CM, !!target_col_name) %>%

@@ -1,45 +1,10 @@
 source("pipeline_lib.R")
 
-# Tasks 1 + 2: filler-word stripping and the general-purpose embedding
-# model (all-mpnet-base-v2) arm.
+# Superseded by 07_full_grid_comparison.R, which runs the full grid for every
+# condition instead of the single operating point used here. Kept for reference.
 #
-# Compares 6 embedding conditions against the original baseline:
-#   ClinicalBERT / base (regenerated, for an apples-to-apples check against
-#     the original externally-generated ClinicalBERT matrices -- see note
-#     below), ClinicalBERT / stripped, SapBERT / base (regenerated, same
-#     check against data/sapbert), SapBERT / stripped, mpnet / base,
-#     mpnet / stripped.
-#
-# NOTE on "base" regeneration: the original data/original ClinicalBERT
-# matrices were produced by an external pipeline not present in this repo
-# (no model name/pooling method documented anywhere -- flagged separately
-# for the PI). To isolate the effect of filler-word stripping cleanly, this
-# script regenerates a ClinicalBERT "base" arm with the *same* generation
-# script/methodology as the "stripped" arm (scripts/generate_embeddings.py,
-# emilyalsentzer/Bio_ClinicalBERT, CLS-token pooling), so base vs stripped
-# is a controlled comparison. The regenerated "base" arm is expected to
-# land close to, but not necessarily exactly match, the original externally
-# generated numbers -- any gap there is attributable to the unknown
-# generation choices in the original pipeline, not to this task's changes.
-# SapBERT / base uses the *existing* data/sapbert matrices directly (that
-# generation method IS documented and already validated in this repo), so
-# SapBERT / base == the already-reported baseline exactly.
-#
-# GRID NOTE: merge_and_flag() costs ~20-30s per (threshold, top_n) point on
-# this machine (rowwise() over ~2-4k candidate rows), confirmed by timing a
-# single reverse-direction call. The full parameter sweep in
-# 02_run_comparison.R (~96 points for 10_9, ~64 for 8_9, per model) already
-# takes ~15-20 min per model x track; running that same sweep for 7 more
-# embedding conditions x 2 tracks would be several hours, which isn't
-# practical here. So this script fixes (threshold, top_n) at the single
-# point that won for the *unstripped* model on each track in the original
-# full grid (10_9: threshold 0.995, top_n 30; 8_9: threshold 0.99, top_n 5
-# -- picked from best_by_model.csv as a reasonable shared operating point
-# rather than re-deriving one per new condition) and only sweeps the 4 flag
-# rules, which is the lever the original grid showed mattered most for
-# F1. This is a resource trade-off, not a change in methodology: if more
-# compute time is available, widen thresholds_10_9/top_ns_10_9/etc. below
-# and re-run for a fuller sweep per condition.
+# Compares filler-word stripping and the mpnet arm against the baseline at one
+# fixed (threshold, top_n) per track, sweeping only the flag rules.
 
 ORIG_BASE <- "../data/original"
 GEN_BASE  <- "../data/generated"

@@ -1,33 +1,17 @@
-# Raising the RECALL CEILING (candidate generation).
+# Tries to raise the recall ceiling.
 #
-# 09_error_analysis.R showed the binding constraint is not the embedding
-# model: 100% of true target codes are present in the similarity matrix, but
-# only ~63% (ICD-10-CA) / ~85% (ICDA-8) survive into the candidate pool. The
-# oracle F1 -- what a PERFECT reranker could achieve on the current pool --
-# is 0.770 / 0.920. No amount of model swapping, ensembling or reranking can
-# beat those numbers while candidate generation stays as it is.
+# 09_ showed the embedding is not the problem: every true target is in the
+# similarity matrix, but only ~63% (ICD-10-CA) / ~85% (ICDA-8) make it into
+# the pool, capping oracle F1 at 0.770 / 0.920. Nothing downstream can beat
+# that, so this varies candidate generation itself:
 #
-# So this script studies candidate generation itself. It varies the three
-# things that decide what enters the pool and reports, for each design, the
-# recall ceiling and the pool size (which bounds precision):
+#   A. similarity cut - "relative" (sim >= threshold * max_sim, current) vs
+#      "topk" (K highest per code)
+#   B. how many co-occurrence candidates
+#   C. chapter filter on or off
 #
-#   A. how similarity candidates are chosen
-#        "relative"  : keep sim >= threshold * max_sim_for_that_code (current)
-#        "topk"      : keep the K highest-similarity targets per code
-#   B. how many co-occurrence candidates (top-N)
-#   C. whether the chapter filter is applied
-#
-# The chapter filter gets special attention: it discards 48 true pairs (5.1%)
-# on ICD-10-CA, which is unrecoverable loss traded for a smaller pool. Whether
-# that trade is worth it is an empirical question this script answers rather
-# than assumes.
-#
-# Output: results/candidate_generation_study.csv, plus a listing of the true
-# pairs the chapter filter destroys (results/chapter_filter_casualties.csv)
-# so the alignment table itself can be inspected.
-#
-# Run from scripts/:  Rscript 10_candidate_generation_study.R
-
+# and reports recall ceiling and pool size for each. The chapter filter gets
+# its own output since it drops 48 true pairs on ICD-10-CA.
 source("pipeline_lib.R")
 
 ORIG_BASE    <- "../data/original"
