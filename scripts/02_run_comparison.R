@@ -6,21 +6,26 @@ OUT_DIR      <- "../results"
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 thresholds  <- c(0.95, 0.99, 0.995, 0.999)
-# ICD-9-CM -> ICDA-8 keeps the original range. ICD-9-CM -> ICD-10-CA is
-# widened to {5,10,15,20,25,30}: {3,5,10,15} was too narrow and was
-# cutting off the actual best combination for that track (see report.Rmd).
-# NOTE: prior to this fix, report.Rmd and results/best_by_model.csv
-# described/contained numbers from this wider range, but this script still
-# ran the narrow range for both tracks -- the checked-in "corrected" F1
-# 0.427/0.530 numbers weren't actually reproducible by any committed code.
-# This top_ns_10_9 change is what makes them (or their real equivalent)
-# reproducible again.
-top_ns_8_9  <- c(3, 5, 10, 15)
-top_ns_10_9 <- c(5, 10, 15, 20, 25, 30)
+# Both tracks sweep top-N {3,5,10,15,20,25,30}, a strict SUPERSET of the two
+# ranges this script has used historically ({3,5,10,15} originally, and
+# {5,10,15,20,25,30} in the first attempt at a fix). Using the superset for
+# both tracks means no earlier result can be lost, and the widened tail is
+# actually searched on both tracks rather than just one.
+#
+# WHY THIS MATTERS: the original range {3,5,10,15} was too narrow and cut off
+# the real optimum on the ICD-9-CM -> ICD-10-CA track. Under it, the best
+# reachable numbers were F1 0.423 (ClinicalBERT) and 0.523 (SapBERT), which is
+# why the reference numbers F1 0.427/Acc 0.271 and F1 0.530/Acc 0.360 looked
+# unreproducible and were flagged as a discrepancy. They are NOT wrong: with
+# the widened range they reproduce exactly, at top_n=30 (ClinicalBERT,
+# threshold 0.995) and top_n=30 (SapBERT, threshold 0.95). See report.Rmd.
+#
+# Sweeping the same range on both tracks is affordable because
+# merge_and_flag() is now ~130x faster (vectorized chapter lookup in
+# pipeline_lib.R, verified bit-identical by verify_vectorized_equivalence.R).
+top_ns_8_9  <- c(3, 5, 10, 15, 20, 25, 30)
+top_ns_10_9 <- c(3, 5, 10, 15, 20, 25, 30)
 flags       <- 1:4
-
-grid <- expand.grid(similarity_threshold = thresholds, top_n = top_ns_10_9,
-                     flag_combination = flags, KEEP.OUT.ATTRS = FALSE)
 
 cat("Loading shared reference data...\n")
 ccs_df <- read_excel(file.path(ORIG_BASE, "ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx"),

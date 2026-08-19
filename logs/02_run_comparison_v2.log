@@ -14,3 +14,11 @@ Loading ClinicalBERT similarity sheets...
 Loading SapBERT similarity sheets...
 
 --- Running grid: track=10_9 model=ClinicalBERT (96 combinations) ---
+  threshold 0.950 done (24/96 combinations)
+  threshold 0.990 done (48/96 combinations)
+  threshold 0.995 done (72/96 combinations)
+  threshold 0.999 done (96/96 combinations)
+
+--- Running grid: track=10_9 model=SapBERT (96 combinations) ---
+  threshold 0.950 done (24/96 combinations)
+  threshold 0.990 done (48/96 combinations)

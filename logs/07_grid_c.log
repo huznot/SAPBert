@@ -1,0 +1,50 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Loading shared reference data...
+
+=== condition mpnet_base (mpnet-base) ===
+--- 10_9 / mpnet-base (112 points) ---
+    threshold 0.950 done (28/112)
+    threshold 0.990 done (56/112)
+    threshold 0.995 done (84/112)
+    threshold 0.999 done (112/112)
+--- 8_9 / mpnet-base (112 points) ---
+    threshold 0.950 done (28/112)
+    threshold 0.990 done (56/112)
+    threshold 0.995 done (84/112)
+    threshold 0.999 done (112/112)
+  wrote ../results/full_grid/mpnet_base.csv (224 rows, 2.1 min)
+# A tibble: 2 × 7
+  track model      similarity_threshold top_n flag_combination    f1 accuracy
+  <chr> <chr>                     <dbl> <dbl>            <int> <dbl>    <dbl>
+1 10_9  mpnet-base                 0.95    25                4 0.533    0.363
+2 8_9   mpnet-base                 0.95     3                2 0.769    0.625
+
+=== condition mpnet_stripped (mpnet-stripped) ===
+--- 10_9 / mpnet-stripped (112 points) ---
+    threshold 0.950 done (28/112)
+    threshold 0.990 done (56/112)
+    threshold 0.995 done (84/112)
+    threshold 0.999 done (112/112)
+--- 8_9 / mpnet-stripped (112 points) ---
+    threshold 0.950 done (28/112)
+    threshold 0.990 done (56/112)
+    threshold 0.995 done (84/112)
+    threshold 0.999 done (112/112)
+  wrote ../results/full_grid/mpnet_stripped.csv (224 rows, 1.1 min)
+# A tibble: 2 × 7
+  track model         similarity_threshold top_n flag_combination    f1 accuracy
+  <chr> <chr>                        <dbl> <dbl>            <int> <dbl>    <dbl>
+1 10_9  mpnet-stripp…                 0.95    25                4 0.523    0.354
+2 8_9   mpnet-stripp…                 0.95     3                2 0.766    0.62 
+
+Done.

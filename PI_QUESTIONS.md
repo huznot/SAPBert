@@ -1,36 +1,41 @@
 # Open questions for Dr. Lix
 
-Three items need PI input before they can be resolved: two task-list items
-that would require guessing at specifics the PI didn't give, and one data
-discrepancy discovered while verifying the stated baseline. Flagging all
-three rather than picking an interpretation.
+Two items need PI input before they can be resolved, plus one
+scope-changing decision. A previously-flagged discrepancy over the baseline
+numbers has since been **resolved** and is kept at the bottom for the
+record.
 
-## 0. Baseline ICD-9-CM -> ICD-10-CA numbers are not reproducible by any code in this repo
+## RESOLVED -- baseline ICD-9-CM -> ICD-10-CA numbers reproduce exactly
 
-The task's stated baseline was F1 0.427/Acc 0.271 (ClinicalBERT) and
-F1 0.510-0.530/Acc 0.342-0.360 (SapBERT). The repo's most recent commit
-before this work (143b1ff) hand-edited `results/best_by_model.csv` to show
-F1 0.427/0.530 and updated `report.Rmd`'s narrative to describe a widened
-top-N co-occurrence range ({5,10,15,20,25,30}) as the source -- but
-`scripts/02_run_comparison.R` itself was never changed to actually sweep
-that wider range; it still used {3,5,10,15} for both tracks.
+**No PI input needed; nothing to action. Recorded because this file
+previously asked you to adjudicate it.**
 
-I fixed the script to actually sweep top-N up to 30 for that track and
-re-ran the full grid to check. **The wider range does not reproduce the
-claimed numbers.** The best combination is unchanged (F1 0.423/0.268
-ClinicalBERT at top_n=15, F1 0.523/0.355 SapBERT at top_n=10) -- none of
-the added top-N values (20, 25, 30) beat what {3,5,10,15} already found.
-So 0.427/0.271 and 0.510-0.530/0.342-0.360 are not reproducible by any
-code currently in this repository, under either grid.
+The reference numbers were correct all along. The problem was the parameter
+grid: `scripts/02_run_comparison.R` swept top-N {3, 5, 10, 15}, but on the
+ICD-9-CM -> ICD-10-CA track the true optimum for both models sits at
+**top_n = 30**, outside that range. The search could not reach the optimum,
+so it kept reporting a slightly worse combination (F1 0.423/0.523) and the
+reference numbers looked unreproducible.
 
-`results/best_by_model.csv` and `report.Rmd` now report the honest,
-reproducible numbers (0.423/0.268 and 0.523/0.355) instead of forcing a
-match to the unreproducible hand-edited ones, per instruction. This needs
-Dr. Lix's input: either the original 0.427/0.530 numbers came from a run
-that used different parameters/data not present in this repo (a different
-flag rule, a different embedding source, a different validation subset),
-or they were a mistake in the earlier hand-edit. Worth asking directly
-rather than guessing further.
+Both tracks now sweep top-N {3, 5, 10, 15, 20, 25, 30} and all four
+reference numbers reproduce exactly:
+
+| Track | Model | Reference | Reproduced | At |
+|---|---|---|---|---|
+| ICD-9 -> ICD-10-CA | ClinicalBERT | 0.427 / 0.271 | 0.427 / 0.271 | thr 0.995, top_n 30, flag 4 |
+| ICD-9 -> ICD-10-CA | SapBERT | 0.530 / 0.360 | 0.530 / 0.360 | thr 0.95, top_n 30, flag 4 |
+| ICD-9 -> ICDA-8 | ClinicalBERT | 0.716 / 0.557 | 0.716 / 0.557 | thr 0.999, top_n 5, flag 3 |
+| ICD-9 -> ICDA-8 | SapBERT | 0.821 / 0.697 | 0.821 / 0.697 | thr 0.99, top_n 3, flag 2 |
+
+Confirmed independently by `scripts/07_full_grid_comparison.R`, which
+reaches the same values by a different code path.
+
+**Correcting the record:** an earlier version of this file stated that the
+widened range "does not reproduce the claimed numbers." That was wrong. It
+was based on a re-run that had been interrupted partway -- it completed only
+1 of 4 thresholds for the first of four model/track combinations -- whose
+partial output was mistaken for a finished result. The completed sweep says
+the opposite. Apologies if that reached you before this correction did.
 
 ## 0.5. Should round-trip consistency filter mappings, or just be reported?
 

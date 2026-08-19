@@ -1,0 +1,7 @@
+"track","family","n_points","stripped_better","tied","base_better","mean_delta_f1"
+"10_9","ClinicalBERT",112,112,0,0,0.0167
+"10_9","SapBERT",112,85,8,19,0.0066
+"10_9","mpnet",112,1,6,105,-0.0039
+"8_9","ClinicalBERT",112,86,1,25,0.0053
+"8_9","SapBERT",112,1,0,111,-0.0115
+"8_9","mpnet",112,27,33,52,-6e-04

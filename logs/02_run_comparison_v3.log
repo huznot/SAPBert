@@ -1,0 +1,50 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Loading shared reference data...
+Loading ClinicalBERT similarity sheets...
+Loading SapBERT similarity sheets...
+
+--- Running grid: track=10_9 model=ClinicalBERT (112 combinations) ---
+  threshold 0.950 done (28/112 combinations)
+  threshold 0.990 done (56/112 combinations)
+  threshold 0.995 done (84/112 combinations)
+  threshold 0.999 done (112/112 combinations)
+
+--- Running grid: track=10_9 model=SapBERT (112 combinations) ---
+  threshold 0.950 done (28/112 combinations)
+  threshold 0.990 done (56/112 combinations)
+  threshold 0.995 done (84/112 combinations)
+  threshold 0.999 done (112/112 combinations)
+
+--- Running grid: track=8_9 model=ClinicalBERT (112 combinations) ---
+  threshold 0.950 done (28/112 combinations)
+  threshold 0.990 done (56/112 combinations)
+  threshold 0.995 done (84/112 combinations)
+  threshold 0.999 done (112/112 combinations)
+
+--- Running grid: track=8_9 model=SapBERT (112 combinations) ---
+  threshold 0.950 done (28/112 combinations)
+  threshold 0.990 done (56/112 combinations)
+  threshold 0.995 done (84/112 combinations)
+  threshold 0.999 done (112/112 combinations)
+
+=== Best combination per track x model (by F1) ===
+# A tibble: 4 × 9
+  track model similarity_threshold top_n flag_combination precision recall    f1
+  <chr> <chr>                <dbl> <dbl>            <int>     <dbl>  <dbl> <dbl>
+1 10_9  Clin…                0.995    30                4     0.578  0.338 0.427
+2 10_9  SapB…                0.95     30                4     0.692  0.429 0.53 
+3 8_9   Clin…                0.999     5                3     0.759  0.677 0.716
+4 8_9   SapB…                0.99      3                2     0.861  0.785 0.821
+# ℹ 1 more variable: accuracy <dbl>
+
+Done. Results written to ../results 

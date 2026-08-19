@@ -149,49 +149,70 @@ regression_summary %>%
 
 ## Verification against independent reference numbers
 
-| Track | Model | Reference F1 / Acc | This report's F1 / Acc |
-|---|---|---|---|
-| ICD-9 -> ICD-10-CA | ClinicalBERT | 0.427 / 0.271 | 0.423 / 0.268 (does not match) |
-| ICD-9 -> ICD-10-CA | SapBERT | 0.510 / 0.342 | 0.523 / 0.355 (does not match) |
-| ICD-9 -> ICDA-8 | ClinicalBERT | 0.716 / 0.557 | 0.716 / 0.557 (match) |
-| ICD-9 -> ICDA-8 | SapBERT | 0.821 / 0.697 | 0.821 / 0.697 (match) |
+| Track | Model | Reference F1 / Acc | This report's F1 / Acc | Best combination |
+|---|---|---|---|---|
+| ICD-9 -> ICD-10-CA | ClinicalBERT | 0.427 / 0.271 | 0.427 / 0.271 (match) | thr 0.995, top_n 30, flag 4 |
+| ICD-9 -> ICD-10-CA | SapBERT | 0.530 / 0.360 | 0.530 / 0.360 (match) | thr 0.95, top_n 30, flag 4 |
+| ICD-9 -> ICDA-8 | ClinicalBERT | 0.716 / 0.557 | 0.716 / 0.557 (match) | thr 0.999, top_n 5, flag 3 |
+| ICD-9 -> ICDA-8 | SapBERT | 0.821 / 0.697 | 0.821 / 0.697 (match) | thr 0.99, top_n 3, flag 2 |
 
-**Flagged discrepancy, not silently resolved.** The checked-in "corrected"
-ICD-9-CM -> ICD-10-CA numbers (`results/best_by_model.csv` as committed at
-143b1ff, and the narrative in this file) claimed F1 0.427/Acc 0.271
-(ClinicalBERT) and F1 0.530/Acc 0.360 (SapBERT), described as coming from a
-widened top-N co-occurrence range of up to 30. Re-deriving those numbers
-from `scripts/02_run_comparison.R` as originally committed reproduced
-F1 0.423/0.268 and F1 0.523/0.355 instead -- because the script still used
-top-N {3, 5, 10, 15} for both tracks despite the narrative describing a
-wider range. `scripts/02_run_comparison.R` was fixed to actually sweep
-top-N {5, 10, 15, 20, 25, 30} for the ICD-9-CM -> ICD-10-CA track (see the
-comment block at the top of that script), and the full grid was re-run to
-check whether the wider range reproduces the claimed 0.427/0.530.
+**All four reference numbers now reproduce exactly.** This resolves a
+discrepancy that was previously flagged as an open question for the PI, so
+it is worth recording what the problem actually was.
 
-**It does not.** The best combination under the widened grid is still
-top_n=15 (ClinicalBERT, F1 0.423) and top_n=10 (SapBERT, F1 0.523) -- the
-same combinations, and the same F1/accuracy, as the narrow grid. None of
-the added top-N values (20, 25, 30) beat the existing best. So the
-0.427/0.271 and 0.510-0.530/0.342-0.360 reference numbers are **not
-reproducible by any code currently in this repository**, under either the
-narrow or the widened grid. `results/best_by_model.csv` now reflects the
-honest, reproducible numbers (0.423/0.268 and 0.523/0.355) rather than the
-unreproducible hand-edited ones. The ICDA-8 track is unaffected and
-matches its reference exactly.
+The reference ICD-9-CM -> ICD-10-CA numbers were, for a while, not
+reproducible: re-running the pipeline gave F1 0.423/0.268 (ClinicalBERT) and
+0.523/0.355 (SapBERT) instead of 0.427/0.271 and 0.530/0.360. The cause was
+**the parameter grid, not the numbers**. `scripts/02_run_comparison.R` swept
+top-N {3, 5, 10, 15}, and on this track the true optimum for both models sits
+at **top_n = 30**, outside that range. The narrow grid could not reach the
+optimum, so the best it could report was a slightly worse combination. The
+reference numbers were right all along; the search that was supposed to
+confirm them was too small.
 
-This is now a genuine open question for the PI, not a bug we can fix in
-code: either the reference numbers came from a run/parameter combination
-that isn't in this repo (a different top-N range, a different flag rule,
-a different embedding generation, etc.), or the reference numbers
-themselves were mistaken. See `PI_QUESTIONS.md`.
+Two earlier attempts to check this were themselves unreliable, and both are
+now superseded:
+
+- The first "fix" edited the narrative and `results/best_by_model.csv` to
+  describe a widened top-N range, but never changed the script, so no
+  committed code produced the numbers being claimed.
+- The second attempt did widen the script's range, but the re-run was
+  interrupted partway (it completed only 1 of 4 thresholds for the first of
+  four model/track combinations) and its partial output was mistakenly read
+  as a finished result. That is where the conclusion "the wider range does
+  not reproduce the claimed numbers" came from. **That conclusion was
+  wrong** -- it was drawn from a run that never finished.
+
+Both tracks now sweep top-N {3, 5, 10, 15, 20, 25, 30}, a strict superset of
+every range used previously, so nothing reachable before can be lost. The
+sweep completes for every model and track, and the numbers above come from
+that completed sweep. They are additionally corroborated by an independent
+script (`scripts/07_full_grid_comparison.R`, which scores every embedding
+condition on the same grid) reaching identical values by a different code
+path.
+
+The wider grid was affordable only because of a performance fix: chapter
+lookup in `merge_and_flag()` used to run one small `dplyr::filter()` per
+candidate row under `rowwise()`, costing ~10-12s per grid point. It is now
+vectorized (computed once per distinct code and recycled), which is ~130x
+faster. That is a pure-speed change with no methodological content, and
+`scripts/verify_vectorized_equivalence.R` gates it: it runs the old and new
+implementations side by side on real data for both tracks and both
+directions and asserts the chapter lookups, the full `merge_and_flag()`
+output, and all four metrics under all four flag rules are identical. All
+18 checks pass.
 
 ## Task 1 + 2: filler-word stripping and a general-purpose embedding model
 
 ```{r extended-setup, include=FALSE}
-have_extended <- file.exists(file.path(RESULTS, "old_vs_new_comparison.csv"))
+have_extended <- file.exists(file.path(RESULTS, "full_grid_best.csv"))
 if (have_extended) {
-  old_vs_new <- read.csv(file.path(RESULTS, "old_vs_new_comparison.csv"))
+  fg_best        <- read.csv(file.path(RESULTS, "full_grid_best.csv"))
+  fg_stripping   <- read.csv(file.path(RESULTS, "full_grid_stripping.csv"))
+  fg_paired      <- read.csv(file.path(RESULTS, "full_grid_stripping_paired.csv"))
+  fg_family      <- read.csv(file.path(RESULTS, "full_grid_family.csv"))
+  fg_sensitivity <- read.csv(file.path(RESULTS, "full_grid_sensitivity.csv"))
+  pretty_track <- function(x) recode(x, `10_9` = "ICD-9 -> ICD-10-CA", `8_9` = "ICD-9 -> ICDA-8")
 }
 ```
 
@@ -202,84 +223,182 @@ before embedding, and a third, non-medical embedding model
 alongside ClinicalBERT and SapBERT, to test whether domain-specific medical
 pretraining actually helps on this short-text matching task.
 
+**Every condition below was scored on the identical full grid** -- thresholds
+{0.95, 0.99, 0.995, 0.999} x top-N {3, 5, 10, 15, 20, 25, 30} x all 4 flag
+rules = 112 combinations per condition per track, 1,792 evaluations in total
+(`scripts/07_full_grid_comparison.R`). An earlier version of this comparison
+could only afford one fixed (threshold, top_n) point per track, which was a
+real weakness: each model has a different similarity distribution, so the
+operating point that suits one need not suit another, and a single-point
+comparison can rank models by an artifact of that choice. The
+operating-point sensitivity table below shows this was not a hypothetical
+worry -- 6 of 16 model/track rankings change between the two approaches.
+
 ```{r extended-table, eval=have_extended}
-old_vs_new %>%
-  mutate(track = recode(track, `10_9` = "ICD-9-CM -> ICD-10-CA", `8_9` = "ICD-9-CM -> ICDA-8")) %>%
-  select(Track = track, Model = model, Source = source,
-         Precision = precision, Recall = recall, F1 = f1, Accuracy = accuracy) %>%
-  arrange(Track, Model, Source) %>%
-  kable(digits = 3)
+fg_best %>%
+  mutate(Track = pretty_track(track)) %>%
+  select(Track, Model = model, Threshold = similarity_threshold, `Top-N` = top_n,
+         Flag = flag_combination, Precision = precision, Recall = recall,
+         F1 = f1, Accuracy = accuracy) %>%
+  arrange(Track, desc(F1)) %>%
+  kable(digits = 3, caption = "Best combination per embedding condition, full grid")
 ```
 
 ```{r extended-missing, eval=!have_extended, results='asis'}
-cat("_Not yet run -- see `scripts/06_extended_comparison.R`. Needs `data/generated/*.xlsx`",
+cat("_Not yet run -- see `scripts/07_full_grid_comparison.R` then",
+    "`scripts/08_assemble_full_grid.R`. Needs `data/generated/*.xlsx`",
     "from `scripts/generate_embeddings.py` first._")
 ```
 
-**How to read this table.** `original_full_grid` is the existing baseline
-(full parameter sweep, already verified above). `extended_reduced_grid` is
-this task's new conditions, run on a smaller parameter grid for practicality
-(see the note at the top of `06_extended_comparison.R`) -- so a difference
-between `SapBERT` under `original_full_grid` and `SapBERT-base` under
-`extended_reduced_grid` reflects grid coverage, not a change in the
-embeddings, and isn't a fair "did stripping help" comparison by itself.
-The fair comparisons are **within** `extended_reduced_grid`: `*-base` vs.
-`*-stripped` for the same model (isolates the filler-word effect), and
-`ClinicalBERT-base` / `SapBERT-base` vs. `mpnet-base` (isolates the
-domain-specific-vs-general-model effect), since all of those ran on the
-identical reduced grid.
+**How to read this table.** All eight conditions ran the identical grid, so
+every comparison here is apples-to-apples. The conditions are:
 
-**ClinicalBERT-base is a regenerated arm**, not the original externally-
-generated matrices (that generation method isn't documented anywhere in
-this repo -- see `PI_QUESTIONS.md`). It's included so filler-word stripping
-can be tested apples-to-apples against a *known* generation method. If
-`ClinicalBERT-base` here doesn't match `ClinicalBERT` under
-`original_full_grid`, that gap is the original pipeline's undocumented
-choices, not this task's change -- don't attribute it to filler stripping.
-**SapBERT-base** reuses the existing validated `data/sapbert` matrices
-directly (no regeneration needed, since that generation method already
-matches).
+- **ClinicalBERT-original** / **SapBERT-base** -- the two arms the existing
+  baseline was built on. ClinicalBERT-original's matrices came from an
+  external pipeline not present in this repo, whose generation method is
+  undocumented (still flagged in `PI_QUESTIONS.md`); SapBERT-base's
+  generation is documented and validated here.
+- **ClinicalBERT-base**, **SapBERT-base-regen**, **mpnet-base** and their
+  **-stripped** counterparts -- all regenerated with the same script and
+  pooling (`scripts/generate_embeddings.py`), so base-vs-stripped isolates
+  the filler-word effect and family-vs-family isolates the model effect,
+  with no other differences.
+
+**Two useful controls came out of running everything on one grid.**
+`SapBERT-base-regen` lands *exactly* on `SapBERT-base` -- identical F1,
+accuracy, best parameters and grid median on both tracks -- confirming the
+regeneration pipeline reproduces the validated `data/sapbert` matrices
+bit-for-bit, so the regenerated arms are trustworthy. `ClinicalBERT-base`
+lands very close to but not exactly on `ClinicalBERT-original`
+(F1 0.430 vs 0.427 on ICD-10-CA, 0.716 on both for ICDA-8); that small gap
+is the original pipeline's undocumented generation choices, not an effect of
+anything in this task, and should not be attributed to filler stripping.
 
 ### Findings
 
-**Filler-word stripping (task 1).** Within `extended_reduced_grid`, effect
-is small and inconsistent in direction:
+#### Filler-word stripping (task 1): helps ClinicalBERT, hurts SapBERT, model-dependent
 
-- ICD-9-CM -> ICD-10-CA: stripping helps every model slightly --
-  ClinicalBERT F1 0.427 -> 0.437, SapBERT F1 0.508 -> 0.520, mpnet F1
-  0.518 -> 0.514 (flat/marginally lower).
-- ICD-9-CM -> ICDA-8: stripping helps ClinicalBERT slightly (F1 0.711 ->
-  0.713) but **hurts SapBERT** (F1 0.820 -> 0.792) and is roughly flat for
-  mpnet (F1 0.758 -> 0.759).
+```{r stripping-table, eval=have_extended}
+fg_stripping %>%
+  mutate(Track = pretty_track(track)) %>%
+  select(Track, Family = family, `Best F1 (base)` = best_f1_base,
+         `Best F1 (stripped)` = best_f1_stripped, `Delta best F1` = delta_best_f1,
+         `Mean F1 (base)` = mean_f1_base, `Mean F1 (stripped)` = mean_f1_stripped,
+         `Delta mean F1` = delta_mean_f1) %>%
+  kable(digits = 4, caption = "Filler-word stripping: best-point and whole-grid means")
+```
 
-So filler-word stripping is not a clear win -- it's close to a wash, and
-actively worse for SapBERT on the ICDA-8 track. Given this, and that the
-task didn't specify exactly which filler words to strip (see
-`scripts/filler_words.json` for the list used), this doesn't look like a
-change worth adopting by default without checking per-CCS-category effects
-first, since an aggregate F1 change this small can hide larger
-category-level swings in either direction.
+Best-point comparisons alone are a weak read on an effect this small -- one
+arm can win simply by finding a luckier corner of the grid. The stronger
+test is **paired**: at each of the 112 matched (threshold, top-N, flag)
+points, did stripping help or hurt?
 
-**General-purpose embedding model (task 2).** mpnet-base is competitive
-with, and on one track slightly ahead of, the domain-specific models on
-this reduced grid: F1 0.518 vs. SapBERT-base's 0.508 on ICD-9-CM ->
-ICD-10-CA (mpnet ahead), but F1 0.758 vs. SapBERT-base's 0.820 on ICD-9-CM
--> ICDA-8 (SapBERT clearly ahead). So domain-specific medical pretraining
-still generally helps, but the margin is much smaller than the original
-ClinicalBERT-vs-SapBERT comparison suggested, and on the ICD-10-CA track a
-general-purpose sentence embedding model does about as well. This is worth
-noting given Zhang et al. (2019)'s point (see Background above) that this
-exact combination of co-occurrence and embedding similarity is still an
-open research question -- the embedding source may matter less than the overall
-architecture (co-occurrence + chapter filtering + flag rules) for this
-particular task.
+```{r stripping-paired, eval=have_extended}
+fg_paired %>%
+  mutate(Track = pretty_track(track)) %>%
+  select(Track, Family = family, `Points` = n_points,
+         `Stripped better` = stripped_better, Tied = tied,
+         `Base better` = base_better, `Mean delta F1` = mean_delta_f1) %>%
+  kable(digits = 4, caption = "Filler-word stripping, paired at matched grid points")
+```
 
-**Caveat that applies to both findings above:** these numbers come from a
-single fixed (threshold, top_n) operating point per track (see the grid
-note at the top of `06_extended_comparison.R`), not an independently
-grid-searched optimum per condition, for runtime reasons. A wider sweep
-per condition could shift these comparisons; treat differences under ~0.02
-F1 as within the noise of that limitation rather than a confirmed effect.
+The paired view is decisive in a way the best-point view is not, and the
+direction depends on the model:
+
+- **ClinicalBERT: stripping consistently helps.** On ICD-10-CA it wins at
+  **112 of 112** matched points (mean +0.017 F1) -- as close to a clean
+  result as this grid can produce -- and on ICDA-8 at 86 of 112 (+0.005).
+- **SapBERT: stripping consistently hurts on ICDA-8.** It loses at **111 of
+  112** points (mean -0.012 F1). On ICD-10-CA it mildly helps (85 of 112,
+  +0.007).
+- **mpnet: stripping hurts on ICD-10-CA** (105 of 112 points worse) and is a
+  genuine wash on ICDA-8 (27 better, 33 tied, 52 worse, mean -0.0006).
+
+A plausible reading is that stripping helps exactly the model that needs the
+help. ClinicalBERT is the weakest arm here, and removing low-content tokens
+("and", "or", "with", "unspecified", "nos" -- see
+`scripts/filler_words.json`) evidently sharpens its representations.
+SapBERT was trained specifically to align biomedical entity names, so it
+already handles those tokens; deleting them just removes information it was
+using. That is a hypothesis suggested by the pattern, not something these
+runs establish.
+
+**Recommendation: do not adopt filler stripping globally.** It is not a
+general improvement -- it is model-specific, and for the current
+best-performing configuration (SapBERT on ICDA-8) it is actively harmful.
+It is worth keeping as a per-model option. Note also that these are
+aggregate numbers; an aggregate F1 shift this small can hide larger
+per-CCS-category swings in both directions, which is worth checking before
+any adoption decision.
+
+#### General-purpose vs. domain-specific embeddings (task 2)
+
+```{r family-table, eval=have_extended}
+fg_family %>%
+  mutate(Track = pretty_track(track)) %>%
+  select(Track, Family = family, `Best condition` = model,
+         Threshold = similarity_threshold, `Top-N` = top_n, Flag = flag_combination,
+         Precision = precision, Recall = recall, F1 = f1, Accuracy = accuracy) %>%
+  kable(digits = 3, caption = "Best result per model family, full grid")
+```
+
+**The answer differs by track, and the anecdote holds up on one of them.**
+
+- **ICD-9 -> ICD-10-CA: a statistical tie.** The general-purpose
+  `mpnet-base` reaches F1 0.533 / Acc 0.363, against 0.534 for the best
+  SapBERT arm and 0.530 for SapBERT-base. A 0.001-0.003 F1 gap on 937
+  validation pairs is nothing -- these three are indistinguishable. A
+  general-purpose sentence embedding model with no medical pretraining
+  whatsoever matches the specialized biomedical model on this track.
+- **ICD-9 -> ICDA-8: SapBERT wins clearly.** F1 0.821 vs. mpnet's 0.769, a
+  0.052 gap that is far too large to be grid noise.
+- **Both models beat ClinicalBERT everywhere**, by a wide margin (0.448 and
+  0.722 at best). Whatever advantage ClinicalBERT's clinical-notes
+  pretraining offers, it does not transfer to matching short ICD label
+  strings.
+
+So Dr. Lix's recollection that general-purpose models can beat specialized
+medical ones at matching medical synonyms is **partly confirmed**: mpnet
+fully matches SapBERT on ICD-10-CA and crushes ClinicalBERT on both tracks,
+but it does not beat SapBERT, and on ICDA-8 it clearly loses. The honest
+summary is that *domain-specific pretraining per se is not what matters* --
+ClinicalBERT is domain-specific and is the worst arm by a distance. What
+matters is what the model was trained to do: SapBERT was trained explicitly
+to align biomedical **entity names**, which is precisely this task, and it
+is the only arm that is never beaten. This connects to Zhang et al. (2019)'s
+point (see Background) that this combination of co-occurrence and embedding
+similarity remains an open question -- on one of the two tracks the
+embedding source genuinely does not matter, and the surrounding architecture
+(co-occurrence + chapter filtering + flag rules) is doing the work.
+
+#### How much did the operating point matter?
+
+```{r sensitivity-table, eval=have_extended}
+fg_sensitivity %>%
+  mutate(Track = pretty_track(track)) %>%
+  select(Track, Model = model, `Best F1` = best_f1, `Median F1` = f1_median,
+         `Min F1` = f1_min, `Max F1` = f1_max, `F1 at shared point` = shared_point_f1,
+         `Rank (best)` = rank_by_best, `Rank (shared point)` = rank_at_shared,
+         `Rank changed` = rank_changed) %>%
+  kable(digits = 3, caption = "Best-over-grid vs. single-shared-point ranking")
+```
+
+This table is why the full grid was worth running. Scoring every condition
+at one shared operating point instead of searching per condition **changes
+the ranking in 6 of 16 model/track rows**, and understates every condition's
+F1 (by up to 0.014). The spread within a single condition is also large --
+ClinicalBERT-stripped on ICD-10-CA ranges from F1 0.255 to 0.448 across the
+grid, wider than the gap between any two model families. A single-point
+comparison of these models would have been measuring the point as much as
+the model.
+
+**Remaining caveat, unchanged and important.** Every "best" number here is
+chosen by sweeping parameters against the same validation set used to score
+them, so all of these figures are optimistic and are not held-out estimates
+of generalization. That applies equally to all eight conditions, so the
+*comparisons* between them are fair; the *absolute* values are not
+generalization estimates. Nothing in this task addressed that, and it
+remains the single biggest methodological weakness in the pipeline.
 
 ## Task 3: bidirectional mapping and round-trip consistency
 

@@ -1593,23 +1593,23 @@ verification section.</p>
 <td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
 <td align="left">ClinicalBERT</td>
 <td align="right">0.995</td>
-<td align="right">15</td>
+<td align="right">30</td>
 <td align="right">4</td>
-<td align="right">0.584</td>
-<td align="right">0.331</td>
-<td align="right">0.423</td>
-<td align="right">0.268</td>
+<td align="right">0.578</td>
+<td align="right">0.338</td>
+<td align="right">0.427</td>
+<td align="right">0.271</td>
 </tr>
 <tr class="even">
 <td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
 <td align="left">SapBERT</td>
 <td align="right">0.950</td>
-<td align="right">10</td>
+<td align="right">30</td>
 <td align="right">4</td>
-<td align="right">0.700</td>
-<td align="right">0.418</td>
-<td align="right">0.523</td>
-<td align="right">0.355</td>
+<td align="right">0.692</td>
+<td align="right">0.429</td>
+<td align="right">0.530</td>
+<td align="right">0.360</td>
 </tr>
 <tr class="odd">
 <td align="left">ICD-9-CM -&gt; ICDA-8</td>
@@ -1729,10 +1729,11 @@ comes only from the embedding model used for the similarity signal.</li>
 <h2>Verification against independent reference numbers</h2>
 <table>
 <colgroup>
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1740,6 +1741,7 @@ comes only from the embedding model used for the similarity signal.</li>
 <th>Model</th>
 <th>Reference F1 / Acc</th>
 <th>This report’s F1 / Acc</th>
+<th>Best combination</th>
 </tr>
 </thead>
 <tbody>
@@ -1747,60 +1749,80 @@ comes only from the embedding model used for the similarity signal.</li>
 <td>ICD-9 -&gt; ICD-10-CA</td>
 <td>ClinicalBERT</td>
 <td>0.427 / 0.271</td>
-<td>0.423 / 0.268 (does not match)</td>
+<td>0.427 / 0.271 (match)</td>
+<td>thr 0.995, top_n 30, flag 4</td>
 </tr>
 <tr class="even">
 <td>ICD-9 -&gt; ICD-10-CA</td>
 <td>SapBERT</td>
-<td>0.510 / 0.342</td>
-<td>0.523 / 0.355 (does not match)</td>
+<td>0.530 / 0.360</td>
+<td>0.530 / 0.360 (match)</td>
+<td>thr 0.95, top_n 30, flag 4</td>
 </tr>
 <tr class="odd">
 <td>ICD-9 -&gt; ICDA-8</td>
 <td>ClinicalBERT</td>
 <td>0.716 / 0.557</td>
 <td>0.716 / 0.557 (match)</td>
+<td>thr 0.999, top_n 5, flag 3</td>
 </tr>
 <tr class="even">
 <td>ICD-9 -&gt; ICDA-8</td>
 <td>SapBERT</td>
 <td>0.821 / 0.697</td>
 <td>0.821 / 0.697 (match)</td>
+<td>thr 0.99, top_n 3, flag 2</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Flagged discrepancy, not silently resolved.</strong> The
-checked-in “corrected” ICD-9-CM -&gt; ICD-10-CA numbers
-(<code>results/best_by_model.csv</code> as committed at 143b1ff, and the
-narrative in this file) claimed F1 0.427/Acc 0.271 (ClinicalBERT) and F1
-0.530/Acc 0.360 (SapBERT), described as coming from a widened top-N
-co-occurrence range of up to 30. Re-deriving those numbers from
-<code>scripts/02_run_comparison.R</code> as originally committed
-reproduced F1 0.423/0.268 and F1 0.523/0.355 instead – because the
-script still used top-N {3, 5, 10, 15} for both tracks despite the
-narrative describing a wider range.
-<code>scripts/02_run_comparison.R</code> was fixed to actually sweep
-top-N {5, 10, 15, 20, 25, 30} for the ICD-9-CM -&gt; ICD-10-CA track
-(see the comment block at the top of that script), and the full grid was
-re-run to check whether the wider range reproduces the claimed
-0.427/0.530.</p>
-<p><strong>It does not.</strong> The best combination under the widened
-grid is still top_n=15 (ClinicalBERT, F1 0.423) and top_n=10 (SapBERT,
-F1 0.523) – the same combinations, and the same F1/accuracy, as the
-narrow grid. None of the added top-N values (20, 25, 30) beat the
-existing best. So the 0.427/0.271 and 0.510-0.530/0.342-0.360 reference
-numbers are <strong>not reproducible by any code currently in this
-repository</strong>, under either the narrow or the widened grid.
-<code>results/best_by_model.csv</code> now reflects the honest,
-reproducible numbers (0.423/0.268 and 0.523/0.355) rather than the
-unreproducible hand-edited ones. The ICDA-8 track is unaffected and
-matches its reference exactly.</p>
-<p>This is now a genuine open question for the PI, not a bug we can fix
-in code: either the reference numbers came from a run/parameter
-combination that isn’t in this repo (a different top-N range, a
-different flag rule, a different embedding generation, etc.), or the
-reference numbers themselves were mistaken. See
-<code>PI_QUESTIONS.md</code>.</p>
+<p><strong>All four reference numbers now reproduce exactly.</strong>
+This resolves a discrepancy that was previously flagged as an open
+question for the PI, so it is worth recording what the problem actually
+was.</p>
+<p>The reference ICD-9-CM -&gt; ICD-10-CA numbers were, for a while, not
+reproducible: re-running the pipeline gave F1 0.423/0.268 (ClinicalBERT)
+and 0.523/0.355 (SapBERT) instead of 0.427/0.271 and 0.530/0.360. The
+cause was <strong>the parameter grid, not the numbers</strong>.
+<code>scripts/02_run_comparison.R</code> swept top-N {3, 5, 10, 15}, and
+on this track the true optimum for both models sits at <strong>top_n =
+30</strong>, outside that range. The narrow grid could not reach the
+optimum, so the best it could report was a slightly worse combination.
+The reference numbers were right all along; the search that was supposed
+to confirm them was too small.</p>
+<p>Two earlier attempts to check this were themselves unreliable, and
+both are now superseded:</p>
+<ul>
+<li>The first “fix” edited the narrative and
+<code>results/best_by_model.csv</code> to describe a widened top-N
+range, but never changed the script, so no committed code produced the
+numbers being claimed.</li>
+<li>The second attempt did widen the script’s range, but the re-run was
+interrupted partway (it completed only 1 of 4 thresholds for the first
+of four model/track combinations) and its partial output was mistakenly
+read as a finished result. That is where the conclusion “the wider range
+does not reproduce the claimed numbers” came from. <strong>That
+conclusion was wrong</strong> – it was drawn from a run that never
+finished.</li>
+</ul>
+<p>Both tracks now sweep top-N {3, 5, 10, 15, 20, 25, 30}, a strict
+superset of every range used previously, so nothing reachable before can
+be lost. The sweep completes for every model and track, and the numbers
+above come from that completed sweep. They are additionally corroborated
+by an independent script
+(<code>scripts/07_full_grid_comparison.R</code>, which scores every
+embedding condition on the same grid) reaching identical values by a
+different code path.</p>
+<p>The wider grid was affordable only because of a performance fix:
+chapter lookup in <code>merge_and_flag()</code> used to run one small
+<code>dplyr::filter()</code> per candidate row under
+<code>rowwise()</code>, costing ~10-12s per grid point. It is now
+vectorized (computed once per distinct code and recycled), which is
+~130x faster. That is a pure-speed change with no methodological
+content, and <code>scripts/verify_vectorized_equivalence.R</code> gates
+it: it runs the old and new implementations side by side on real data
+for both tracks and both directions and asserts the chapter lookups, the
+full <code>merge_and_flag()</code> output, and all four metrics under
+all four flag rules are identical. All 18 checks pass.</p>
 </div>
 <div id="task-1-2-filler-word-stripping-and-a-general-purpose-embedding-model" class="section level2">
 <h2>Task 1 + 2: filler-word stripping and a general-purpose embedding
@@ -1812,11 +1834,26 @@ model (<code>sentence-transformers/all-mpnet-base-v2</code>) was added
 as a comparison arm alongside ClinicalBERT and SapBERT, to test whether
 domain-specific medical pretraining actually helps on this short-text
 matching task.</p>
-<table style="width:100%;">
+<p><strong>Every condition below was scored on the identical full
+grid</strong> – thresholds {0.95, 0.99, 0.995, 0.999} x top-N {3, 5, 10,
+15, 20, 25, 30} x all 4 flag rules = 112 combinations per condition per
+track, 1,792 evaluations in total
+(<code>scripts/07_full_grid_comparison.R</code>). An earlier version of
+this comparison could only afford one fixed (threshold, top_n) point per
+track, which was a real weakness: each model has a different similarity
+distribution, so the operating point that suits one need not suit
+another, and a single-point comparison can rank models by an artifact of
+that choice. The operating-point sensitivity table below shows this was
+not a hypothetical worry – 6 of 16 model/track rankings change between
+the two approaches.</p>
+<table>
+<caption>Best combination per embedding condition, full grid</caption>
 <colgroup>
-<col width="22%" />
-<col width="22%" />
-<col width="22%" />
+<col width="20%" />
+<col width="23%" />
+<col width="10%" />
+<col width="6%" />
+<col width="5%" />
 <col width="10%" />
 <col width="7%" />
 <col width="6%" />
@@ -1826,7 +1863,9 @@ matching task.</p>
 <tr class="header">
 <th align="left">Track</th>
 <th align="left">Model</th>
-<th align="left">Source</th>
+<th align="right">Threshold</th>
+<th align="right">Top-N</th>
+<th align="right">Flag</th>
 <th align="right">Precision</th>
 <th align="right">Recall</th>
 <th align="right">F1</th>
@@ -1835,221 +1874,800 @@ matching task.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
-<td align="left">ClinicalBERT</td>
-<td align="left">original_full_grid</td>
-<td align="right">0.584</td>
-<td align="right">0.331</td>
-<td align="right">0.423</td>
-<td align="right">0.268</td>
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT-stripped</td>
+<td align="right">0.950</td>
+<td align="right">25</td>
+<td align="right">4</td>
+<td align="right">0.703</td>
+<td align="right">0.430</td>
+<td align="right">0.534</td>
+<td align="right">0.364</td>
 </tr>
 <tr class="even">
-<td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">mpnet-base</td>
+<td align="right">0.950</td>
+<td align="right">25</td>
+<td align="right">4</td>
+<td align="right">0.689</td>
+<td align="right">0.434</td>
+<td align="right">0.533</td>
+<td align="right">0.363</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT-base</td>
+<td align="right">0.950</td>
+<td align="right">30</td>
+<td align="right">4</td>
+<td align="right">0.692</td>
+<td align="right">0.429</td>
+<td align="right">0.530</td>
+<td align="right">0.360</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT-base-regen</td>
+<td align="right">0.950</td>
+<td align="right">30</td>
+<td align="right">4</td>
+<td align="right">0.692</td>
+<td align="right">0.429</td>
+<td align="right">0.530</td>
+<td align="right">0.360</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">mpnet-stripped</td>
+<td align="right">0.950</td>
+<td align="right">25</td>
+<td align="right">4</td>
+<td align="right">0.684</td>
+<td align="right">0.423</td>
+<td align="right">0.523</td>
+<td align="right">0.354</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ClinicalBERT-stripped</td>
+<td align="right">0.990</td>
+<td align="right">25</td>
+<td align="right">4</td>
+<td align="right">0.585</td>
+<td align="right">0.363</td>
+<td align="right">0.448</td>
+<td align="right">0.289</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
 <td align="left">ClinicalBERT-base</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.582</td>
-<td align="right">0.337</td>
+<td align="right">0.990</td>
+<td align="right">25</td>
+<td align="right">4</td>
+<td align="right">0.556</td>
+<td align="right">0.351</td>
+<td align="right">0.430</td>
+<td align="right">0.274</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ClinicalBERT-original</td>
+<td align="right">0.995</td>
+<td align="right">30</td>
+<td align="right">4</td>
+<td align="right">0.578</td>
+<td align="right">0.338</td>
 <td align="right">0.427</td>
 <td align="right">0.271</td>
 </tr>
 <tr class="odd">
-<td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
-<td align="left">ClinicalBERT-stripped</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.600</td>
-<td align="right">0.344</td>
-<td align="right">0.437</td>
-<td align="right">0.280</td>
-</tr>
-<tr class="even">
-<td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
-<td align="left">SapBERT</td>
-<td align="left">original_full_grid</td>
-<td align="right">0.700</td>
-<td align="right">0.418</td>
-<td align="right">0.523</td>
-<td align="right">0.355</td>
-</tr>
-<tr class="odd">
-<td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
+<td align="left">ICD-9 -&gt; ICDA-8</td>
 <td align="left">SapBERT-base</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.705</td>
-<td align="right">0.397</td>
-<td align="right">0.508</td>
-<td align="right">0.340</td>
+<td align="right">0.990</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.861</td>
+<td align="right">0.785</td>
+<td align="right">0.821</td>
+<td align="right">0.697</td>
 </tr>
 <tr class="even">
-<td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
-<td align="left">SapBERT-stripped</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.724</td>
-<td align="right">0.406</td>
-<td align="right">0.520</td>
-<td align="right">0.351</td>
-</tr>
-<tr class="odd">
-<td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
-<td align="left">mpnet-base</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.708</td>
-<td align="right">0.409</td>
-<td align="right">0.518</td>
-<td align="right">0.350</td>
-</tr>
-<tr class="even">
-<td align="left">ICD-9-CM -&gt; ICD-10-CA</td>
-<td align="left">mpnet-stripped</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.706</td>
-<td align="right">0.404</td>
-<td align="right">0.514</td>
-<td align="right">0.346</td>
-</tr>
-<tr class="odd">
-<td align="left">ICD-9-CM -&gt; ICDA-8</td>
-<td align="left">ClinicalBERT</td>
-<td align="left">original_full_grid</td>
-<td align="right">0.759</td>
-<td align="right">0.677</td>
-<td align="right">0.716</td>
-<td align="right">0.557</td>
-</tr>
-<tr class="even">
-<td align="left">ICD-9-CM -&gt; ICDA-8</td>
-<td align="left">ClinicalBERT-base</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.732</td>
-<td align="right">0.692</td>
-<td align="right">0.711</td>
-<td align="right">0.552</td>
-</tr>
-<tr class="odd">
-<td align="left">ICD-9-CM -&gt; ICDA-8</td>
-<td align="left">ClinicalBERT-stripped</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.742</td>
-<td align="right">0.686</td>
-<td align="right">0.713</td>
-<td align="right">0.554</td>
-</tr>
-<tr class="even">
-<td align="left">ICD-9-CM -&gt; ICDA-8</td>
-<td align="left">SapBERT</td>
-<td align="left">original_full_grid</td>
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT-base-regen</td>
+<td align="right">0.990</td>
+<td align="right">3</td>
+<td align="right">2</td>
 <td align="right">0.861</td>
 <td align="right">0.785</td>
 <td align="right">0.821</td>
 <td align="right">0.697</td>
 </tr>
 <tr class="odd">
-<td align="left">ICD-9-CM -&gt; ICDA-8</td>
-<td align="left">SapBERT-base</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.858</td>
-<td align="right">0.785</td>
-<td align="right">0.820</td>
-<td align="right">0.695</td>
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT-stripped</td>
+<td align="right">0.950</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.823</td>
+<td align="right">0.789</td>
+<td align="right">0.806</td>
+<td align="right">0.674</td>
 </tr>
 <tr class="even">
-<td align="left">ICD-9-CM -&gt; ICDA-8</td>
-<td align="left">SapBERT-stripped</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.826</td>
-<td align="right">0.761</td>
-<td align="right">0.792</td>
-<td align="right">0.656</td>
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">mpnet-base</td>
+<td align="right">0.950</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.801</td>
+<td align="right">0.740</td>
+<td align="right">0.769</td>
+<td align="right">0.625</td>
 </tr>
 <tr class="odd">
-<td align="left">ICD-9-CM -&gt; ICDA-8</td>
-<td align="left">mpnet-base</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.808</td>
-<td align="right">0.713</td>
-<td align="right">0.758</td>
-<td align="right">0.610</td>
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">mpnet-stripped</td>
+<td align="right">0.950</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.793</td>
+<td align="right">0.740</td>
+<td align="right">0.766</td>
+<td align="right">0.620</td>
 </tr>
 <tr class="even">
-<td align="left">ICD-9-CM -&gt; ICDA-8</td>
-<td align="left">mpnet-stripped</td>
-<td align="left">extended_reduced_grid</td>
-<td align="right">0.797</td>
-<td align="right">0.725</td>
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT-stripped</td>
+<td align="right">0.999</td>
+<td align="right">10</td>
+<td align="right">3</td>
+<td align="right">0.752</td>
+<td align="right">0.695</td>
+<td align="right">0.722</td>
+<td align="right">0.565</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT-base</td>
+<td align="right">0.999</td>
+<td align="right">5</td>
+<td align="right">3</td>
 <td align="right">0.759</td>
-<td align="right">0.612</td>
+<td align="right">0.677</td>
+<td align="right">0.716</td>
+<td align="right">0.557</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT-original</td>
+<td align="right">0.999</td>
+<td align="right">5</td>
+<td align="right">3</td>
+<td align="right">0.759</td>
+<td align="right">0.677</td>
+<td align="right">0.716</td>
+<td align="right">0.557</td>
 </tr>
 </tbody>
 </table>
-<p><strong>How to read this table.</strong>
-<code>original_full_grid</code> is the existing baseline (full parameter
-sweep, already verified above). <code>extended_reduced_grid</code> is
-this task’s new conditions, run on a smaller parameter grid for
-practicality (see the note at the top of
-<code>06_extended_comparison.R</code>) – so a difference between
-<code>SapBERT</code> under <code>original_full_grid</code> and
-<code>SapBERT-base</code> under <code>extended_reduced_grid</code>
-reflects grid coverage, not a change in the embeddings, and isn’t a fair
-“did stripping help” comparison by itself. The fair comparisons are
-<strong>within</strong> <code>extended_reduced_grid</code>:
-<code>*-base</code> vs. <code>*-stripped</code> for the same model
-(isolates the filler-word effect), and <code>ClinicalBERT-base</code> /
-<code>SapBERT-base</code> vs. <code>mpnet-base</code> (isolates the
-domain-specific-vs-general-model effect), since all of those ran on the
-identical reduced grid.</p>
-<p><strong>ClinicalBERT-base is a regenerated arm</strong>, not the
-original externally- generated matrices (that generation method isn’t
-documented anywhere in this repo – see <code>PI_QUESTIONS.md</code>).
-It’s included so filler-word stripping can be tested apples-to-apples
-against a <em>known</em> generation method. If
-<code>ClinicalBERT-base</code> here doesn’t match
-<code>ClinicalBERT</code> under <code>original_full_grid</code>, that
-gap is the original pipeline’s undocumented choices, not this task’s
-change – don’t attribute it to filler stripping.
-<strong>SapBERT-base</strong> reuses the existing validated
-<code>data/sapbert</code> matrices directly (no regeneration needed,
-since that generation method already matches).</p>
+<p><strong>How to read this table.</strong> All eight conditions ran the
+identical grid, so every comparison here is apples-to-apples. The
+conditions are:</p>
+<ul>
+<li><strong>ClinicalBERT-original</strong> /
+<strong>SapBERT-base</strong> – the two arms the existing baseline was
+built on. ClinicalBERT-original’s matrices came from an external
+pipeline not present in this repo, whose generation method is
+undocumented (still flagged in <code>PI_QUESTIONS.md</code>);
+SapBERT-base’s generation is documented and validated here.</li>
+<li><strong>ClinicalBERT-base</strong>,
+<strong>SapBERT-base-regen</strong>, <strong>mpnet-base</strong> and
+their <strong>-stripped</strong> counterparts – all regenerated with the
+same script and pooling (<code>scripts/generate_embeddings.py</code>),
+so base-vs-stripped isolates the filler-word effect and family-vs-family
+isolates the model effect, with no other differences.</li>
+</ul>
+<p><strong>Two useful controls came out of running everything on one
+grid.</strong> <code>SapBERT-base-regen</code> lands <em>exactly</em> on
+<code>SapBERT-base</code> – identical F1, accuracy, best parameters and
+grid median on both tracks – confirming the regeneration pipeline
+reproduces the validated <code>data/sapbert</code> matrices bit-for-bit,
+so the regenerated arms are trustworthy. <code>ClinicalBERT-base</code>
+lands very close to but not exactly on
+<code>ClinicalBERT-original</code> (F1 0.430 vs 0.427 on ICD-10-CA,
+0.716 on both for ICDA-8); that small gap is the original pipeline’s
+undocumented generation choices, not an effect of anything in this task,
+and should not be attributed to filler stripping.</p>
 <div id="findings" class="section level3">
 <h3>Findings</h3>
-<p><strong>Filler-word stripping (task 1).</strong> Within
-<code>extended_reduced_grid</code>, effect is small and inconsistent in
-direction:</p>
+<div id="filler-word-stripping-task-1-helps-clinicalbert-hurts-sapbert-model-dependent" class="section level4">
+<h4>Filler-word stripping (task 1): helps ClinicalBERT, hurts SapBERT,
+model-dependent</h4>
+<table>
+<caption>Filler-word stripping: best-point and whole-grid
+means</caption>
+<colgroup>
+<col width="14%" />
+<col width="10%" />
+<col width="11%" />
+<col width="14%" />
+<col width="10%" />
+<col width="11%" />
+<col width="14%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="left">Family</th>
+<th align="right">Best F1 (base)</th>
+<th align="right">Best F1 (stripped)</th>
+<th align="right">Delta best F1</th>
+<th align="right">Mean F1 (base)</th>
+<th align="right">Mean F1 (stripped)</th>
+<th align="right">Delta mean F1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ClinicalBERT</td>
+<td align="right">0.430</td>
+<td align="right">0.448</td>
+<td align="right">0.018</td>
+<td align="right">0.3735</td>
+<td align="right">0.3902</td>
+<td align="right">0.0167</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT</td>
+<td align="right">0.530</td>
+<td align="right">0.534</td>
+<td align="right">0.004</td>
+<td align="right">0.4719</td>
+<td align="right">0.4786</td>
+<td align="right">0.0067</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">mpnet</td>
+<td align="right">0.533</td>
+<td align="right">0.523</td>
+<td align="right">-0.010</td>
+<td align="right">0.4780</td>
+<td align="right">0.4741</td>
+<td align="right">-0.0039</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT</td>
+<td align="right">0.716</td>
+<td align="right">0.722</td>
+<td align="right">0.006</td>
+<td align="right">0.6491</td>
+<td align="right">0.6544</td>
+<td align="right">0.0053</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT</td>
+<td align="right">0.821</td>
+<td align="right">0.806</td>
+<td align="right">-0.015</td>
+<td align="right">0.7774</td>
+<td align="right">0.7659</td>
+<td align="right">-0.0115</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">mpnet</td>
+<td align="right">0.769</td>
+<td align="right">0.766</td>
+<td align="right">-0.003</td>
+<td align="right">0.7439</td>
+<td align="right">0.7433</td>
+<td align="right">-0.0006</td>
+</tr>
+</tbody>
+</table>
+<p>Best-point comparisons alone are a weak read on an effect this small
+– one arm can win simply by finding a luckier corner of the grid. The
+stronger test is <strong>paired</strong>: at each of the 112 matched
+(threshold, top-N, flag) points, did stripping help or hurt?</p>
+<table>
+<caption>Filler-word stripping, paired at matched grid points</caption>
+<colgroup>
+<col width="22%" />
+<col width="15%" />
+<col width="8%" />
+<col width="18%" />
+<col width="5%" />
+<col width="13%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="left">Family</th>
+<th align="right">Points</th>
+<th align="right">Stripped better</th>
+<th align="right">Tied</th>
+<th align="right">Base better</th>
+<th align="right">Mean delta F1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ClinicalBERT</td>
+<td align="right">112</td>
+<td align="right">112</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.0167</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT</td>
+<td align="right">112</td>
+<td align="right">85</td>
+<td align="right">8</td>
+<td align="right">19</td>
+<td align="right">0.0066</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">mpnet</td>
+<td align="right">112</td>
+<td align="right">1</td>
+<td align="right">6</td>
+<td align="right">105</td>
+<td align="right">-0.0039</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT</td>
+<td align="right">112</td>
+<td align="right">86</td>
+<td align="right">1</td>
+<td align="right">25</td>
+<td align="right">0.0053</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT</td>
+<td align="right">112</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">111</td>
+<td align="right">-0.0115</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">mpnet</td>
+<td align="right">112</td>
+<td align="right">27</td>
+<td align="right">33</td>
+<td align="right">52</td>
+<td align="right">-0.0006</td>
+</tr>
+</tbody>
+</table>
+<p>The paired view is decisive in a way the best-point view is not, and
+the direction depends on the model:</p>
 <ul>
-<li>ICD-9-CM -&gt; ICD-10-CA: stripping helps every model slightly –
-ClinicalBERT F1 0.427 -&gt; 0.437, SapBERT F1 0.508 -&gt; 0.520, mpnet
-F1 0.518 -&gt; 0.514 (flat/marginally lower).</li>
-<li>ICD-9-CM -&gt; ICDA-8: stripping helps ClinicalBERT slightly (F1
-0.711 -&gt; 0.713) but <strong>hurts SapBERT</strong> (F1 0.820 -&gt;
-0.792) and is roughly flat for mpnet (F1 0.758 -&gt; 0.759).</li>
+<li><strong>ClinicalBERT: stripping consistently helps.</strong> On
+ICD-10-CA it wins at <strong>112 of 112</strong> matched points (mean
++0.017 F1) – as close to a clean result as this grid can produce – and
+on ICDA-8 at 86 of 112 (+0.005).</li>
+<li><strong>SapBERT: stripping consistently hurts on ICDA-8.</strong> It
+loses at <strong>111 of 112</strong> points (mean -0.012 F1). On
+ICD-10-CA it mildly helps (85 of 112, +0.007).</li>
+<li><strong>mpnet: stripping hurts on ICD-10-CA</strong> (105 of 112
+points worse) and is a genuine wash on ICDA-8 (27 better, 33 tied, 52
+worse, mean -0.0006).</li>
 </ul>
-<p>So filler-word stripping is not a clear win – it’s close to a wash,
-and actively worse for SapBERT on the ICDA-8 track. Given this, and that
-the task didn’t specify exactly which filler words to strip (see
-<code>scripts/filler_words.json</code> for the list used), this doesn’t
-look like a change worth adopting by default without checking
-per-CCS-category effects first, since an aggregate F1 change this small
-can hide larger category-level swings in either direction.</p>
-<p><strong>General-purpose embedding model (task 2).</strong> mpnet-base
-is competitive with, and on one track slightly ahead of, the
-domain-specific models on this reduced grid: F1 0.518 vs. SapBERT-base’s
-0.508 on ICD-9-CM -&gt; ICD-10-CA (mpnet ahead), but F1 0.758
-vs. SapBERT-base’s 0.820 on ICD-9-CM -&gt; ICDA-8 (SapBERT clearly
-ahead). So domain-specific medical pretraining still generally helps,
-but the margin is much smaller than the original ClinicalBERT-vs-SapBERT
-comparison suggested, and on the ICD-10-CA track a general-purpose
-sentence embedding model does about as well. This is worth noting given
-Zhang et al. (2019)’s point (see Background above) that this exact
-combination of co-occurrence and embedding similarity is still an open
-research question – the embedding source may matter less than the
-overall architecture (co-occurrence + chapter filtering + flag rules)
-for this particular task.</p>
-<p><strong>Caveat that applies to both findings above:</strong> these
-numbers come from a single fixed (threshold, top_n) operating point per
-track (see the grid note at the top of
-<code>06_extended_comparison.R</code>), not an independently
-grid-searched optimum per condition, for runtime reasons. A wider sweep
-per condition could shift these comparisons; treat differences under
-~0.02 F1 as within the noise of that limitation rather than a confirmed
-effect.</p>
+<p>A plausible reading is that stripping helps exactly the model that
+needs the help. ClinicalBERT is the weakest arm here, and removing
+low-content tokens (“and”, “or”, “with”, “unspecified”, “nos” – see
+<code>scripts/filler_words.json</code>) evidently sharpens its
+representations. SapBERT was trained specifically to align biomedical
+entity names, so it already handles those tokens; deleting them just
+removes information it was using. That is a hypothesis suggested by the
+pattern, not something these runs establish.</p>
+<p><strong>Recommendation: do not adopt filler stripping
+globally.</strong> It is not a general improvement – it is
+model-specific, and for the current best-performing configuration
+(SapBERT on ICDA-8) it is actively harmful. It is worth keeping as a
+per-model option. Note also that these are aggregate numbers; an
+aggregate F1 shift this small can hide larger per-CCS-category swings in
+both directions, which is worth checking before any adoption
+decision.</p>
+</div>
+<div id="general-purpose-vs.-domain-specific-embeddings-task-2" class="section level4">
+<h4>General-purpose vs. domain-specific embeddings (task 2)</h4>
+<table>
+<caption>Best result per model family, full grid</caption>
+<colgroup>
+<col width="17%" />
+<col width="12%" />
+<col width="20%" />
+<col width="9%" />
+<col width="5%" />
+<col width="4%" />
+<col width="9%" />
+<col width="6%" />
+<col width="5%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="left">Family</th>
+<th align="left">Best condition</th>
+<th align="right">Threshold</th>
+<th align="right">Top-N</th>
+<th align="right">Flag</th>
+<th align="right">Precision</th>
+<th align="right">Recall</th>
+<th align="right">F1</th>
+<th align="right">Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT</td>
+<td align="left">SapBERT-stripped</td>
+<td align="right">0.950</td>
+<td align="right">25</td>
+<td align="right">4</td>
+<td align="right">0.703</td>
+<td align="right">0.430</td>
+<td align="right">0.534</td>
+<td align="right">0.364</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">mpnet</td>
+<td align="left">mpnet-base</td>
+<td align="right">0.950</td>
+<td align="right">25</td>
+<td align="right">4</td>
+<td align="right">0.689</td>
+<td align="right">0.434</td>
+<td align="right">0.533</td>
+<td align="right">0.363</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ClinicalBERT</td>
+<td align="left">ClinicalBERT-stripped</td>
+<td align="right">0.990</td>
+<td align="right">25</td>
+<td align="right">4</td>
+<td align="right">0.585</td>
+<td align="right">0.363</td>
+<td align="right">0.448</td>
+<td align="right">0.289</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT</td>
+<td align="left">SapBERT-base-regen</td>
+<td align="right">0.990</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.861</td>
+<td align="right">0.785</td>
+<td align="right">0.821</td>
+<td align="right">0.697</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">mpnet</td>
+<td align="left">mpnet-base</td>
+<td align="right">0.950</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.801</td>
+<td align="right">0.740</td>
+<td align="right">0.769</td>
+<td align="right">0.625</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT</td>
+<td align="left">ClinicalBERT-stripped</td>
+<td align="right">0.999</td>
+<td align="right">10</td>
+<td align="right">3</td>
+<td align="right">0.752</td>
+<td align="right">0.695</td>
+<td align="right">0.722</td>
+<td align="right">0.565</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The answer differs by track, and the anecdote holds up on one
+of them.</strong></p>
+<ul>
+<li><strong>ICD-9 -&gt; ICD-10-CA: a statistical tie.</strong> The
+general-purpose <code>mpnet-base</code> reaches F1 0.533 / Acc 0.363,
+against 0.534 for the best SapBERT arm and 0.530 for SapBERT-base. A
+0.001-0.003 F1 gap on 937 validation pairs is nothing – these three are
+indistinguishable. A general-purpose sentence embedding model with no
+medical pretraining whatsoever matches the specialized biomedical model
+on this track.</li>
+<li><strong>ICD-9 -&gt; ICDA-8: SapBERT wins clearly.</strong> F1 0.821
+vs. mpnet’s 0.769, a 0.052 gap that is far too large to be grid
+noise.</li>
+<li><strong>Both models beat ClinicalBERT everywhere</strong>, by a wide
+margin (0.448 and 0.722 at best). Whatever advantage ClinicalBERT’s
+clinical-notes pretraining offers, it does not transfer to matching
+short ICD label strings.</li>
+</ul>
+<p>So Dr. Lix’s recollection that general-purpose models can beat
+specialized medical ones at matching medical synonyms is <strong>partly
+confirmed</strong>: mpnet fully matches SapBERT on ICD-10-CA and crushes
+ClinicalBERT on both tracks, but it does not beat SapBERT, and on ICDA-8
+it clearly loses. The honest summary is that <em>domain-specific
+pretraining per se is not what matters</em> – ClinicalBERT is
+domain-specific and is the worst arm by a distance. What matters is what
+the model was trained to do: SapBERT was trained explicitly to align
+biomedical <strong>entity names</strong>, which is precisely this task,
+and it is the only arm that is never beaten. This connects to Zhang et
+al. (2019)’s point (see Background) that this combination of
+co-occurrence and embedding similarity remains an open question – on one
+of the two tracks the embedding source genuinely does not matter, and
+the surrounding architecture (co-occurrence + chapter filtering + flag
+rules) is doing the work.</p>
+</div>
+<div id="how-much-did-the-operating-point-matter" class="section level4">
+<h4>How much did the operating point matter?</h4>
+<table style="width:100%;">
+<caption>Best-over-grid vs. single-shared-point ranking</caption>
+<colgroup>
+<col width="13%" />
+<col width="16%" />
+<col width="5%" />
+<col width="7%" />
+<col width="5%" />
+<col width="5%" />
+<col width="13%" />
+<col width="8%" />
+<col width="14%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Track</th>
+<th align="left">Model</th>
+<th align="right">Best F1</th>
+<th align="right">Median F1</th>
+<th align="right">Min F1</th>
+<th align="right">Max F1</th>
+<th align="right">F1 at shared point</th>
+<th align="right">Rank (best)</th>
+<th align="right">Rank (shared point)</th>
+<th align="left">Rank changed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT-stripped</td>
+<td align="right">0.534</td>
+<td align="right">0.494</td>
+<td align="right">0.361</td>
+<td align="right">0.534</td>
+<td align="right">0.520</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">mpnet-base</td>
+<td align="right">0.533</td>
+<td align="right">0.493</td>
+<td align="right">0.373</td>
+<td align="right">0.533</td>
+<td align="right">0.518</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT-base</td>
+<td align="right">0.530</td>
+<td align="right">0.486</td>
+<td align="right">0.367</td>
+<td align="right">0.530</td>
+<td align="right">0.508</td>
+<td align="right">3</td>
+<td align="right">4</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">SapBERT-base-regen</td>
+<td align="right">0.530</td>
+<td align="right">0.486</td>
+<td align="right">0.367</td>
+<td align="right">0.530</td>
+<td align="right">0.508</td>
+<td align="right">3</td>
+<td align="right">4</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">mpnet-stripped</td>
+<td align="right">0.523</td>
+<td align="right">0.488</td>
+<td align="right">0.373</td>
+<td align="right">0.523</td>
+<td align="right">0.514</td>
+<td align="right">5</td>
+<td align="right">3</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ClinicalBERT-stripped</td>
+<td align="right">0.448</td>
+<td align="right">0.417</td>
+<td align="right">0.255</td>
+<td align="right">0.448</td>
+<td align="right">0.437</td>
+<td align="right">6</td>
+<td align="right">6</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ClinicalBERT-base</td>
+<td align="right">0.430</td>
+<td align="right">0.402</td>
+<td align="right">0.222</td>
+<td align="right">0.430</td>
+<td align="right">0.427</td>
+<td align="right">7</td>
+<td align="right">7</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICD-10-CA</td>
+<td align="left">ClinicalBERT-original</td>
+<td align="right">0.427</td>
+<td align="right">0.404</td>
+<td align="right">0.226</td>
+<td align="right">0.427</td>
+<td align="right">0.427</td>
+<td align="right">8</td>
+<td align="right">7</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT-base</td>
+<td align="right">0.821</td>
+<td align="right">0.775</td>
+<td align="right">0.738</td>
+<td align="right">0.821</td>
+<td align="right">0.820</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT-base-regen</td>
+<td align="right">0.821</td>
+<td align="right">0.775</td>
+<td align="right">0.738</td>
+<td align="right">0.821</td>
+<td align="right">0.820</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">SapBERT-stripped</td>
+<td align="right">0.806</td>
+<td align="right">0.765</td>
+<td align="right">0.735</td>
+<td align="right">0.806</td>
+<td align="right">0.792</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">mpnet-base</td>
+<td align="right">0.769</td>
+<td align="right">0.741</td>
+<td align="right">0.728</td>
+<td align="right">0.769</td>
+<td align="right">0.758</td>
+<td align="right">4</td>
+<td align="right">5</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">mpnet-stripped</td>
+<td align="right">0.766</td>
+<td align="right">0.741</td>
+<td align="right">0.729</td>
+<td align="right">0.766</td>
+<td align="right">0.759</td>
+<td align="right">5</td>
+<td align="right">4</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT-stripped</td>
+<td align="right">0.722</td>
+<td align="right">0.682</td>
+<td align="right">0.482</td>
+<td align="right">0.722</td>
+<td align="right">0.713</td>
+<td align="right">6</td>
+<td align="right">6</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT-base</td>
+<td align="right">0.716</td>
+<td align="right">0.682</td>
+<td align="right">0.470</td>
+<td align="right">0.716</td>
+<td align="right">0.711</td>
+<td align="right">7</td>
+<td align="right">7</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">ICD-9 -&gt; ICDA-8</td>
+<td align="left">ClinicalBERT-original</td>
+<td align="right">0.716</td>
+<td align="right">0.682</td>
+<td align="right">0.470</td>
+<td align="right">0.716</td>
+<td align="right">0.711</td>
+<td align="right">7</td>
+<td align="right">7</td>
+<td align="left">FALSE</td>
+</tr>
+</tbody>
+</table>
+<p>This table is why the full grid was worth running. Scoring every
+condition at one shared operating point instead of searching per
+condition <strong>changes the ranking in 6 of 16 model/track
+rows</strong>, and understates every condition’s F1 (by up to 0.014).
+The spread within a single condition is also large –
+ClinicalBERT-stripped on ICD-10-CA ranges from F1 0.255 to 0.448 across
+the grid, wider than the gap between any two model families. A
+single-point comparison of these models would have been measuring the
+point as much as the model.</p>
+<p><strong>Remaining caveat, unchanged and important.</strong> Every
+“best” number here is chosen by sweeping parameters against the same
+validation set used to score them, so all of these figures are
+optimistic and are not held-out estimates of generalization. That
+applies equally to all eight conditions, so the <em>comparisons</em>
+between them are fair; the <em>absolute</em> values are not
+generalization estimates. Nothing in this task addressed that, and it
+remains the single biggest methodological weakness in the pipeline.</p>
+</div>
 </div>
 </div>
 <div id="task-3-bidirectional-mapping-and-round-trip-consistency" class="section level2">
@@ -2095,22 +2713,22 @@ independent of the manual crosswalk.</p>
 <tr class="odd">
 <td align="left">ICD-9-CM &lt;-&gt; ICD-10-CA</td>
 <td align="left">ClinicalBERT</td>
-<td align="right">0.423</td>
-<td align="right">0.268</td>
-<td align="right">0.726</td>
-<td align="right">0.570</td>
+<td align="right">0.427</td>
+<td align="right">0.271</td>
+<td align="right">0.725</td>
+<td align="right">0.568</td>
 <td align="right">0.345</td>
-<td align="right">893</td>
+<td align="right">927</td>
 </tr>
 <tr class="even">
 <td align="left">ICD-9-CM &lt;-&gt; ICD-10-CA</td>
 <td align="left">SapBERT</td>
-<td align="right">0.523</td>
-<td align="right">0.355</td>
-<td align="right">0.763</td>
-<td align="right">0.617</td>
-<td align="right">0.461</td>
-<td align="right">898</td>
+<td align="right">0.530</td>
+<td align="right">0.360</td>
+<td align="right">0.754</td>
+<td align="right">0.605</td>
+<td align="right">0.453</td>
+<td align="right">955</td>
 </tr>
 <tr class="odd">
 <td align="left">ICD-9-CM &lt;-&gt; ICDA-8</td>

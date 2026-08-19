@@ -100,12 +100,30 @@ chapter_alignment_10 <- list(
 
 chapter_alignment_8 <- setNames(as.list(1:17), as.character(1:17))
 
+# find_chapter()/compute_chapter_distance() are VECTORIZED (they accept and
+# return whole vectors, and are still correct for length-1 input, so every
+# existing scalar call site keeps working unchanged). This matters for
+# runtime, not for results: merge_and_flag() used to call these row-by-row
+# under dplyr::rowwise(), i.e. one small dplyr::filter() per candidate row,
+# which cost ~20-30s per (threshold, top_n) grid point and made a full
+# parameter sweep per embedding condition impractical. Both functions are
+# pure lookups over a <=22-row table, so they are computed once per DISTINCT
+# code / chapter pair and recycled by match(). Output is bit-identical to
+# the previous scalar implementation -- verified over the full candidate set
+# of both tracks by scripts/verify_vectorized_equivalence.R.
 find_chapter <- function(code, chapter_table, pad_width = 3, alpha = FALSE) {
   code <- as.character(code)
-  key <- if (alpha) substr(code, 1, 3) else str_pad(str_split_i(code, "\\.", 1), pad_width, pad = "0")
-  hit <- chapter_table %>% filter(start <= key, key <= end)
-  if (nrow(hit) == 0) return(NA_integer_)
-  hit$chapter[1]
+  uniq <- unique(code)
+  key <- if (alpha) substr(uniq, 1, 3) else str_pad(str_split_i(uniq, "\\.", 1), pad_width, pad = "0")
+
+  hit <- outer(key, chapter_table$start, ">=") & outer(key, chapter_table$end, "<=")
+  hit[is.na(hit)] <- FALSE
+
+  ch <- rep(NA_integer_, length(uniq))
+  any_hit <- rowSums(hit) > 0
+  # ties.method = "first" reproduces the old `hit$chapter[1]`
+  ch[any_hit] <- as.integer(chapter_table$chapter[max.col(hit * 1, ties.method = "first")[any_hit]])
+  ch[match(code, uniq)]
 }
 
 find_icd9cm_chapter <- function(code) find_chapter(code, icd9cm_chapters, pad_width = 3, alpha = FALSE)
@@ -113,11 +131,26 @@ find_icd10ca_chapter <- function(code) find_chapter(code, icd10ca_chapters, alph
 find_icda8_chapter   <- function(code) find_chapter(code, icda8_chapters, pad_width = 3, alpha = FALSE)
 
 compute_chapter_distance <- function(chapter_icd9cm, chapter_target, alignment) {
-  if (is.na(chapter_icd9cm) || is.na(chapter_target)) return(NA_integer_)
-  allowed <- alignment[[as.character(chapter_icd9cm)]]
-  if (!is.null(allowed) && chapter_target %in% allowed) return(0L)
-  if (abs(chapter_icd9cm - chapter_target) == 1) return(1L)
-  return(2L)
+  n <- max(length(chapter_icd9cm), length(chapter_target))
+  if (n == 0) return(integer(0))
+  a <- rep_len(as.integer(chapter_icd9cm), n)
+  b <- rep_len(as.integer(chapter_target), n)
+
+  # at most 17 x 22 distinct (source chapter, target chapter) pairs
+  key <- paste(a, b, sep = "|")
+  uniq <- unique(key)
+  ua <- a[match(uniq, key)]
+  ub <- b[match(uniq, key)]
+
+  val <- vapply(seq_along(uniq), function(i) {
+    if (is.na(ua[i]) || is.na(ub[i])) return(NA_integer_)
+    allowed <- alignment[[as.character(ua[i])]]
+    if (!is.null(allowed) && ub[i] %in% allowed) return(0L)
+    if (abs(ua[i] - ub[i]) == 1) return(1L)
+    2L
+  }, integer(1))
+
+  val[match(key, uniq)]
 }
 
 load_similarity_sheets <- function(path) {
@@ -178,7 +211,6 @@ merge_and_flag <- function(similarity_df, cooccurrence_df, target_col_name,
   )
 
   merged <- merged %>%
-    rowwise() %>%
     mutate(
       chapter_icd9cm = find_icd9cm_chapter(ICD_9_CM),
       chapter_target = find_target_chapter_fn(.data[[target_col_name]]),
@@ -383,7 +415,6 @@ merge_and_flag_reverse <- function(similarity_df, cooccurrence_df, target_col_na
   )
 
   merged <- merged %>%
-    rowwise() %>%
     mutate(
       chapter_icd9cm = find_icd9cm_chapter(ICD_9_CM),
       chapter_target = find_target_chapter_fn(.data[[target_col_name]]),
