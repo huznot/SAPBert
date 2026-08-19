@@ -17,3 +17,13 @@ Precomputing baseline pipeline emissions...
   ClinicalBERT done
 
 --- outer fold 1/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=30 chapter=FALSE tau=0.45 rho=0.50 (inner F1 0.590)
+  baseline pick on train: SapBERT|0.95|30|4 (train F1 0.537)
+  TEST FOLD  baseline F1 0.586 | reranker F1 0.680
+
+--- outer fold 2/5 (276 train codes, 69 test codes) ---
+  inner-CV pick: K=10 N=30 chapter=FALSE tau=0.25 rho=0.30 (inner F1 0.622)
+  baseline pick on train: SapBERT|0.95|25|4 (train F1 0.538)
+  TEST FOLD  baseline F1 0.581 | reranker F1 0.588
+
+--- outer fold 3/5 (276 train codes, 69 test codes) ---
