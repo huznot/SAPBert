@@ -11,7 +11,7 @@
 
 
 
-<title>SapBERT vs. ClinicalBERT for ICD Crosswalk Automation</title>
+<title>Automating ICD Code Crosswalks</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1495,26 +1495,47 @@ border-radius: 0px;
 
 
 
-<h1 class="title toc-ignore">SapBERT vs. ClinicalBERT for ICD Crosswalk
-Automation</h1>
-<h3 class="subtitle">ICD-9-CM to ICD-10-CA / ICDA-8 automatic mapping
-pipeline</h3>
+<h1 class="title toc-ignore">Automating ICD Code Crosswalks</h1>
+<h3 class="subtitle">Building most of a code migration automatically,
+and knowing which parts to trust</h3>
 
 </div>
 
 
 <div id="purpose" class="section level2">
 <h2>Purpose</h2>
-<p>The pipeline maps ICD-9-CM codes to ICD-10-CA and ICDA-8 by combining
-embedding cosine similarity between code labels with historical
-co-occurrence frequency. A rule-based flag combination picks the final
-mapping, which is validated against a manual crosswalk for precision,
-recall, F1, and accuracy, overall and per CCS category.</p>
-<p>This report compares two embedding models for the similarity signal:
-ClinicalBERT (the original) and SapBERT
-(<code>cambridgeltl/SapBERT-from-PubMedBERT-fulltext</code>). Everything
-downstream of the embeddings stays the same between the two runs, so any
-difference in the metrics comes from the embedding model itself.</p>
+<p>When a health system changes diagnosis coding standards, every record
+coded under the old system becomes hard to use. Bridging them needs a
+crosswalk: a mapping from each old code to its modern equivalent.
+Building one by hand takes clinical coders months, and it has to be
+redone for every pair of systems and every country that migrates.</p>
+<p>This report covers work on automating that. The pipeline maps
+ICD-9-CM codes to ICD-10-CA and to ICDA-8 by combining embedding
+similarity between code labels with historical co-occurrence frequency,
+scored against a manually built crosswalk.</p>
+<p>Neither track is the point on its own. The inputs the method needs
+are code labels and co-occurrence counts from records coded both ways,
+which any health system mid-migration will have, so the two tracks here
+are better read as two independent tests of one approach than as two
+separate deliverables. ICDA-8 is a historical target and ICD-10-CA a
+current one, which makes them a reasonable pair to test against.</p>
+<p>The report has three parts:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Comparing embedding models</strong> (ClinicalBERT, SapBERT,
+and a general-purpose model, mpnet) and testing filler-word stripping,
+over a full parameter grid.</li>
+<li><strong>Finding out what actually limits accuracy.</strong> Not the
+embedding model, as it turns out: the candidate generation step was
+discarding most correct answers before ranking began, capping the whole
+system regardless of what was placed downstream.</li>
+<li><strong>A two-stage system built around that finding</strong>,
+evaluated with grouped cross-validation, and reported as precision at
+coverage: how much of the crosswalk can be built automatically at a
+precision worth trusting.</li>
+</ol>
+<p>Everything in parts 1 and 2 tunes parameters on the same data it
+scores on, which is stated where it matters. Part 3 does not, and its
+numbers are the ones to quote.</p>
 <p><strong>Background.</strong> Combining co-occurrence-based similarity
 with text-embedding similarity, which is this pipeline’s core approach,
 is a recognized open question in the medical coding literature, not a

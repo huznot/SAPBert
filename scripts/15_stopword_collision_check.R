@@ -100,3 +100,12 @@ print(as.data.frame(out %>% group_by(list, n_words) %>%
             clinical_words_removed = first(clinical_words_removed),
             .groups = "drop") %>% arrange(new_collisions)))
 cat("\nWritten to results/stopword_collision_check.csv\n")
+
+# Guard: the list actually in use must not merge any two codes. Run this after
+# changing filler_words.json.
+ours_coll <- sum(out$new_collisions[out$list == "filler_words.json"])
+if (ours_coll > 0) {
+  cat(sprintf("\nFAIL: filler_words.json merges %d code(s). Fix the list.\n", ours_coll))
+  quit(status = 1)
+}
+cat("\nPASS: filler_words.json merges no codes.\n")

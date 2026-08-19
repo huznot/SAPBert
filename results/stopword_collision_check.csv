@@ -1,7 +1,7 @@
 "list","n_words","system","n_codes","labels_emptied","new_collisions","unique_before","unique_after","clinical_words_removed"
-"filler_words.json",16,"ICD-9-CM",354,0,0,354,354,5
-"filler_words.json",16,"ICD-10-CA",2038,0,10,2038,2033,5
-"filler_words.json",16,"ICDA-8",858,0,0,858,858,5
+"filler_words.json",11,"ICD-9-CM",354,0,0,354,354,2
+"filler_words.json",11,"ICD-10-CA",2038,0,0,2038,2038,2
+"filler_words.json",11,"ICDA-8",858,0,0,858,858,2
 "NLTK english",120,"ICD-9-CM",354,0,0,354,354,17
 "NLTK english",120,"ICD-10-CA",2038,0,0,2038,2038,17
 "NLTK english",120,"ICDA-8",858,0,0,858,858,17
