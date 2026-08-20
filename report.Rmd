@@ -398,8 +398,8 @@ fg_family %>%
   pretraining offers, it does not transfer to matching short ICD label
   strings.
 
-So Dr. Lix's recollection that general-purpose models can beat specialized
-medical ones at matching medical synonyms is **partly confirmed**: mpnet
+So the suggestion that general-purpose models can beat specialised medical
+ones at matching medical synonyms is partly confirmed. mpnet
 fully matches SapBERT on ICD-10-CA and crushes ClinicalBERT on both tracks,
 but it does not beat SapBERT, and on ICDA-8 it clearly loses. The honest
 summary is that *domain-specific pretraining per se is not what matters* --
@@ -489,8 +489,8 @@ change the actual mapping output rather than just how it's scored. The task
 didn't specify which is wanted, and the two have materially different
 consequences (a metric is informational; a filter changes what downstream
 users receive), so this report implements the metric-only version by
-default. Please confirm with Dr. Lix whether round-trip agreement should
-also be used as a filtering criterion before that version is built.
+default. Whether round-trip agreement should also be used as a filtering
+criterion needs confirming before that version is built.
 ```
 
 ## Where the accuracy ceiling actually comes from
@@ -749,6 +749,6 @@ Two items from the task list are intentionally not implemented:
   the exact mechanism, weren't specified. Not guessed at, per instructions.
 - **Expanded validation dataset** -- no additional verified crosswalk pairs
   beyond the existing 937 (ICD-9/10) and 331 (ICD-9/ICDA-8) were found
-  anywhere in this repository. If Dr. Lix has more, point the pipeline at
+  anywhere in this repository. If more become available, point the pipeline at
   them and re-run; a drop in F1/accuracy as the validation set grows would
   be expected (an easier-subset effect), not a bug.

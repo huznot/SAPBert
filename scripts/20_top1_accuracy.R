@@ -1,6 +1,6 @@
-# Top-1 accuracy, for context against the GPT-4 results in Monchka et al.
+# Top-1 accuracy, for context against the published GPT-4 results.
 #
-# That paper reports, for each source code, whether the single predicted code
+# That study reports, for each source code, whether the single predicted code
 # matched the reference. This system predicts a SET per code and is scored with
 # precision/recall/F1, so the numbers are not comparable as they stand. This
 # computes the closest equivalent we can: for each ICD-9 code, is the
@@ -53,10 +53,10 @@ for (tr in unique(preds$track)) {
 res <- bind_rows(rows)
 write.csv(res, file.path(OUT_DIR, "top1_accuracy.csv"), row.names = FALSE)
 
-cat("\n=== why this is not a head-to-head with Monchka et al. ===\n")
-cat("  direction : they translate ICD-10-CA -> ICD-9-CM, this goes ICD-9-CM -> ICD-10-CA\n")
-cat("  reference : they score against the CIHI crosswalk, this against the local manual one\n")
-cat("  codes     : they use 1,272 chronic-disease (Elixhauser) codes, this uses 345/302\n")
+cat("\n=== why this is not a head-to-head with the GPT-4 study ===\n")
+cat("  direction : that study translates ICD-10-CA -> ICD-9-CM, this goes ICD-9-CM -> ICD-10-CA\n")
+cat("  reference : the GPT-4 study scores against the CIHI crosswalk, this against the local manual one\n")
+cat("  codes     : it uses 1,272 chronic-disease (Elixhauser) codes, this uses 345/302\n")
 cat("  structure : the CIHI crosswalk is one-to-one; here a code averages >1 correct target,\n")
 cat("              so top-1 is an easier target for them and a harder one here\n")
 cat("  contamination : public crosswalks may sit in GPT-4 training data, which they flag.\n")

@@ -2448,21 +2448,21 @@ margin (0.448 and 0.722 at best). Whatever advantage ClinicalBERT’s
 clinical-notes pretraining offers, it does not transfer to matching
 short ICD label strings.</li>
 </ul>
-<p>So Dr. Lix’s recollection that general-purpose models can beat
-specialized medical ones at matching medical synonyms is <strong>partly
-confirmed</strong>: mpnet fully matches SapBERT on ICD-10-CA and crushes
-ClinicalBERT on both tracks, but it does not beat SapBERT, and on ICDA-8
-it clearly loses. The honest summary is that <em>domain-specific
-pretraining per se is not what matters</em> – ClinicalBERT is
-domain-specific and is the worst arm by a distance. What matters is what
-the model was trained to do: SapBERT was trained explicitly to align
-biomedical <strong>entity names</strong>, which is precisely this task,
-and it is the only arm that is never beaten. This connects to Zhang et
-al. (2019)’s point (see Background) that this combination of
-co-occurrence and embedding similarity remains an open question – on one
-of the two tracks the embedding source genuinely does not matter, and
-the surrounding architecture (co-occurrence + chapter filtering + flag
-rules) is doing the work.</p>
+<p>So the suggestion that general-purpose models can beat specialised
+medical ones at matching medical synonyms is partly confirmed. mpnet
+fully matches SapBERT on ICD-10-CA and crushes ClinicalBERT on both
+tracks, but it does not beat SapBERT, and on ICDA-8 it clearly loses.
+The honest summary is that <em>domain-specific pretraining per se is not
+what matters</em> – ClinicalBERT is domain-specific and is the worst arm
+by a distance. What matters is what the model was trained to do: SapBERT
+was trained explicitly to align biomedical <strong>entity
+names</strong>, which is precisely this task, and it is the only arm
+that is never beaten. This connects to Zhang et al. (2019)’s point (see
+Background) that this combination of co-occurrence and embedding
+similarity remains an open question – on one of the two tracks the
+embedding source genuinely does not matter, and the surrounding
+architecture (co-occurrence + chapter filtering + flag rules) is doing
+the work.</p>
 </div>
 <div id="how-much-did-the-operating-point-matter" class="section level4">
 <h4>How much did the operating point matter?</h4>
@@ -2800,9 +2800,9 @@ if the reverse pipeline agrees, which would change the actual mapping
 output rather than just how it’s scored. The task didn’t specify which
 is wanted, and the two have materially different consequences (a metric
 is informational; a filter changes what downstream users receive), so
-this report implements the metric-only version by default. Please
-confirm with Dr. Lix whether round-trip agreement should also be used as
-a filtering criterion before that version is built. ```</p>
+this report implements the metric-only version by default. Whether
+round-trip agreement should also be used as a filtering criterion needs
+confirming before that version is built. ```</p>
 </div>
 <div id="where-the-accuracy-ceiling-actually-comes-from" class="section level2">
 <h2>Where the accuracy ceiling actually comes from</h2>
@@ -3539,9 +3539,9 @@ which codes, and the exact mechanism, weren’t specified. Not guessed at,
 per instructions.</li>
 <li><strong>Expanded validation dataset</strong> – no additional
 verified crosswalk pairs beyond the existing 937 (ICD-9/10) and 331
-(ICD-9/ICDA-8) were found anywhere in this repository. If Dr. Lix has
-more, point the pipeline at them and re-run; a drop in F1/accuracy as
-the validation set grows would be expected (an easier-subset effect),
+(ICD-9/ICDA-8) were found anywhere in this repository. If more become
+available, point the pipeline at them and re-run; a drop in F1/accuracy
+as the validation set grows would be expected (an easier-subset effect),
 not a bug.</li>
 </ul>
 </div>
