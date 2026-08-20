@@ -1,10 +1,10 @@
 source("pipeline_lib.R")
 
-# Superseded by 07_full_grid_comparison.R, which runs the full grid for every
-# condition instead of the single operating point used here. Kept for reference.
+# superseded by 07_full_grid_comparison.R which runs the full grid for every
+# condition instead of the single operating point used here. kept for reference
 #
-# Compares filler-word stripping and the mpnet arm against the baseline at one
-# fixed (threshold, top_n) per track, sweeping only the flag rules.
+# compares filler stripping and the mpnet arm against the baseline at one fixed
+# threshold/top_n per track, sweeping only the flag rules
 
 ORIG_BASE <- "../data/original"
 GEN_BASE  <- "../data/generated"

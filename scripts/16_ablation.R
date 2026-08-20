@@ -1,23 +1,16 @@
-# Ablation: which features earn their place, and does a ranking objective beat
-# scoring candidates one at a time.
+# ablation, which features earn their place and whether a ranking objective
+# beats scoring candidates one at a time
 #
-# Same folds and same retrieval settings as 12_, so the only thing that changes
-# between variants is the thing being tested. Retrieval is fixed at the config
-# 12_ picked most often per track instead of being re-searched, which keeps the
-# comparison clean and the run short.
+# same folds and same retrieval as 12_ so the only thing that changes is the
+# thing being tested. retrieval is fixed at what 12_ picked most often rather
+# than re-searched, which keeps it clean and short
 #
-# Two questions:
+# two questions. which feature groups matter, since the mutual features and the
+# training change shipped together and couldnt be attributed. and whether
+# rank:pairwise / rank:ndcg beat binary:logistic, since the task is picking a
+# set per code and most codes have several correct targets
 #
-#   1. Feature groups. The mutual/reverse features and the training change
-#      landed in the same run, so the gain from 0.614 to 0.668 could not be
-#      attributed. Dropping one group at a time settles it.
-#   2. Objective. binary:logistic scores each candidate on its own, but the
-#      task is picking a SET per code, and most codes have several correct
-#      targets. rank:pairwise and rank:ndcg optimise the order within a code,
-#      which is closer to what is actually wanted.
-#
-# Usage:  Rscript 16_ablation.R          both tracks
-#         Rscript 16_ablation.R 10_9     one track
+# usage: Rscript 16_ablation.R [track]
 
 source("pipeline_lib.R")
 suppressMessages(library(xgboost))
@@ -52,7 +45,7 @@ emit_from_scores <- function(df, tau, rho) {
     select(ICD_9_CM, target)
 }
 
-# feature groups, by name pattern
+# feature groups by name pattern
 GROUPS <- list(
   mutual  = "^simrankrev_|^simrelrev_|^ens_mean_relrev|^ens_best_rankrev|^ens_rrf_rev|^ens_mutual|^is_mutual_top1|^ens_direction_gap|^target_n_suitors|^target_rank_here|^target_is_best_here",
   lexical = "^lex_",
@@ -146,7 +139,7 @@ for (tr in tracks) {
       train_codes <- setdiff(codes, test_codes)
       train_full  <- feat %>% filter(ICD_9_CM %in% train_codes)
 
-      # inner CV only to pick tau/rho
+      # inner cv only to pick tau/rho
       inner <- make_folds(train_codes, N_INNER)
       isc <- list()
       for (ii in seq_along(inner)) {
@@ -162,8 +155,8 @@ for (tr in tracks) {
       }
       isc <- bind_rows(isc)
       best <- list(f1 = -1, tau = 0.5, rho = 0.7)
-      # ranking objectives output unbounded scores, so sweep quantiles of the
-      # score distribution rather than fixed probabilities
+      # ranking objectives give unbounded scores so sweep quantiles of the score
+      # distribution rather than fixed probabilities
       taus <- if (grepl("^rank:", v$objective))
                 unname(quantile(isc$.p_score, seq(0.5, 0.995, length.out = 19))) else
                 seq(0.05, 0.95, by = 0.05)

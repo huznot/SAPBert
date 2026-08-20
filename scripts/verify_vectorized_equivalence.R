@@ -1,16 +1,11 @@
-# Verifies that the vectorized find_chapter()/compute_chapter_distance() in
-# pipeline_lib.R produce EXACTLY the same pipeline output as the previous
-# scalar + dplyr::rowwise() implementation. This is a correctness gate on a
-# pure-performance refactor: the refactor exists only to make a full
-# parameter sweep per embedding condition affordable (scripts/07_*), and it
-# must not move a single metric.
+# checks the vectorized find_chapter / compute_chapter_distance give exactly the
+# same output as the old scalar rowwise version
 #
-# Compares, on real data for both tracks and both directions:
-#   1. find_*_chapter() over every distinct code appearing in the candidate set
-#   2. the full merge_and_flag() output (rows, flags, similarity, co-occurrence)
-#   3. the four overall metrics (precision/recall/F1/accuracy)
+# the refactor is purely for speed, it exists so a full sweep per condition is
+# affordable, so it must not move a single metric
 #
-# Run from scripts/:  Rscript verify_vectorized_equivalence.R
+# compares chapter lookups, the full merge_and_flag output, and all four metrics
+# under all four flag rules, on real data for both tracks and both directions
 
 OLD_LIB <- tempfile(fileext = ".R")
 system2("git", c("show", "HEAD:scripts/pipeline_lib.R"), stdout = OLD_LIB)

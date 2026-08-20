@@ -1,8 +1,8 @@
 source("pipeline_lib.R")
 
-# Reverse mapping (target -> ICD-9-CM) and round-trip consistency.
-# Reuses the forward parameters from best_by_model.csv instead of running a
-# separate reverse grid search.
+# reverse mapping (target -> icd-9-cm) and round trip consistency
+# reuses the forward parameters from best_by_model.csv instead of running a
+# separate reverse grid search
 
 ORIG_BASE    <- "../data/original"
 SAPBERT_BASE <- "../data/sapbert"

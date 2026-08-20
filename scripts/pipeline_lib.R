@@ -4,8 +4,8 @@ library(readxl)
 library(stringr)
 library(purrr)
 
-# Low-content words stripped from label text before embedding. Kept in
-# filler_words.json so R and generate_embeddings.py use the same list.
+# low content words stripped from label text before embedding. kept in
+# filler_words.json so R and generate_embeddings.py use the same list
 load_filler_words <- function(path = "filler_words.json") {
   cfg <- jsonlite::fromJSON(path)
   cfg$filler_words
@@ -98,11 +98,11 @@ chapter_alignment_10 <- list(
 
 chapter_alignment_8 <- setNames(as.list(1:17), as.character(1:17))
 
-# Vectorized, but still fine for length-1 input so existing scalar calls work.
-# These used to run per-row under rowwise() -- one dplyr::filter() per candidate
-# -- which cost ~20-30s per grid point. Both are lookups over a <=22-row table,
-# so compute once per distinct code and recycle with match(). Output is
-# identical to the old version; verify_vectorized_equivalence.R checks it.
+# vectorized but still fine for length 1 input so existing scalar calls work.
+# these used to run per row under rowwise, one dplyr::filter per candidate, which
+# cost ~20-30s per grid point. both are lookups over a <=22 row table so compute
+# once per distinct code and recycle with match. output is identical to the old
+# version, verify_vectorized_equivalence.R checks it
 find_chapter <- function(code, chapter_table, pad_width = 3, alpha = FALSE) {
   code <- as.character(code)
   uniq <- unique(code)
@@ -113,7 +113,7 @@ find_chapter <- function(code, chapter_table, pad_width = 3, alpha = FALSE) {
 
   ch <- rep(NA_integer_, length(uniq))
   any_hit <- rowSums(hit) > 0
-  # ties.method = "first" reproduces the old `hit$chapter[1]`
+  # ties.method "first" reproduces the old hit$chapter[1]
   ch[any_hit] <- as.integer(chapter_table$chapter[max.col(hit * 1, ties.method = "first")[any_hit]])
   ch[match(code, uniq)]
 }
@@ -128,7 +128,7 @@ compute_chapter_distance <- function(chapter_icd9cm, chapter_target, alignment) 
   a <- rep_len(as.integer(chapter_icd9cm), n)
   b <- rep_len(as.integer(chapter_target), n)
 
-  # at most 17 x 22 distinct (source chapter, target chapter) pairs
+  # at most 17 x 22 distinct source/target chapter pairs
   key <- paste(a, b, sep = "|")
   uniq <- unique(key)
   ua <- a[match(uniq, key)]
@@ -338,9 +338,9 @@ run_pipeline_8_9_cached <- function(sheets_dict, cooc_df, manual_df, ccs_df, val
   list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df, auto_df = auto_df)
 }
 
-# --- reverse direction (target -> ICD-9-CM) ---
-# Same pipeline, but normalized per target instead of per ICD-9 code, with an
-# inverted chapter table. Cosine is symmetric so the same sheets are reused.
+# reverse direction, target -> icd-9-cm
+# same pipeline but normalized per target instead of per icd-9 code, with an
+# inverted chapter table. cosine is symmetric so the same sheets are reused
 
 invert_alignment <- function(alignment) {
   rev <- list()
@@ -490,8 +490,8 @@ run_pipeline_8_9_reverse_cached <- function(sheets_dict, cooc_df, manual_df, ccs
   list(grouped = metrics$grouped, overall = metrics$overall, final_valid_df = final_valid_df, auto_df = auto_df)
 }
 
-# Round-trip: does a target a code maps to map back to that same code?
-# Independent of the manual crosswalk.
+# round trip, does a target a code maps to map back to that same code
+# independent of the manual crosswalk
 compute_roundtrip_consistency <- function(forward_auto_df, reverse_auto_df, target_col_name) {
   fwd <- forward_auto_df %>%
     select(ICD_9_CM, !!target_col_name) %>%

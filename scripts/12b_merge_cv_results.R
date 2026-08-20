@@ -1,13 +1,10 @@
-# Stitches per-track CV outputs back together after running the two tracks as
-# parallel processes:
+# stitches the per track cv outputs back together after running both in parallel
 #
 #   Rscript 12_cv_rerank.R 10_9 &   Rscript 12_cv_rerank.R 8_9 &
 #   Rscript 12b_merge_cv_results.R
 #
-# Each track writes results/cv_rerank_part_<track>.rds; this merges them into
-# the combined CSVs that report.Rmd and 13_precision_coverage.R read. Running
-# 12_ without arguments does both tracks and writes those CSVs directly, in
-# which case this script is unnecessary.
+# running 12_ with no arguments does both tracks and writes these files directly,
+# in which case this isnt needed
 
 suppressMessages(library(dplyr))
 OUT_DIR <- "../results"

@@ -1,13 +1,12 @@
-# Combines the per-condition grids from 07_ into summary tables.
-#
+# combines the per condition grids from 07_ into summary tables
 #   full_grid_all.csv          every point
 #   full_grid_best.csv         best per condition x track
-#   full_grid_stripping.csv    base vs stripped (task 1)
-#   full_grid_family.csv       best per model family (task 2)
+#   full_grid_stripping.csv    base vs stripped
+#   full_grid_family.csv       best per model family
 #   full_grid_sensitivity.csv  how much the ranking depends on the operating point
 #
-# The sensitivity table is the point: comparing models at one arbitrary
-# operating point cannot tell "A is better" from "A wins at this one spot".
+# the sensitivity table is the point, comparing models at one arbitrary operating
+# point cant tell "A is better" from "A wins at this one spot"
 source("pipeline_lib.R")
 
 GRID_DIR <- "../results/full_grid"
@@ -21,8 +20,8 @@ cat(sprintf("Assembling %d condition file(s): %s\n", length(files),
 
 all_grid <- bind_rows(lapply(files, read.csv, stringsAsFactors = FALSE))
 
-# every condition must have run the same grid, or best-F1 is comparing
-# different amounts of search
+# every condition must have run the same grid or best-f1 is comparing different
+# amounts of search
 pts <- all_grid %>% count(model, track, name = "n_points")
 if (length(unique(pts$n_points)) != 1) {
   cat("\nWARNING: conditions did not all run the same number of grid points --\n")
@@ -42,8 +41,8 @@ best <- all_grid %>%
   arrange(track, desc(f1))
 write.csv(best, file.path(OUT_DIR, "full_grid_best.csv"), row.names = FALSE)
 
-# task 1: paired within family and track, regenerated arms only, so base and
-# stripped differ only by the stripping
+# paired within family and track, regenerated arms only, so base and stripped
+# differ only by the stripping
 paired <- all_grid %>%
   filter(model %in% c("ClinicalBERT-base", "ClinicalBERT-stripped",
                       "SapBERT-base-regen", "SapBERT-stripped",
@@ -59,8 +58,8 @@ stripping <- paired %>%
   arrange(track, family)
 write.csv(stripping, file.path(OUT_DIR, "full_grid_stripping.csv"), row.names = FALSE)
 
-# win rate at matched points. Better read than best-F1 for a small effect,
-# since one arm can win just by finding a luckier corner of the grid.
+# win rate at matched points. better read than best-f1 for a small effect since
+# one arm can win just by finding a luckier corner of the grid
 paired_points <- paired %>%
   select(track, family, stripping, similarity_threshold, top_n, flag_combination, f1) %>%
   tidyr::pivot_wider(names_from = stripping, values_from = f1) %>%
@@ -84,8 +83,8 @@ family_best <- all_grid %>%
   arrange(track, desc(f1))
 write.csv(family_best, file.path(OUT_DIR, "full_grid_family.csv"), row.names = FALSE)
 
-# rank by best-over-grid F1 vs F1 at the single point 06_ used. If they
-# disagree, the single-point comparison was measuring the point.
+# rank by best over grid f1 vs f1 at the single point 06_ used. if they disagree
+# the single point comparison was measuring the point
 SHARED_POINT <- list(`10_9` = list(thr = 0.995, tn = 30),
                      `8_9`  = list(thr = 0.99,  tn = 5))
 

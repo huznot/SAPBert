@@ -1,18 +1,12 @@
-# Produces the actual crosswalk.
+# produces the actual crosswalk
 #
-# 12_cv_rerank.R measures how good the system is. This script is the system:
-# it trains on every code that has a known answer, then maps the codes that
-# don't, which is what you'd run on a real legacy code set.
+# 12_ measures how good the system is, this is the system. trains on every code
+# with a known answer then maps the ones without, which is what youd run on a
+# real legacy code set
 #
-# Each predicted mapping gets a confidence and a triage label:
-#   auto-accept  - above the 95%-precision threshold from the CV run
-#   review       - plausible candidates, none confident enough
-#   no-candidate - nothing plausible retrieved
-#
-# The threshold comes from 13_precision_coverage.R, which derives it from
-# out-of-fold predictions, so it isn't tuned on anything this script sees.
-#
-# Run from scripts/:  Rscript 14_predict_crosswalk.R
+# each mapping gets a confidence and a triage label. the threshold comes from
+# 13_ which derives it from out of fold predictions, so it isnt tuned on
+# anything this script sees
 
 source("pipeline_lib.R")
 suppressMessages(library(xgboost))

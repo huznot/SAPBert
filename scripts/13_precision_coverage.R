@@ -1,14 +1,12 @@
-# Precision at coverage, and a review queue.
+# precision at coverage, and a review queue
 #
-# F1 assumes the system has to answer everything. It does not - some codes
-# have no counterpart at all, and what matters in practice is knowing which
-# mappings are safe to accept without checking.
+# f1 assumes the system has to answer everything. it doesnt, some codes have no
+# counterpart at all and what matters in practice is knowing which mappings are
+# safe to accept without checking
 #
-# So this reports precision vs coverage, the threshold that hits a target
-# precision and how much of the crosswalk it builds there, and a triage split
-# of auto-accept / review / no candidate.
-#
-# Uses the out-of-fold predictions from 12_.
+# reports precision vs coverage, the threshold that hits a target precision and
+# how much of the crosswalk it builds there, and an auto-accept / review / no
+# candidate split. runs off the out of fold predictions from 12_
 source("pipeline_lib.R")
 
 OUT_DIR <- "../results"
@@ -29,7 +27,7 @@ for (tr in unique(preds$track)) {
   cat(sprintf("\n######## track %s: %d candidates, %d codes, %d reachable true pairs ########\n",
               tr, nrow(d), n_codes, n_true))
 
-  # --- precision / coverage curve over the emission threshold -----------
+  # precision / coverage curve over the emission threshold
   for (tau in c(seq(0.01, 0.95, by = 0.01), 0.97, 0.99)) {
     em <- d %>% filter(.p_score >= tau)
     tp <- sum(em$y); fp <- nrow(em) - tp
@@ -44,9 +42,8 @@ for (tr in unique(preds$track)) {
 
   cur <- bind_rows(curve_rows) %>% filter(track == tr)
 
-  # --- operating points at target precision -----------------------------
-  # The practical question: "if we insist on being right 95% of the time,
-  # how much of the crosswalk can we build automatically?"
+  # operating points at target precision. the practical question is, if we insist
+  # on being right 95% of the time how much can we build automatically
   for (target in c(0.80, 0.90, 0.95, 0.99)) {
     ok <- cur %>% filter(!is.na(precision), precision >= target)
     if (!nrow(ok)) {
@@ -59,7 +56,7 @@ for (tr in unique(preds$track)) {
     op_rows[[length(op_rows)+1]] <- b %>% mutate(precision_target = target)
   }
 
-  # --- triage: what a coder would actually see ---------------------------
+  # triage, what a coder would actually see
   # auto-accept   : candidates above the 95%-precision threshold
   # review        : the code has candidates, but none confident enough
   # no candidate  : nothing plausible retrieved at all
@@ -91,7 +88,7 @@ write.csv(curve, file.path(OUT_DIR, "precision_coverage_curve.csv"), row.names =
 write.csv(bind_rows(op_rows), file.path(OUT_DIR, "precision_coverage_operating_points.csv"), row.names = FALSE)
 write.csv(bind_rows(triage_rows), file.path(OUT_DIR, "precision_coverage_triage.csv"), row.names = FALSE)
 
-# --- plot -------------------------------------------------------------
+# plot
 png(file.path(OUT_DIR, "plot_precision_coverage.png"), width = 1100, height = 500, res = 110)
 par(mfrow = c(1, 2), mar = c(4.2, 4.2, 3, 1))
 for (tr in unique(curve$track)) {

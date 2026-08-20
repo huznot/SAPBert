@@ -1,20 +1,14 @@
-# Does the model generalise to clinical areas it has never seen?
+# does the model generalise to clinical areas it has never seen
 #
-# Everything so far splits folds by ICD-9 code at random. That is probably
-# optimistic. Codes inside a CCS category are clinically adjacent (140, 141 and
-# 142 are all head and neck cancers), so a random split routinely puts 140 and
-# 141 in training and 142 in test, and the model can lean on a near-neighbour
-# it has already seen.
+# everything so far splits folds by icd-9 code at random which is probably
+# optimistic. codes inside a ccs category are clinically adjacent (140, 141, 142
+# are all head and neck cancers) so a random split often leaves a near neighbour
+# in training
 #
-# Deployment does not look like that. Mapping a legacy code set means whole
-# areas with no examples at all.
+# deployment doesnt look like that, mapping a legacy code set means whole areas
+# with no examples. so this groups folds by ccs category instead
 #
-# So this repeats the evaluation with folds grouped by CCS category: every code
-# in a category lands in the same fold, and the model is tested on categories
-# it never trained on. Comparing the two says how much of the headline number
-# comes from near-neighbour leakage.
-#
-# Usage:  Rscript 19_category_holdout.R [track]
+# usage: Rscript 19_category_holdout.R [track]
 
 source("pipeline_lib.R")
 suppressMessages(library(xgboost))
@@ -65,7 +59,7 @@ train_ranker <- function(d, fc) xgb.train(
                 nthread = parallel::detectCores()),
   data = xgb.DMatrix(as.matrix(d[, fc]), label = d$y), nrounds = 200, verbose = 0)
 
-# folds by random code, or by whole CCS category
+# folds by random code, or by whole ccs category
 build_folds <- function(map, k, mode) {
   if (mode == "code") {
     cs <- sample(map$ICD_9_CM)

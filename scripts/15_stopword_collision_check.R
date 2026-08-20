@@ -1,14 +1,11 @@
-# Checks what stripping filler words does to the label text before any
-# embedding happens.
+# checks what stripping filler words does to the label text before embedding
 #
-# The risk with any stopword list on ICD labels is that two codes with
-# different meanings end up with identical text. "with complication" and
-# "without complication" are separate codes; if the list removes "with" and
-# "without" they collapse into the same string and no embedding model can
-# tell them apart afterwards.
+# the risk with any stopword list on icd labels is two codes with different
+# meanings ending up with identical text. "with complication" and "without
+# complication" are separate codes, if the list removes with/without they
+# collapse and no model can tell them apart afterwards
 #
-# Compares the hand-written list in filler_words.json against standard
-# English stopword lists.
+# compares the hand written list against standard english stopword lists
 
 source("pipeline_lib.R")
 
@@ -21,11 +18,11 @@ sheets <- list(
   `ICDA-8`    = list(sheet = "ICDA-8-3Level",       code = "ICDA_8",    lab = "ICDA_8_LABEL")
 )
 
-# hand-written list currently in use
+# the hand written list currently in use
 ours <- load_filler_words("filler_words.json")
 
-# standard lists. snowball/smart come from the stopwords package if it is
-# installed; otherwise fall back to copies so this runs anywhere.
+# standard lists. snowball/smart come from the stopwords package if installed,
+# otherwise fall back to copies so this runs anywhere
 nltk_like <- c("i","me","my","myself","we","our","ours","ourselves","you","your","yours",
   "he","him","his","she","her","hers","it","its","they","them","their","what","which","who",
   "whom","this","that","these","those","am","is","are","was","were","be","been","being",
@@ -101,8 +98,8 @@ print(as.data.frame(out %>% group_by(list, n_words) %>%
             .groups = "drop") %>% arrange(new_collisions)))
 cat("\nWritten to results/stopword_collision_check.csv\n")
 
-# Guard: the list actually in use must not merge any two codes. Run this after
-# changing filler_words.json.
+# the list in use must not merge any two codes. run this after changing
+# filler_words.json
 ours_coll <- sum(out$new_collisions[out$list == "filler_words.json"])
 if (ours_coll > 0) {
   cat(sprintf("\nFAIL: filler_words.json merges %d code(s). Fix the list.\n", ours_coll))

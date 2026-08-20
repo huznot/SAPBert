@@ -1,14 +1,11 @@
-# Does putting the code number in the embedding text help or hurt?
+# does putting the code number in the embedding text help or hurt
 #
-# We were embedding "250 diabetes mellitus" rather than "diabetes mellitus".
-# The numbers carry no meaning across coding systems (ICD-9 250 and ICD-10 E11
-# are the same concept with nothing in common lexically), so they may just be
-# noise. This scores both versions on retrieval quality, which is where the
-# effect would show up first.
+# we were embedding "250 diabetes mellitus" rather than "diabetes mellitus". the
+# numbers mean nothing across coding systems, icd-9 250 and icd-10 E11 are the
+# same concept with nothing in common lexically, so they may just be noise
 #
-# Compares recall ceiling of the candidate pool at several top-K values, since
-# that is what retrieval controls, plus top-1 hit rate on similarity alone.
-
+# compares recall ceiling of the pool at a few top-K values plus top-1 hit rate
+# on similarity alone
 source("pipeline_lib.R")
 
 ORIG <- "../data/original"

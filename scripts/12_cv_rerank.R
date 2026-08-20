@@ -1,16 +1,11 @@
-# Trains the reranker and evaluates it with grouped cross-validation.
+# trains the reranker and scores it with grouped cross validation
+# 5 folds grouped by icd-9 code so a code and all its candidates stay together,
+# splitting on pairs would leak some of a codes targets into training
+# everything is fitted inside the training folds, test folds are only predicted on
+# the old pipeline runs through the same folds so the comparison is fair
 #
-# 5 outer folds, grouped by ICD-9 code so a code and all its candidates stay
-# in one fold. A random split over pairs would leak: some of a code's true
-# targets would end up in train and the rest in test.
-#
-# The ranker, retrieval settings, decision thresholds and chapter encoding are
-# all fitted inside the training folds. Test folds are only ever predicted on.
-# The old pipeline is run through the same folds so the comparison is fair.
-#
-# Usage:  Rscript 12_cv_rerank.R          both tracks
-#         Rscript 12_cv_rerank.R 10_9     one track (run both in parallel,
-#                                         then 12b_merge_cv_results.R)
+# usage: Rscript 12_cv_rerank.R          both tracks
+#        Rscript 12_cv_rerank.R 10_9     one track, run both in parallel then 12b_
 
 source("pipeline_lib.R")
 suppressMessages(library(xgboost))
@@ -51,7 +46,7 @@ prf <- function(tp, fp, fn) {
     accuracy = if (tp+fp+fn > 0) tp/(tp+fp+fn) else 0)
 }
 
-# score a set of emitted pairs against the truth, restricted to some codes
+# score emitted pairs against the truth for a given set of codes
 score_pairs <- function(emitted, truth, codes) {
   e <- emitted %>% filter(ICD_9_CM %in% codes) %>% distinct(ICD_9_CM, target)
   t <- truth   %>% filter(ICD_9_CM %in% codes) %>% distinct(ICD_9_CM, target)
@@ -66,7 +61,7 @@ make_folds <- function(codes, k) {
 
 all_rows <- list(); fold_rows <- list(); imp_rows <- list(); pred_rows <- list()
 
-# run one track at a time so both can go in parallel; 12b_ merges them
+# one track at a time so both can run in parallel, 12b_ merges them
 .args <- commandArgs(trailingOnly = TRUE)
 SELECTED_TRACKS <- if (length(.args)) .args else names(TRACKS)
 stopifnot(all(SELECTED_TRACKS %in% names(TRACKS)))
@@ -78,9 +73,8 @@ for (tr in SELECTED_TRACKS) {
   feat_all <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
   n_true_pairs <- attr(feat_all, "n_true_pairs")
 
-  # Only codes with a known answer can be cross-validated. Codes without one
-  # are held back for 14_predict_crosswalk.R -- if they were left in they
-  # would look like all-negative rows and drag the model down.
+  # only codes with a known answer can be cross validated. the rest go to 14_,
+  # leaving them in would look like all negative rows and drag the model down
   feat <- feat_all %>% filter(has_truth == 1)
   truth <- feat %>% filter(y == 1) %>% select(ICD_9_CM, target)
   codes <- sort(unique(feat$ICD_9_CM))
@@ -91,8 +85,8 @@ for (tr in SELECTED_TRACKS) {
     c("ICD_9_CM","target","y","has_truth","icd9_label","target_label","chapter_pair","CCS_ID",
       "chapter_icd9","chapter_target"))
 
-  # baseline emissions per (thr, top_n, flag). Same every run, so cache them.
-  # rm results/base_emit_<track>.rds to rebuild.
+  # baseline emissions per thr/top_n/flag. same every run so cache them,
+  # rm results/base_emit_<track>.rds to rebuild
   base_cache <- file.path(OUT_DIR, sprintf("base_emit_%s.rds", tr))
   if (file.exists(base_cache)) {
     cat("Loading cached baseline emissions...\n")
@@ -122,7 +116,7 @@ for (tr in SELECTED_TRACKS) {
   }
   base_keys <- names(base_emit)
 
-  # ---- retrieval configs the inner CV may choose between ----------------
+  # retrieval configs the inner cv picks between
   RETRIEVAL <- list()
   for (K in c(10, 25, 50)) for (N in c(10, 30, 50)) for (chap in c(TRUE, FALSE))
     RETRIEVAL[[length(RETRIEVAL)+1]] <- list(K = K, N = N, chapter = chap)
@@ -134,9 +128,9 @@ for (tr in SELECTED_TRACKS) {
     df[keep, , drop = FALSE]
   }
 
-  # Learn how often each chapter pair is real, from train only. The hand-written
-  # alignment table misses cases (ICD-9 ch 3 is "endocrine ... and immunity" but
-  # never maps to D80-D89), and patching it by hand would be fitting the answers.
+  # learn how often each chapter pair is real, from train only. the hand written
+  # table misses cases, icd-9 ch 3 is "endocrine ... and immunity" but never maps
+  # to D80-D89. patching it by hand would just be fitting the answers
   fit_chapter_encoding <- function(train_df) {
     prior <- mean(train_df$y)
     enc <- train_df %>% group_by(chapter_pair) %>%
@@ -158,10 +152,9 @@ for (tr in SELECTED_TRACKS) {
               data = dtrain, nrounds = 200, verbose = 0)
   }
 
-  # Emit if the candidate is confident in absolute terms (tau) or nearly as
-  # good as the best one for its code (rho). Most codes have several valid
-  # targets, so a single global threshold does badly. rho = 1 means top-1 only.
-  # Every code emits at least its best candidate.
+  # emit if confident on its own (tau) or nearly as good as the best one for that
+  # code (rho). most codes have several valid targets so one global threshold does
+  # badly. rho = 1 means top 1 only. every code emits at least its best candidate
   emit_from_scores <- function(df, tau, rho) {
     df %>% group_by(ICD_9_CM) %>%
       mutate(.mx = max(.p_score)) %>% ungroup() %>%
@@ -181,15 +174,15 @@ for (tr in SELECTED_TRACKS) {
 
     train_full <- feat %>% filter(ICD_9_CM %in% train_codes)
 
-    # Inner CV picks the retrieval config and decision rule.
+    # inner cv picks the retrieval config and decision rule
     #
-    # Train once per inner fold on the full pool, then test every config by
-    # filtering the scored rows. Retrieval only decides which candidates are
-    # eligible, not what they look like, so retraining per config was wasted
-    # work: 54 fits per outer fold down to 3.
+    # train once per inner fold on the full pool then test every config by
+    # filtering the scored rows. retrieval only decides what is eligible, not what
+    # a candidate looks like, so retraining per config was wasted work. 54 fits
+    # per outer fold down to 3.
     #
-    # This does change the procedure, not just the speed. The ranker trains on
-    # the full pool and retrieval becomes an inference-time filter.
+    # note this changes the procedure not just the speed, the ranker now trains on
+    # the full pool and retrieval becomes an inference time filter
     inner_folds <- make_folds(train_codes, N_INNER)
     fcols <- c(FEATURE_COLS, "chapter_rate")
 
@@ -230,7 +223,7 @@ for (tr in SELECTED_TRACKS) {
     tr_df <- apply_chapter_encoding(tr_df, ce); te_df <- apply_chapter_encoding(te_df, ce)
     bst <- train_ranker(tr_df, fcols)
     te_df$.p_score <- predict(bst, as.matrix(te_df[, fcols]))
-    # retrieval applied at inference, as an eligibility filter
+    # retrieval applied at inference as an eligibility filter
     te_df <- apply_retrieval(te_df, best$cfg)
 
     em <- emit_from_scores(te_df, best$tau, best$rho)
@@ -261,7 +254,7 @@ for (tr in SELECTED_TRACKS) {
     imp_rows[[length(imp_rows)+1]] <- as_tibble(imp) %>% mutate(track = tr, fold = fi)
   }
 
-  # checkpoint before aggregating, so a bug down there does not bin the run
+  # checkpoint before aggregating so a bug down there doesnt bin the whole run
   oof <- bind_rows(oof_pred)
   saveRDS(list(oof = oof, fold_base_key = fold_base_key, outer_folds = outer_folds),
           file.path(OUT_DIR, sprintf("cv_rerank_checkpoint_%s.rds", tr)))
@@ -270,17 +263,17 @@ for (tr in SELECTED_TRACKS) {
   em_all <- bind_rows(lapply(oof_pred, function(d) emit_from_scores(d, d$.tau[1], d$.rho[1])))
   m_rr_all <- score_pairs(em_all, truth, codes)
 
-  # baseline, pooled the same way: each fold's test codes scored with the
-  # config chosen on that fold's training codes
+  # baseline pooled the same way, each folds test codes scored with the config
+  # picked on that folds training codes
   stopifnot(all(nzchar(fold_base_key)), all(fold_base_key %in% names(base_emit)))
   bl_pairs <- bind_rows(lapply(seq_along(outer_folds), function(i) {
     base_emit[[fold_base_key[i]]] %>% filter(ICD_9_CM %in% outer_folds[[i]])
   }))
   m_bl_all <- score_pairs(bl_pairs, truth, codes)
 
-  # in-sample baseline: best config scored on everything
-  # index by position: score_pairs returns a named vector, so sapply names come
-  # out as "SapBERT|0.95|3|1.f1" and the lookup returns NULL
+  # in sample baseline, best config scored on everything
+  # index by position. score_pairs returns a named vector so sapply names come out
+  # as "SapBERT|0.95|3|1.f1" and the lookup silently returns NULL
   in_sample <- vapply(base_keys,
                       function(k) unname(score_pairs(base_emit[[k]], truth, codes)["f1"]),
                       numeric(1))
@@ -304,7 +297,7 @@ for (tr in SELECTED_TRACKS) {
 
 results <- bind_rows(all_rows)
 
-# per-track artifacts, so parallel invocations never clobber each other
+# per track files so parallel runs dont clobber each other
 for (tr in SELECTED_TRACKS) {
   saveRDS(list(results = results %>% filter(track == tr),
                folds   = bind_rows(fold_rows) %>% filter(track == tr),

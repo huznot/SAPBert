@@ -1,16 +1,14 @@
-# Top-1 accuracy, for context against the published GPT-4 results.
+# top-1 accuracy, for context against the published gpt-4 results
 #
-# That study reports, for each source code, whether the single predicted code
-# matched the reference. This system predicts a SET per code and is scored with
-# precision/recall/F1, so the numbers are not comparable as they stand. This
-# computes the closest equivalent we can: for each ICD-9 code, is the
-# highest-scoring predicted target one of its correct targets.
+# that study reports whether the single predicted code matched the reference.
+# this system predicts a set per code and is scored with precision/recall/f1 so
+# the numbers arent comparable as they stand. this computes the closest thing:
+# for each icd-9 code, is the top scoring target one of its correct ones
 #
-# Read the caveats in the output before putting this next to their 84.7%. The
-# two setups differ in direction, reference standard, and code subset, so this
-# is context, not a head-to-head.
+# read the caveats in the output before putting this next to their 84.7%,
+# direction and reference standard and code subset all differ
 #
-# Uses the out-of-fold predictions from 12_, so it is held out.
+# uses the out of fold predictions from 12_ so it is held out
 
 source("pipeline_lib.R")
 

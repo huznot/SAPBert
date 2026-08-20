@@ -1,19 +1,15 @@
-# How much would more training data actually buy?
+# how much would more training data actually buy
 #
-# The validation set is small (345 and 302 codes) and that is the limitation
-# most often raised about this work. "Small" on its own is not actionable
-# though. What matters is whether performance is still climbing at the size we
-# have: if it is, collecting more pairs is worth someone's time and this says
-# roughly how many; if it has flattened, more data is not the bottleneck and
-# effort should go elsewhere.
+# the validation set is small and thats the limitation people raise most. but
+# "small" isnt actionable on its own, what matters is whether performance is
+# still climbing at the size we have. if it is, collecting more pairs is worth
+# someones time and this says roughly how many. if it flattened, more data isnt
+# the bottleneck
 #
-# Holds everything else fixed and varies only the number of training codes.
-# Retrieval and the emission rule are fixed at the values 12_ settled on rather
-# than re-tuned, so the only thing moving is training set size. Each size is
-# repeated over several random subsamples to average out which codes are drawn.
+# holds everything else fixed and varies only the number of training codes,
+# repeated over a few random subsamples per size
 #
-# Usage:  Rscript 18_learning_curve.R [track]
-
+# usage: Rscript 18_learning_curve.R [track]
 source("pipeline_lib.R")
 suppressMessages(library(xgboost))
 set.seed(20260819)

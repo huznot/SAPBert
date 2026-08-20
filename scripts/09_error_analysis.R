@@ -1,13 +1,11 @@
-# Works out where the pipeline loses points.
+# works out where the pipeline loses points
 #
-# Two stages fail differently. Candidate generation (threshold + top-N
-# co-occurrence + chapter filter) decides what gets considered at all, and
-# anything it drops is gone for good. Selection then picks what to emit, and
-# whatever it emits that is wrong costs precision.
+# two stages fail differently. candidate generation decides what gets considered
+# at all and anything it drops is gone for good. selection then picks what to
+# emit and whatever it gets wrong costs precision
 #
-# So this measures both, plus an oracle: the F1 a perfect selector would get
-# on the current pool. That is the hard ceiling for any amount of reranking or
-# model swapping. It also breaks down where the lost pairs died.
+# measures both plus an oracle, the f1 a perfect selector would get on the
+# current pool. thats the hard ceiling for any amount of reranking
 source("pipeline_lib.R")
 
 ORIG_BASE    <- "../data/original"
@@ -46,7 +44,7 @@ MODELS <- list(
                  `8_9`  = file.path(GEN_BASE, "cosine_similarity_matrices_8_9_mpnet_base.xlsx"))
 )
 
-# true pairs, after applying the same exclusion list the scorer uses
+# true pairs, after the same exclusion list the scorer uses
 true_pairs <- function(tk) {
   excluded <- as.character(tk$excl$`ICD-9-CM`)
   tk$manual %>%
@@ -85,8 +83,8 @@ for (tr in names(TRACKS)) {
       transmute(ICD_9_CM = as.character(ICD_9_CM), target = as.character(.data[[tcn]]),
                 Co_Occurrence_Frequency)
 
-    # everything the matrix could offer, unthresholded. Separates "threshold
-    # cut it" from "embedding never had it".
+    # everything the matrix could offer, unthresholded. separates "threshold cut
+    # it" from "embedding never had it"
     universe <- get_similarity_scores_from_sheets(sheets, 0, tcn) %>%
       transmute(ICD_9_CM = as.character(ICD_9_CM), target = as.character(.data[[tcn]])) %>%
       distinct()
@@ -108,9 +106,9 @@ for (tr in names(TRACKS)) {
     in_sim      <- semi_join(tp_df, sim_raw %>% select(ICD_9_CM, target), by = c("ICD_9_CM", "target"))
     in_cooc     <- semi_join(tp_df, cooc_raw %>% select(ICD_9_CM, target), by = c("ICD_9_CM", "target"))
 
-    # oracle: perfect selection out of the candidate pool
+    # oracle, perfect selection out of the pool
     oracle <- f1_of(tp = nrow(in_pool), fp = 0, fn = nrow(tp_df) - nrow(in_pool))
-    # actual, recomputed here as a cross-check on the main pipeline
+    # actual, recomputed here as a cross check on the main pipeline
     tp_n <- nrow(in_emitted)
     actual <- f1_of(tp = tp_n, fp = nrow(emitted) - tp_n, fn = nrow(tp_df) - tp_n)
 

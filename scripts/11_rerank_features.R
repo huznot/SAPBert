@@ -1,14 +1,7 @@
-# Builds the candidate pool and feature table for the reranker.
-#
-# Takes top-50 similarity per model plus top-50 co-occurrence, no chapter
-# filter, and attaches all features. Narrower retrieval settings are just row
-# filters on this (sim_rank <= K, cooc_rank <= N, chapter_ok), so 12_ can
-# sweep them without rebuilding anything.
-#
-# The manual crosswalk is only joined at the end as the label y. Nothing here
-# is fitted.
-#
-# Writes results/rerank_features_<track>.rds
+# builds the candidate pool + features for the reranker
+# top 50 similarity per model plus top 50 co-occurrence, no chapter filter
+# narrower settings are just row filters on this so 12_ can sweep them
+# writes results/rerank_features_<track>.rds
 
 source("pipeline_lib.R")
 
@@ -65,9 +58,8 @@ long_similarity <- function(path) {
   }) %>% filter(!is.na(sim))
 }
 
-# Non-neural label features. Embeddings smooth over exact word matches, so
-# two labels sharing a rare word ("mesothelioma") look no better than ones
-# sharing "other". These catch that.
+# plain word overlap. embeddings miss exact matches, two labels sharing a rare
+# word like "mesothelioma" score no better than ones sharing "other"
 tokenize <- function(x) strsplit(gsub("[^a-z0-9 ]", " ", x), "\\s+")
 
 lexical_features <- function(a, b, idf) {
@@ -80,12 +72,12 @@ lexical_features <- function(a, b, idf) {
     inter <- intersect(x, y)
     jac[i] <- length(inter) / length(union(x, y))
     ovl[i] <- length(inter) / min(length(x), length(y))
-    # rare words count more than "other"/"disease"
+    # rare words count more than "other" or "disease"
     idf_ovl[i] <- if (length(inter)) sum(idf[inter], na.rm = TRUE) / sum(idf[union(x, y)], na.rm = TRUE) else 0
     first_tok[i] <- as.numeric(x[1] == y[1])
   }
-  # Edit distance, pairwise on distinct label pairs only.
-  # adist(a, b) builds the full a x b matrix and segfaults at this size.
+  # edit distance. adist(a,b) builds the whole a x b matrix and segfaults here
+  # so do it pairwise on distinct pairs only
   key <- paste(a, b, sep = "\r")
   uk <- !duplicated(key)
   ua <- a[uk]; ub <- b[uk]
@@ -105,15 +97,15 @@ for (tr in names(TRACKS)) {
   for (mdl in names(tk$sim)) {
     cat(sprintf("  loading similarity: %s\n", mdl))
     s <- long_similarity(tk$sim[[mdl]])
-    # forward: rank each target within its ICD-9 code
+    # forward: rank each target within its icd-9 code
     s <- s %>% group_by(ICD_9_CM) %>%
       mutate(sim_rank = rank(-sim, ties.method = "first"),
              sim_rel  = sim / max(sim, na.rm = TRUE),
              sim_z    = (sim - mean(sim, na.rm = TRUE)) / (sd(sim, na.rm = TRUE) + 1e-9)) %>%
       ungroup()
 
-    # reverse: rank each ICD-9 code within its target. Catches generic
-    # "other/unspecified" targets that look good to everyone.
+    # reverse: rank each icd-9 code within its target. catches generic
+    # "other/unspecified" targets that look good to everything
     s <- s %>% group_by(target) %>%
       mutate(sim_rank_rev = rank(-sim, ties.method = "first"),
              sim_rel_rev  = sim / max(sim, na.rm = TRUE)) %>%
@@ -154,8 +146,8 @@ for (tr in names(TRACKS)) {
   for (m in names(sims)) feat <- feat %>% left_join(sims[[m]], by = c("ICD_9_CM", "target"))
   feat <- feat %>% left_join(cooc, by = c("ICD_9_CM", "target"))
 
-  # a candidate in one source but not the other is informative, so flag it and
-  # floor the missing numbers instead of leaving NA
+  # in one source but not the other is informative, so flag it and floor the
+  # missing numbers instead of leaving NA
   feat <- feat %>%
     mutate(has_cooc = as.integer(!is.na(cooc_freq)),
            cooc_freq  = ifelse(is.na(cooc_freq), 0, cooc_freq),
@@ -172,8 +164,7 @@ for (tr in names(TRACKS)) {
   }
 
   # --- ensemble across models ------------------------------------------
-  # Fuse ranks, not raw scores: cosine scales differ between models, ranks do
-  # not, so no calibration needed.
+  # fuse ranks not raw scores, cosine scales differ between models but ranks dont
   rank_cols    <- paste0("simrank_",    names(sims))
   rel_cols     <- paste0("simrel_",     names(sims))
   rankrev_cols <- paste0("simrankrev_", names(sims))
@@ -184,7 +175,7 @@ for (tr in names(TRACKS)) {
            ens_max_rel   = do.call(pmax, c(across(all_of(rel_cols)), na.rm = TRUE)),
            ens_min_rel   = do.call(pmin, c(across(all_of(rel_cols)), na.rm = TRUE)),
            ens_best_rank = do.call(pmin, c(across(all_of(rank_cols)), na.rm = TRUE)),
-           # models disagreeing is itself informative
+           # models disagreeing is itself a signal
            ens_rel_sd    = apply(across(all_of(rel_cols)), 1, sd),
 
            # reverse direction
@@ -192,12 +183,11 @@ for (tr in names(TRACKS)) {
            ens_best_rankrev = do.call(pmin, c(across(all_of(rankrev_cols)), na.rm = TRUE)),
            ens_rrf_rev      = rowSums(1 / (60 + as.matrix(across(all_of(rankrev_cols))))),
 
-           # mutual agreement. geometric mean, so one strong direction can't
-           # mask a weak one the way a sum would
+           # geometric mean so one strong direction cant mask a weak one
            ens_mutual_rel  = sqrt(ens_mean_rel * ens_mean_relrev),
            ens_mutual_rank = ens_best_rank + ens_best_rankrev,
            is_mutual_top1  = as.integer(ens_best_rank == 1 & ens_best_rankrev == 1),
-           # positive when the target wants this code more than vice versa
+           # positive when the target wants this code more than the reverse
            ens_direction_gap = ens_mean_rel - ens_mean_relrev)
 
   # --- chapter features ------------------------------------------------
@@ -229,11 +219,11 @@ for (tr in names(TRACKS)) {
            ens_rrf_rank = rank(-ens_rrf, ties.method = "first"),
            ens_rrf_rel  = ens_rrf / max(ens_rrf, na.rm = TRUE),
            lex_idf_rank = rank(-lex_idf_overlap, ties.method = "first"),
-           # gap to the runner-up: clear winner vs crowded tie
+           # gap to the runner up, clear winner vs crowded tie
            ens_margin   = ens_mean_rel - max(ens_mean_rel[ens_mean_rel < max(ens_mean_rel)], -1)) %>%
     ungroup()
 
-  # how contested each target is within the pool
+  # how contested each target is in the pool
   feat <- feat %>% group_by(target) %>%
     mutate(target_n_suitors    = n(),
            target_rank_here    = rank(-ens_mean_rel, ties.method = "first"),
@@ -248,9 +238,8 @@ for (tr in names(TRACKS)) {
     transmute(ICD_9_CM = as.character(`ICD-9-CM`), target = as.character(.data[[tk$manual_target_col]])) %>%
     filter(!(ICD_9_CM %in% excluded)) %>% distinct() %>% mutate(y = 1L)
 
-  # Keep every code, including ones with no known answer. has_truth marks
-  # which codes can be scored; codes without it are what the finished tool
-  # actually has to map. Codes on the exclusion list are dropped.
+  # keep every code. has_truth marks which ones can be scored, the rest are what
+  # 14_ actually has to map. exclusion list codes are dropped
   eval_codes <- unique(tp_df$ICD_9_CM)
   feat <- feat %>%
     filter(!(ICD_9_CM %in% excluded)) %>%

@@ -1,20 +1,13 @@
-# Full parameter grid for every embedding condition.
+# full parameter grid for every embedding condition
+# 06_ only had budget for one operating point per track which is a weak way to
+# compare models, each one has a different similarity distribution
+# merge_and_flag is ~130x faster now so this runs the whole grid:
+# thresholds {0.95,0.99,0.995,0.999} x top_n {3,5,10,15,20,25,30} x flags 1:4
 #
-# 06_ only had budget for one (threshold, top_n) point per track, which is a
-# weak basis for comparing models: each one has a different similarity
-# distribution, so the best point for one need not be the best for another.
-# merge_and_flag is ~130x faster now (vectorized chapter lookup), so this runs
-# the whole grid for all of them:
-#
-#   thresholds {0.95, 0.99, 0.995, 0.999} x top_n {3,5,10,15,20,25,30}
-#   x flags 1:4  = 112 points per condition per track
-#
-# That top_n range covers every range used before, so nothing can be lost.
-#
-# Usage:  Rscript 07_full_grid_comparison.R              all conditions
-#         Rscript 07_full_grid_comparison.R mpnet_base   named ones only
-# Each condition writes its own results/full_grid/<tag>.csv so they can run in
-# parallel. Combine with 08_assemble_full_grid.R.
+# usage: Rscript 07_full_grid_comparison.R              all conditions
+#        Rscript 07_full_grid_comparison.R mpnet_base   named ones only
+# each condition writes its own results/full_grid/<tag>.csv so they can run in
+# parallel, then 08_ combines them
 source("pipeline_lib.R")
 
 ORIG_BASE    <- "../data/original"
@@ -27,12 +20,11 @@ thresholds <- c(0.95, 0.99, 0.995, 0.999)
 top_ns     <- c(3, 5, 10, 15, 20, 25, 30)
 flags      <- 1:4
 
-# Tags become filenames. Windows is case-insensitive, so two tags differing
-# only by case are the same file and parallel runs clobber each other. The
-# check below stops that.
+# tags become filenames and windows is case insensitive, so two tags differing
+# only by case are the same file and parallel runs clobber each other
 CONDITIONS <- list(
   # the two arms the baseline was built on. clinicalbert_original came from an
-  # external pipeline we do not have; sapbert_original is generated here.
+  # external pipeline we dont have, sapbert_original is generated here
   clinicalbert_original = list(
     model = "ClinicalBERT-original", family = "ClinicalBERT", stripping = "base",
     path_10_9 = file.path(ORIG_BASE, "Cosine_Similarity_Matrices/cosine_similarity_matrices_10_9_ClinicalBERT.xlsx"),
@@ -43,7 +35,7 @@ CONDITIONS <- list(
     path_8_9  = file.path(SAPBERT_BASE, "cosine_similarity_matrices_8_9_SapBERT.xlsx")),
   # regenerated arms, all from generate_embeddings.py, so base vs stripped and
   # family vs family are controlled. sapbert_base doubles as a check that the
-  # regeneration reproduces data/sapbert.
+  # regeneration reproduces data/sapbert
   clinicalbert_base     = list(model = "ClinicalBERT-base",     family = "ClinicalBERT", stripping = "base"),
   clinicalbert_stripped = list(model = "ClinicalBERT-stripped", family = "ClinicalBERT", stripping = "stripped"),
   sapbert_base          = list(model = "SapBERT-base-regen",    family = "SapBERT",      stripping = "base"),
@@ -101,8 +93,7 @@ run_full_grid <- function(cond, track_name, sheets) {
   n_total <- length(thresholds) * length(top_ns) * length(flags)
   cat(sprintf("--- %s / %s (%d points) ---\n", track_name, cond$model, n_total))
 
-  # co-occurrence candidates depend only on top_n, so build each one once and
-  # reuse it across all four thresholds
+  # co-occurrence candidates only depend on top_n so build each once and reuse
   cooc_by_top_n <- lapply(top_ns, function(tn)
     get_cooccurrence_codes_from_df(tk$cooc, tn, tk$icd9_col, tk$target_col, tcn))
   names(cooc_by_top_n) <- as.character(top_ns)

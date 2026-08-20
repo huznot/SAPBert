@@ -1,17 +1,12 @@
-# Are the multiple targets of one source code clustered in the target system?
+# are the multiple targets of one source code clustered in the target system
 #
-# ICD-10 splits single ICD-9 concepts into adjacent codes. ICD-9 250 (diabetes
-# mellitus) becomes E10, E11, E13, E14, which is the defined ICD-10 block for
-# diabetes. Coders work from that structure: find the block, take what fits.
+# icd-10 splits single icd-9 concepts into adjacent codes, 250 diabetes becomes
+# E10 E11 E13 E14 which is the defined icd-10 diabetes block. coders work from
+# that structure, find the block and take what fits
 #
-# The reranker scores every candidate independently and has no notion of a
-# block, which is why it emits the strongest target and stops. If true target
-# sets really are contiguous, expanding around a confident prediction should
-# recover the missing ones cheaply.
-#
-# This measures how clustered the target sets are, then tests what a simple
-# neighbour-expansion rule would recover and what it would cost in precision.
-
+# the reranker scores candidates independently and has no notion of a block,
+# which is why it emits the strongest target and stops. if the true sets really
+# are contiguous, expanding around a confident prediction should recover the rest
 source("pipeline_lib.R")
 
 OUT_DIR <- "../results"
@@ -50,10 +45,10 @@ for (tr in names(TRACKS)) {
   cat(sprintf("  median span %g, mean targets %.2f\n", median(stats$span), mean(stats$n)))
 }
 
-# --- what would neighbour expansion recover? --------------------------
-# Take the auto-accepted mappings at the 95% precision point. For each, add
-# any pooled candidate sharing the letter prefix and within a numeric span,
-# provided the reranker gave it at least a modest score.
+# what would neighbour expansion recover
+# take the auto accepted mappings at the 95% precision point and add any pooled
+# candidate sharing the letter prefix and within a numeric span, if the reranker
+# gave it at least a modest score
 cat("\n\n######## neighbour expansion on the auto-accepted set ########\n")
 preds <- readRDS(file.path(OUT_DIR, "cv_rerank_predictions.rds"))
 ops   <- read.csv(file.path(OUT_DIR, "precision_coverage_operating_points.csv"))

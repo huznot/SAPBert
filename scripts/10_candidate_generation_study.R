@@ -1,17 +1,12 @@
-# Tries to raise the recall ceiling.
+# tries to raise the recall ceiling
 #
-# 09_ showed the embedding is not the problem: every true target is in the
-# similarity matrix, but only ~63% (ICD-10-CA) / ~85% (ICDA-8) make it into
-# the pool, capping oracle F1 at 0.770 / 0.920. Nothing downstream can beat
-# that, so this varies candidate generation itself:
-#
-#   A. similarity cut - "relative" (sim >= threshold * max_sim, current) vs
-#      "topk" (K highest per code)
+# 09_ showed the embedding isnt the problem, every true target is in the
+# similarity matrix but only ~63% (icd-10-ca) / ~85% (icda-8) make it into the
+# pool, capping oracle f1 at 0.770 / 0.920. so vary candidate generation itself:
+#   A. similarity cut, relative (current) vs topk
 #   B. how many co-occurrence candidates
 #   C. chapter filter on or off
-#
-# and reports recall ceiling and pool size for each. The chapter filter gets
-# its own output since it drops 48 true pairs on ICD-10-CA.
+# the chapter filter gets its own output since it drops 48 true pairs on icd-10-ca
 source("pipeline_lib.R")
 
 ORIG_BASE    <- "../data/original"
@@ -53,8 +48,8 @@ true_pairs <- function(tk) {
     filter(!(ICD_9_CM %in% excluded)) %>% distinct()
 }
 
-# Full long-format similarity, computed ONCE per model x track and reused for
-# every candidate-generation design. This is the expensive part.
+# full long format similarity, computed once per model x track and reused for
+# every design. this is the expensive part
 long_similarity <- function(path, tcn) {
   sheets <- load_similarity_sheets(path)
   purrr::map_dfr(sheets, function(df) {
@@ -76,7 +71,7 @@ for (tr in names(TRACKS)) {
   }
 }
 
-# chapter-distance lookup for an arbitrary pair set (vectorized)
+# chapter distance lookup for an arbitrary pair set
 chapter_ok <- function(icd9, target, tk) {
   d <- compute_chapter_distance(find_icd9cm_chapter(icd9), tk$find_fn(target), tk$align)
   !is.na(d) & d < 1
@@ -126,8 +121,8 @@ for (tr in names(TRACKS)) {
             pool_pairs = nrow(pool),
             pool_per_code = round(nrow(pool) / n_distinct(pool$ICD_9_CM), 2),
             recall_ceiling = round(hit / n_true, 4),
-            # oracle F1 assumes a perfect selector: it emits exactly the true
-            # pairs it can find, so precision is 1 and recall is the ceiling
+            # oracle f1 assumes a perfect selector, precision 1 and recall is
+            # the ceiling
             oracle_f1 = round(2 * (hit/n_true) / (1 + hit/n_true), 4))
         }
       }
@@ -157,7 +152,7 @@ chap_cost <- study %>%
             mean_pool_saved_pct = round(mean(pool_saved_pct), 1), .groups = "drop")
 print(as.data.frame(chap_cost))
 
-# --- which true pairs does the chapter filter destroy? ----------------
+# which true pairs the chapter filter destroys
 cas <- list()
 for (tr in names(TRACKS)) {
   tk <- TRACKS[[tr]]

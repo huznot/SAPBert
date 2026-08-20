@@ -6,10 +6,10 @@ OUT_DIR      <- "../results"
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 thresholds  <- c(0.95, 0.99, 0.995, 0.999)
-# Both tracks sweep top-N {3,5,10,15,20,25,30}. The original {3,5,10,15} was
-# too narrow and cut off the real optimum on ICD-9 -> ICD-10-CA, which sits at
-# top_n=30 for both models -- that is why the reference numbers looked
-# unreproducible. They reproduce exactly with this range.
+# both tracks sweep top-n {3,5,10,15,20,25,30}. the original {3,5,10,15} was too
+# narrow and cut off the real optimum on icd-9 -> icd-10-ca which sits at
+# top_n=30 for both models, thats why the reference numbers looked
+# unreproducible. they reproduce exactly with this range
 top_ns_8_9  <- c(3, 5, 10, 15, 20, 25, 30)
 top_ns_10_9 <- c(3, 5, 10, 15, 20, 25, 30)
 flags       <- 1:4

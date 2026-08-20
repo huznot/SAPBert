@@ -1,15 +1,13 @@
-# Is fixing the retrieval config better than tuning it per fold, or did one
-# lucky choice make it look that way?
+# is fixing the retrieval config better than tuning it per fold, or did one lucky
+# choice make it look that way
 #
-# 12_ picks K and N inside each outer fold by inner CV and gets 0.668 / 0.840.
-# 16_ fixes them and gets 0.702 / 0.867. That looks like per-fold tuning
-# overfitting on ~276 training codes, but the fixed values in 16_ came from the
-# medians of what 12_ picked, so they were informed by CV behaviour across all
-# folds and are mildly optimistic.
+# 12_ picks K and N inside each fold and gets 0.668 / 0.840. 16_ fixes them and
+# gets more, which looks like per fold tuning overfitting on ~276 training codes.
+# but the fixed values came from medians of what 12_ picked so theyre mildly
+# optimistic
 #
-# This scores the same model over a spread of fixed configs. If most of them
-# land near 0.70 the conclusion holds and the specific value does not matter.
-# If only one does, it was a lucky pick and 12_'s number stands.
+# this scores the same model over a spread of fixed configs. if most land in the
+# same place the conclusion holds, if only one does it was a lucky pick
 
 source("pipeline_lib.R")
 suppressMessages(library(xgboost))
