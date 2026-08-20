@@ -29,10 +29,16 @@ built with no human involved, if you require 95% of those mappings to be right:
 
 | | ICD-9 → ICD-10-CA | ICD-9 → ICDA-8 |
 |---|---|---|
-| **Built automatically** | **43%** | **79%** |
-| Sent for human review | 57% | 21% |
+| Codes given a confident mapping | 86% | 84% |
+| Mappings built automatically | 37% | 76% |
 
-At a stricter 99% precision, ICDA-8 still builds 64% automatically.
+The two rows measure different things. The first is how many old codes get a
+suggestion good enough to accept without checking. The second is how much of
+the full crosswalk is complete, and it is lower for ICD-10-CA because those
+codes map to 2.7 targets on average. The system finds the main mapping for
+most codes and misses some of the secondary ones.
+
+At a stricter 99% precision, ICDA-8 still builds 62% of the crosswalk.
 
 ![Precision vs recall](results/plot_precision_coverage.png)
 

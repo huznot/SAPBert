@@ -31,7 +31,8 @@ rule-based pipeline was evaluated under the same protocol.
 **Results.** Held-out F1 was 0.668 for ICD-9-CM to ICD-10-CA and 0.840 for
 ICD-9-CM to ICDA-8, compared with 0.546 and 0.824 for the rule-based baseline.
 A correct target ranked first for 93.3% and 88.4% of codes. At 95% precision,
-43.2% and 79.0% of the reference crosswalk was reproduced without review.
+37.5% and 76.1% of the manual crosswalk pairs were reproduced without review,
+covering 86.1% and 84.1% of source codes.
 Error decomposition showed candidate retrieval was the binding constraint:
 all correct targets were present in the similarity matrices, but the original
 retrieval rule admitted 62.6% of them, capping attainable F1 at 0.770.
@@ -153,16 +154,26 @@ codes, and appeared in the top three for 97.7% and 93.7%.
 
 ### 3.2 Precision at coverage
 
-| Precision target | ICD-10-CA reproduced | ICDA-8 reproduced |
-|---|---|---|
-| 80% | 60.6% | 85.6% |
-| 90% | 49.4% | 82.1% |
-| 95% | 43.2% | 79.0% |
-| 99% | 21.3% (100% precision attained) | 63.9% |
+Two denominators matter and they answer different questions. Pair-level
+recall asks how much of the crosswalk is complete. Code coverage asks how
+many source codes receive a confident mapping at all.
 
-At the 95% operating point, 86.1% and 84.1% of codes receive at least one
-automatically accepted mapping, 13.6% and 11.9% are routed for review, and
-0.3% and 4.0% have no plausible candidate.
+| Precision target | ICD-10-CA pairs | ICD-10-CA codes | ICDA-8 pairs | ICDA-8 codes |
+|---|---|---|---|---|
+| 80% | 52.6% | 96.8% | 82.5% | 93.7% |
+| 90% | 42.9% | 92.2% | 79.2% | 90.1% |
+| 95% | 37.5% | 86.1% | 76.1% | 84.1% |
+| 99% | 18.5% | 49.6% | 61.6% | 67.9% |
+
+Percentages are of the 937 and 331 manually verified pairs, and of the 345
+and 302 source codes.
+
+The gap between the two tracks is pair-level, not code-level. ICD-10-CA codes
+have 2.7 correct targets on average against 1.09 for ICDA-8, and at 95%
+precision the system emits about 1.07 mappings per code. It recovers the
+primary mapping for most codes and misses secondary targets. At the 95%
+operating point 13.6% and 11.9% of codes are routed for review and 0.3% and
+4.0% have no plausible candidate.
 
 ### 3.3 What limits accuracy
 
