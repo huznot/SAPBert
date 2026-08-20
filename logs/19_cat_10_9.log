@@ -1,0 +1,18 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+######## 10_9: 345 codes, 130 CCS categories ########
+  split by code     : P 0.735 R 0.600 F1 0.6606 (sd 0.0101 over 3 repeats)
+  split by category : P 0.749 R 0.585 F1 0.6570 (sd 0.0063 over 3 repeats)
+
+===== cost of holding out whole clinical areas =====
+  10_9: by code 0.6606 -> by category 0.6570  (-0.0037)

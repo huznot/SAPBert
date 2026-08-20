@@ -1,3 +1,5 @@
 .Rhistory
 .RData
 .Rproj.user/
+*.docx
+clean_paper.txt

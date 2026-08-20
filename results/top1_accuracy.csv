@@ -1,0 +1,3 @@
+"track","n_codes","mean_targets_per_code","top1_accuracy","top3_accuracy","top5_accuracy"
+"10_9",345,2.36,0.9333,0.9768,0.9855
+"8_9",302,1.09,0.8841,0.9371,0.947
