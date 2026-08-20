@@ -119,6 +119,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True, choices=list(MODEL_IDS.keys()))
     ap.add_argument("--clean", required=True, choices=["base", "stripped"])
+    ap.add_argument("--no-code", action="store_true",
+                    help="embed the label only, without the code number prefix")
     ap.add_argument("--max-length", type=int, default=64)
     args = ap.parse_args()
 
@@ -130,12 +132,15 @@ def main():
     icd10 = pd.read_excel(labels_path, sheet_name="ICD-10-CA-3Level")
     icd8 = pd.read_excel(labels_path, sheet_name="ICDA-8-3Level")
 
-    icd9["text"] = icd9["ICD_9_CM"].astype(str) + " " + icd9["ICD_9_CM_LABEL"].apply(
-        lambda s: clean_label(s, args.clean, filler_words))
-    icd10["text"] = icd10["ICD_10_CA"].astype(str) + " " + icd10["ICD_10_CA_LABEL"].apply(
-        lambda s: clean_label(s, args.clean, filler_words))
-    icd8["text"] = icd8["ICDA_8"].astype(str) + " " + icd8["ICDA_8_LABEL"].apply(
-        lambda s: clean_label(s, args.clean, filler_words))
+    def build_text(df, code_col, label_col):
+        lab = df[label_col].apply(lambda s: clean_label(s, args.clean, filler_words))
+        if args.no_code:
+            return lab
+        return df[code_col].astype(str) + " " + lab
+
+    icd9["text"]  = build_text(icd9,  "ICD_9_CM",  "ICD_9_CM_LABEL")
+    icd10["text"] = build_text(icd10, "ICD_10_CA", "ICD_10_CA_LABEL")
+    icd8["text"]  = build_text(icd8,  "ICDA_8",    "ICDA_8_LABEL")
 
     print(f"Embedding with {model_id} (clean={args.clean})...")
     if args.model in CLS_MODELS:
@@ -159,13 +164,14 @@ def main():
 
     sim_10_9 = cosine_sim_matrix(emb10, emb9)
     sim_10_9_df = pd.DataFrame(sim_10_9, index=icd10_codes, columns=icd9_codes)
-    out_10_9 = OUT_BASE / f"cosine_similarity_matrices_10_9_{args.model}_{args.clean}.xlsx"
+    tag = args.clean + ("_nocode" if args.no_code else "")
+    out_10_9 = OUT_BASE / f"cosine_similarity_matrices_10_9_{args.model}_{tag}.xlsx"
     write_ccs_sheets(out_10_9, sim_10_9_df, icd9_codes, ccs_map, "ICD_10_CA")
     print(f"Wrote {out_10_9}")
 
     sim_8_9 = cosine_sim_matrix(emb8, emb9)
     sim_8_9_df = pd.DataFrame(sim_8_9, index=icd8_codes, columns=icd9_codes)
-    out_8_9 = OUT_BASE / f"cosine_similarity_matrices_8_9_{args.model}_{args.clean}.xlsx"
+    out_8_9 = OUT_BASE / f"cosine_similarity_matrices_8_9_{args.model}_{tag}.xlsx"
     write_ccs_sheets(out_8_9, sim_8_9_df, icd9_codes, ccs_map, "ICDA_8")
     print(f"Wrote {out_8_9}")
 
