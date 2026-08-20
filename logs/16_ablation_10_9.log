@@ -12,31 +12,31 @@ The following objects are masked from 'package:base':
 
 ################ TRACK 10_9 ################
 22434 candidates, 345 codes, 812 positives
-  full               P 0.759 R 0.653 F1 0.702 Acc 0.541  (52 features)
-  no_mutual          P 0.668 R 0.591 F1 0.627 Acc 0.457  (36 features)
-  no_lexical         P 0.739 R 0.651 F1 0.692 Acc 0.530  (46 features)
-  no_cooccurrence    P 0.742 R 0.578 F1 0.650 Acc 0.481  (47 features)
-  no_chapter         P 0.740 R 0.574 F1 0.646 Acc 0.477  (49 features)
-  no_ensemble        P 0.736 R 0.661 F1 0.696 Acc 0.534  (37 features)
-  no_mpnet           P 0.718 R 0.677 F1 0.697 Acc 0.535  (46 features)
-  no_clinicalbert    P 0.744 R 0.647 F1 0.692 Acc 0.529  (46 features)
-  rank_pairwise      P 0.759 R 0.639 F1 0.694 Acc 0.531  (52 features)
-  rank_ndcg          P 0.732 R 0.633 F1 0.679 Acc 0.514  (52 features)
+  full               P 0.750 R 0.604 F1 0.669 Acc 0.503  (52 features)
+  no_mutual          P 0.655 R 0.564 F1 0.606 Acc 0.435  (36 features)
+  no_lexical         P 0.702 R 0.613 F1 0.655 Acc 0.487  (46 features)
+  no_cooccurrence    P 0.734 R 0.534 F1 0.618 Acc 0.448  (47 features)
+  no_chapter         P 0.698 R 0.555 F1 0.618 Acc 0.447  (49 features)
+  no_ensemble        P 0.731 R 0.607 F1 0.663 Acc 0.496  (37 features)
+  no_mpnet           P 0.713 R 0.621 F1 0.664 Acc 0.497  (46 features)
+  no_clinicalbert    P 0.739 R 0.592 F1 0.657 Acc 0.489  (46 features)
+  rank_pairwise      P 0.758 R 0.585 F1 0.660 Acc 0.493  (52 features)
+  rank_ndcg          P 0.732 R 0.578 F1 0.646 Acc 0.477  (52 features)
 
 
 ===== ablation, held-out =====
 
--- 10_9 (full = 0.702) --
+-- 10_9 (full = 0.669) --
            variant n_features precision recall     f1 delta_vs_full
-1             full         52    0.7593 0.6527 0.7020        0.0000
-2         no_mpnet         46    0.7180 0.6773 0.6971       -0.0049
-3      no_ensemble         37    0.7356 0.6613 0.6965       -0.0055
-4    rank_pairwise         52    0.7588 0.6392 0.6939       -0.0081
-5       no_lexical         46    0.7388 0.6515 0.6924       -0.0096
-6  no_clinicalbert         46    0.7436 0.6466 0.6917       -0.0103
-7        rank_ndcg         52    0.7322 0.6330 0.6790       -0.0230
-8  no_cooccurrence         47    0.7421 0.5776 0.6496       -0.0524
-9       no_chapter         49    0.7397 0.5739 0.6463       -0.0557
-10       no_mutual         36    0.6676 0.5911 0.6270       -0.0749
+1             full         52    0.7500 0.6040 0.6692        0.0000
+2         no_mpnet         46    0.7132 0.6209 0.6639       -0.0053
+3      no_ensemble         37    0.7307 0.6074 0.6634       -0.0058
+4    rank_pairwise         52    0.7580 0.5849 0.6603       -0.0088
+5  no_clinicalbert         46    0.7388 0.5917 0.6571       -0.0121
+6       no_lexical         46    0.7023 0.6130 0.6547       -0.0145
+7        rank_ndcg         52    0.7322 0.5782 0.6461       -0.0230
+8  no_cooccurrence         47    0.7342 0.5343 0.6185       -0.0507
+9       no_chapter         49    0.6983 0.5546 0.6182       -0.0510
+10       no_mutual         36    0.6549 0.5636 0.6058       -0.0634
 
 Written to ../results/ablation_10_9.csv

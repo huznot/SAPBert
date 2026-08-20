@@ -17,8 +17,7 @@ It is tested on two migrations:
 
 ## Results
 
-Measured with 5-fold cross-validation grouped by code, so every number is on
-codes the system never saw while training.
+Measured with 5-fold cross-validation grouped by code
 
 | | ICD-9 → ICD-10-CA | ICD-9 → ICDA-8 |
 |---|---|---|
@@ -63,8 +62,7 @@ the best match for that code. That sounds reasonable and is not, it threw away
 can never be recovered, this capped the best possible F1 at **0.77**, no matter
 what model or ranker you put downstream.
 
-Every correct answer was sitting in the similarity matrix. The pipeline just
-never looked at it. Switching to plain top-K retrieval raised that ceiling to
+Every correct answer was sitting in the similarity matrix. Switching to plain top-K retrieval raised that ceiling to
 **0.96**.
 
 ## Charts
@@ -145,7 +143,3 @@ report.Rmd        full write-up with methodology and caveats
   Most codes map to more than one target and the boundaries are judgement
   calls that human coders disagree on.
 - Only tested on these two migrations. Transfer to other systems is untested.
-
-## License
-
-MIT see [LICENSE](LICENSE).

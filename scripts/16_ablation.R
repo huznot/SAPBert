@@ -118,8 +118,12 @@ rows <- list()
 for (tr in tracks) {
   cat(sprintf("\n################ TRACK %s ################\n", tr))
   feat_all <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
-  feat <- feat_all %>% filter(has_truth == 1) %>% apply_retrieval(RETRIEVAL[[tr]])
-  truth <- feat %>% filter(y == 1) %>% select(ICD_9_CM, target)
+  base <- feat_all %>% filter(has_truth == 1)
+  # truth comes from the FULL pool, before retrieval. Taking it after would
+  # drop the positives retrieval missed out of the recall denominator and
+  # inflate F1, which is not comparable to what 12_ reports.
+  truth <- base %>% filter(y == 1) %>% select(ICD_9_CM, target)
+  feat <- base %>% apply_retrieval(RETRIEVAL[[tr]])
   codes <- sort(unique(feat$ICD_9_CM))
   cat(sprintf("%d candidates, %d codes, %d positives\n", nrow(feat), length(codes), sum(feat$y)))
 
