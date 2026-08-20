@@ -1,0 +1,33 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+######## 8_9: 302 codes total ########
+  n_train  40 : F1 0.8279 (sd 0.0062 over 4 repeats)
+  n_train  70 : F1 0.8428 (sd 0.0106 over 4 repeats)
+  n_train 100 : F1 0.8421 (sd 0.0069 over 4 repeats)
+  n_train 140 : F1 0.8460 (sd 0.0116 over 4 repeats)
+  n_train 180 : F1 0.8461 (sd 0.0057 over 4 repeats)
+  n_train 220 : F1 0.8414 (sd 0.0074 over 4 repeats)
+  n_train 260 : F1 NA (sd NA over 0 repeats)
+Warning messages:
+1: In mean.default(f1s) : argument is not numeric or logical: returning NA
+2: In mean.default(f1s) : argument is not numeric or logical: returning NA
+
+===== is it still climbing? =====
+
+8_9: F1 0.828 at n=40, NA at n=260
+  slope over the last three points: -0.0118 F1 per +100 training codes
+  log-fit projection at n=500  : 0.853
+  log-fit projection at n=1000 : 0.859
+  log-fit projection at n=2000 : 0.865
+
+Projections assume the curve keeps its shape and are not measurements.
