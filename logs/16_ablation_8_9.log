@@ -1,0 +1,42 @@
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+################ TRACK 8_9 ################
+8075 candidates, 302 codes, 320 positives
+  full               P 0.881 R 0.853 F1 0.867 Acc 0.765  (52 features)
+  no_mutual          P 0.871 R 0.841 F1 0.855 Acc 0.747  (36 features)
+  no_lexical         P 0.886 R 0.850 F1 0.868 Acc 0.766  (46 features)
+  no_cooccurrence    P 0.842 R 0.819 F1 0.830 Acc 0.710  (47 features)
+  no_chapter         P 0.877 R 0.850 F1 0.863 Acc 0.760  (49 features)
+  no_ensemble        P 0.862 R 0.838 F1 0.849 Acc 0.738  (37 features)
+  no_mpnet           P 0.854 R 0.841 F1 0.847 Acc 0.735  (46 features)
+  no_clinicalbert    P 0.886 R 0.853 F1 0.869 Acc 0.769  (46 features)
+  rank_pairwise      P 0.861 R 0.850 F1 0.855 Acc 0.747  (52 features)
+  rank_ndcg          P 0.890 R 0.859 F1 0.874 Acc 0.777  (52 features)
+
+
+===== ablation, held-out =====
+
+-- 8_9 (full = 0.867) --
+           variant n_features precision recall     f1 delta_vs_full
+1        rank_ndcg         52    0.8900 0.8594 0.8744        0.0077
+2  no_clinicalbert         46    0.8864 0.8531 0.8694        0.0028
+3       no_lexical         46    0.8860 0.8500 0.8676        0.0010
+4             full         52    0.8806 0.8531 0.8667        0.0000
+5       no_chapter         49    0.8774 0.8500 0.8635       -0.0032
+6    rank_pairwise         52    0.8608 0.8500 0.8553       -0.0113
+7        no_mutual         36    0.8706 0.8406 0.8553       -0.0113
+8      no_ensemble         37    0.8617 0.8375 0.8494       -0.0172
+9         no_mpnet         46    0.8540 0.8406 0.8472       -0.0194
+10 no_cooccurrence         47    0.8424 0.8188 0.8304       -0.0362
+
+Written to ../results/ablation_8_9.csv
