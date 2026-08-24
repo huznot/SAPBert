@@ -207,3 +207,15 @@ Completeness per source code at the 95% precision point.
   the proportion of multi-target codes.
 - Checked whether the extra targets of a multi-target code sit in contiguous
   blocks. They partly do. Not implemented.
+
+## 10. 
+Began exploring stopwords dictionarys:
+- R's SMART `stopwords`, largest library but removes all single letters and negations
+- R's Snowball `stopwords`, moderately large and removes negations as well as letters i and a when as a word
+- NTLK, also moderately large and removes letters i a s t d m o y as well as negations
+
+Experimented by modifying the Snowball library to not remove negations (no/not/nor) and letters. Positive result
+
+## 11.
+Implementing modified Snowball `stopwords` into the ClinicalBert model and running full pipeline again
+- 

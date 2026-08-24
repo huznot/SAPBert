@@ -1,12 +1,3 @@
-# compares the standard english stopword dictionaries on the icd label text
-#
-# the question is which standardized list to use for the clinicalbert re-run.
-# every standard list treats single letters as stopwords, which breaks labels
-# like "vitamin a deficiency" and "acute hepatitis a".
-#
-# run from the repo root, takes a few seconds:
-#   source("scripts/26_stopword_choice.R")
-
 suppressMessages({library(readxl); library(dplyr); library(stopwords)})
 
 LABELS <- "data/original/ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx"

@@ -1,12 +1,3 @@
-# shows what a cosine similarity matrix actually is, for explaining the method
-#
-# prints the top candidates for a few icd-9 codes with the true answers marked,
-# and writes a heatmap of one corner of the matrix
-#
-# run from the repo root:
-#   Rscript scripts/24_show_similarity_matrix.R
-# or open the project in rstudio and source it
-
 suppressMessages({library(readxl); library(dplyr); library(tidyr); library(ggplot2)})
 
 SIM   <- "data/sapbert/cosine_similarity_matrices_10_9_SapBERT.xlsx"

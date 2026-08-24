@@ -1,12 +1,3 @@
-# prints every headline result from the saved output files
-#
-# nothing is recomputed here, it just reads results/ and formats it, so it runs
-# instantly and is safe to run in front of someone. rerun the numbered scripts
-# if the underlying results need rebuilding.
-#
-# run from the repo root:
-#   source("scripts/27_show_results.R")
-
 suppressMessages({library(dplyr)})
 
 R <- "results"
