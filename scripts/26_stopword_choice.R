@@ -62,9 +62,3 @@ show_damage <- function(nm, codes_of_interest) {
 }
 INTEREST <- c("B15", "E50", "E55", "260", "265", "268", "C84", "X00", "X01")
 for (nm in c("nltk", "snowball", "snowball, keep letters + not")) show_damage(nm, INTEREST)
-
-cat("\n\n============ 3. recommendation ============\n")
-cat("snowball is the safest standard list, but it still deletes \"a\", so\n")
-cat("\"vitamin a deficiency\" and \"acute hepatitis a\" lose their meaning, and it\n")
-cat("deletes \"not\", so X00 and X01 become the same text.\n\n")
-cat("keeping single characters and no/not/nor fixes all of that.\n")
