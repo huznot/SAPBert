@@ -97,14 +97,8 @@ Rscript 12_cv_rerank.R 8_9   &
 Rscript 12b_merge_cv_results.R
 ```
 
-Then build the report from the project root:
-
-```r
-rmarkdown::render("report.Rmd")
-```
-
 R packages: `dplyr`, `tidyr`, `readxl`, `writexl`, `stringr`, `purrr`,
-`ggplot2`, `xgboost`, `jsonlite`, `knitr`, `rmarkdown`, `reticulate`.
+`ggplot2`, `xgboost`, `jsonlite`, `reticulate`.
 
 Python is only needed to regenerate embeddings (`torch`, `transformers`,
 `sentence-transformers`, `pandas`, `openpyxl`):
@@ -138,7 +132,7 @@ data/sapbert/     SapBERT similarity matrices
 data/generated/   regenerated / filler-stripped / mpnet matrices
 scripts/          pipeline code
 results/          csv output and charts
-report.Rmd        full write-up with methodology and caveats
+CHANGELOG.md      every change from the original pipeline to now
 ```
 
 ## Limitations
