@@ -15,6 +15,8 @@ It is tested on two migrations:
 - **ICD-9-CM → ICD-10-CA** (Canadian, the modern standard)
 - **ICD-9-CM → ICDA-8** (historical, going backwards)
 
+![Precision vs recall](results/logos.png)
+
 ## Results
 
 Measured with 5-fold cross-validation grouped by code
