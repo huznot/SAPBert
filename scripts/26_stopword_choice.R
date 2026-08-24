@@ -2,8 +2,7 @@
 #
 # the question is which standardized list to use for the clinicalbert re-run.
 # every standard list treats single letters as stopwords, which breaks labels
-# like "vitamin a deficiency" and "acute hepatitis a". this shows how much each
-# list damages and which codes it merges.
+# like "vitamin a deficiency" and "acute hepatitis a".
 #
 # run from the repo root, takes a few seconds:
 #   source("scripts/26_stopword_choice.R")
@@ -11,7 +10,6 @@
 suppressMessages({library(readxl); library(dplyr); library(stopwords)})
 
 LABELS <- "data/original/ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx"
-VALID  <- "data/original/ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx"
 
 SHEETS <- list(
   `ICD-9-CM`  = c("CCS ICD-9-CM-3Level", "ICD_9_CM",  "ICD_9_CM_LABEL"),
@@ -27,7 +25,6 @@ strip_words <- function(x, w) {
   vapply(strsplit(x, " "),
          function(t) paste(t[!(t %in% w)], collapse = " "), character(1))
 }
-n_dup <- function(v) { tb <- table(v); sum(tb[tb > 1]) }
 
 # read the labels once, everything below reuses this
 cat("reading labels...\n")
@@ -36,18 +33,12 @@ DATA <- lapply(SHEETS, function(p) {
   list(code = as.character(d[[p[2]]]), lab = base_clean(d[[p[3]]]))
 })
 
-# codes that are actually used as targets in the manual crosswalk. a collision
-# only matters if the merged codes are ones we have to map to
-tgt10 <- unique(as.character(read_excel(VALID, sheet = "Validation_ICD9_ICD10")$`ICD-10-CA`))
-tgt8  <- unique(as.character(read_excel(VALID, sheet = "Validaion_ICD9_ICD8")$`ICDA-8`))
-REAL <- list(`ICD-9-CM` = character(0), `ICD-10-CA` = tgt10, `ICDA-8` = tgt8)
-
 LISTS <- list(
   snowball        = stopwords("en", source = "snowball"),
   nltk            = stopwords("en", source = "nltk"),
   smart           = stopwords("en", source = "smart"),
   `stopwords-iso` = stopwords("en", source = "stopwords-iso"))
-# the proposed one: snowball, but keep single characters and negations
+# snowball, but keeping single characters and negations
 LISTS[["snowball, keep letters + not"]] <-
   setdiff(LISTS$snowball, c(letters, "no", "not", "nor"))
 
@@ -64,30 +55,7 @@ for (nm in names(LISTS)) {
                      "NONE, negations kept")))
 }
 
-cat("\n\n============ 2. collisions, two codes becoming the same text ============\n")
-summ <- list()
-for (nm in names(LISTS)) {
-  w <- LISTS[[nm]]
-  tot <- 0; real <- 0; changed <- 0
-  for (sn in names(DATA)) {
-    d <- DATA[[sn]]
-    sp <- strip_words(d$lab, w)
-    tot <- tot + (n_dup(sp) - n_dup(d$lab))
-    changed <- changed + sum(sp != d$lab)
-    # collisions where at least one side is a code the crosswalk maps to
-    tb <- tibble(code = d$code, lab = d$lab, sp = sp) %>%
-      group_by(sp) %>% filter(n() > 1, n_distinct(lab) > 1) %>% ungroup()
-    if (nrow(tb)) real <- real + sum(tb$code %in% REAL[[sn]])
-  }
-  summ[[nm]] <- tibble(list = nm, words = length(w), merged = tot,
-                       merged_real = real, stripped = changed)
-}
-cat("merged      = pairs of codes that become identical text\n")
-cat("merged_real = of those, ones the manual crosswalk actually maps to\n")
-cat("stripped    = labels the list changes at all, i.e. how much work it does\n\n")
-print(as.data.frame(bind_rows(summ)), row.names = FALSE)
-
-cat("\n\n============ 3. what actually breaks ============\n")
+cat("\n\n============ 2. what breaks ============\n")
 show_damage <- function(nm, codes_of_interest) {
   w <- LISTS[[nm]]
   cat(sprintf("\n-- %s --\n", nm))
@@ -104,9 +72,8 @@ show_damage <- function(nm, codes_of_interest) {
 INTEREST <- c("B15", "E50", "E55", "260", "265", "268", "C84", "X00", "X01")
 for (nm in c("nltk", "snowball", "snowball, keep letters + not")) show_damage(nm, INTEREST)
 
-cat("\n\n============ 4. recommendation ============\n")
+cat("\n\n============ 3. recommendation ============\n")
 cat("snowball is the safest standard list, but it still deletes \"a\", so\n")
 cat("\"vitamin a deficiency\" and \"acute hepatitis a\" lose their meaning, and it\n")
-cat("deletes \"not\", which merges the X00/X01 fire codes.\n\n")
-cat("keeping single characters and no/not/nor fixes every collision and barely\n")
-cat("reduces how much cleaning happens (see stripped above).\n")
+cat("deletes \"not\", so X00 and X01 become the same text.\n\n")
+cat("keeping single characters and no/not/nor fixes all of that.\n")
