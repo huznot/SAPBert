@@ -11,8 +11,10 @@ Usage:
     python generate_embeddings.py --model mpnet          --clean stripped
 
 --model:  clinicalbert | sapbert | mpnet
---clean:  base (original label-cleaning only) | stripped (also removes
-          filler words from scripts/filler_words.json -- task 1)
+--clean:  base       original label-cleaning only
+          stripped   also removes filler words from filler_words.json
+          stopwords  also removes the snowball english stopword list from
+                     stopwords_snowball.json
 
 Output goes to data/generated/cosine_similarity_matrices_{track}_{MODEL}_{clean}.xlsx
 """
@@ -47,6 +49,14 @@ def load_filler_words():
         return json.load(f)["filler_words"]
 
 
+def load_stopwords():
+    # snowball english. picked over nltk and smart because it is the only
+    # standard list that merges no codes the crosswalk actually uses. see
+    # 15_stopword_collision_check.R
+    with open(HERE / "stopwords_snowball.json") as f:
+        return json.load(f)["words"]
+
+
 def base_clean(text):
     text = str(text).lower()
     text = re.sub(r"[^a-z0-9\s]", " ", text)
@@ -62,10 +72,17 @@ def strip_filler(text, filler_words):
     return re.sub(r"\s+", " ", text).strip()
 
 
-def clean_label(text, mode, filler_words):
+def strip_stopwords(text, stop_words):
+    kept = [w for w in text.split() if w not in stop_words]
+    return " ".join(kept)
+
+
+def clean_label(text, mode, filler_words, stop_words):
     text = base_clean(text)
     if mode == "stripped":
         text = strip_filler(text, filler_words)
+    elif mode == "stopwords":
+        text = strip_stopwords(text, stop_words)
     return text
 
 
@@ -118,7 +135,8 @@ def write_ccs_sheets(path, sim_df, icd9_codes, ccs_map, target_col_name):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True, choices=list(MODEL_IDS.keys()))
-    ap.add_argument("--clean", required=True, choices=["base", "stripped"])
+    ap.add_argument("--clean", required=True,
+                    choices=["base", "stripped", "stopwords"])
     ap.add_argument("--no-code", action="store_true",
                     help="embed the label only, without the code number prefix")
     ap.add_argument("--max-length", type=int, default=64)
@@ -126,6 +144,7 @@ def main():
 
     model_id = MODEL_IDS[args.model]
     filler_words = load_filler_words()
+    stop_words = load_stopwords()
 
     labels_path = ORIG_BASE / "ICD_Codes_Files_and_Validation_Data" / "ICD_Codes_Labels.xlsx"
     icd9 = pd.read_excel(labels_path, sheet_name="CCS ICD-9-CM-3Level")
@@ -133,7 +152,8 @@ def main():
     icd8 = pd.read_excel(labels_path, sheet_name="ICDA-8-3Level")
 
     def build_text(df, code_col, label_col):
-        lab = df[label_col].apply(lambda s: clean_label(s, args.clean, filler_words))
+        lab = df[label_col].apply(
+            lambda s: clean_label(s, args.clean, filler_words, stop_words))
         if args.no_code:
             return lab
         return df[code_col].astype(str) + " " + lab
