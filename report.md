@@ -6,24 +6,6 @@
 
 This document records the changes made to the automatic mapping pipeline since
 the original analysis, in the order they were made, with the result of each one.
-The pipeline itself is unchanged in structure. The original best F1 score was
-0.427 for ICD-9-CM to ICD-10-CA and 0.716 for ICD-9-CM to ICDA-8.
-
-We rebuilt the pipeline in R and reproduced both of those figures exactly. We
-then replaced ClinicalBERT with a newer model, SapBERT, which raised the
-ICD-9-CM to ICD-10-CA F1 score from 0.427 to 0.530. Further investigation showed
-that the language model was not what limited performance. We traced each
-manually mapped pair through the pipeline and found that the similarity cutoff
-in Step 1 removed 63% of the correct ICD-10-CA pairs before any selection took
-place. Once a pair is removed at that step it cannot be recovered later, so no
-version of Step 4 could have produced an F1 score above 0.770.
-
-Widening Step 1 so that a fixed number of candidates is kept for each ICD-9-CM
-code, rather than a number that depends on that code's best similarity score,
-raises that limit from 0.770 to 0.927. Nothing here changes Step 4. The
-remaining sections cover the questions raised in review: the code number in the
-embedded text, the choice of stop word dictionary, and the distributions of the
-two quantities Steps 1 and 2 threshold on. Section 9 lists what is unfinished.
 
 ---
 
