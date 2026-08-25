@@ -7,10 +7,8 @@ the old system. Someone has to build a crosswalk, a mapping from every old
 code to its modern equivalent and that is normally done by hand, by clinical
 coders, over months.
 
-This builds most of that mapping automatically and tells you which parts it is
-confident about, so a human only reviews the rest.
-
-It is tested on two migrations:
+This work builds on an existing pipeline and reports what changes to it are
+worth making. It is tested on two migrations:
 
 - **ICD-9-CM → ICD-10-CA** (Canadian, the modern standard)
 - **ICD-9-CM → ICDA-8** (historical, going backwards)
@@ -29,21 +27,19 @@ methodology has been agreed.
 
 ## Running it
 
-Needs R. From `scripts/`:
+Needs R. Open `icd_crosswalk.Rproj` in RStudio, then:
 
 ```r
-source("11_rerank_features.R")   # build candidates and features
-source("12_cv_rerank.R")         # train and evaluate  (~10 min)
-source("13_precision_coverage.R")# confidence thresholds and triage
-source("14_predict_crosswalk.R") # map codes with no known answer
+source("scripts/27_show_results.R")   # every headline number, about a second
 ```
 
-Both tracks can run at once:
+To reproduce the analysis from the data, from `scripts/`:
 
-```bash
-Rscript 12_cv_rerank.R 10_9  &
-Rscript 12_cv_rerank.R 8_9   &
-Rscript 12b_merge_cv_results.R
+```r
+source("07_full_grid_comparison.R")  # parameter grid, all conditions
+source("08_assemble_full_grid.R")    # combine into summary tables
+source("09_error_analysis.R")        # where correct mappings are lost
+source("23_code_prefix_test.R")      # code number in the embedded text
 ```
 
 R packages: `dplyr`, `tidyr`, `readxl`, `writexl`, `stringr`, `purrr`,
@@ -74,11 +70,11 @@ still runs.
 | | |
 |---|---|
 | `02_run_comparison.R` | first ClinicalBERT vs SapBERT run |
-| `03_visualize_results.R` | makes report Figure 1 |
+| `03_visualize_results.R` | per-CCS-category charts |
 | `05_bidirectional_and_roundtrip.R` | mapping in the reverse direction |
 | `06_extended_comparison.R` | wider parameter sweep, superseded by `07` |
 | `07_full_grid_comparison.R` | full grid, one file per condition |
-| `08_assemble_full_grid.R` | combines those into the summary tables |
+| `08_assemble_full_grid.R` | combines those into the summary tables and report Figure 1 |
 
 **Diagnosing the ceiling**
 

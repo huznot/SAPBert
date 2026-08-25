@@ -11,16 +11,16 @@ frequently co-occurring target codes, removed pairs whose chapters did not
 align, and reported whatever passed one of four mapping algorithms. The best F1
 score was 0.427 for ICD-9-CM to ICD-10-CA and 0.716 for ICD-9-CM to ICDA-8.
 
-We rebuilt the pipeline in R and reproduced both of those figures exactly. We
+I rebuilt the pipeline in R and reproduced both of those figures exactly. I
 then replaced ClinicalBERT with a newer model, SapBERT, which raised the
 ICD-9-CM to ICD-10-CA F1 score from 0.427 to 0.530. Further investigation showed
-that the language model was not what limited performance. We traced each
+that the language model was not what limited performance. I traced each
 manually mapped pair through the pipeline and found that the similarity cutoff
 in Step 1 removed 63% of the correct ICD-10-CA pairs before any selection took
 place. Once a pair is removed at that step it cannot be recovered later, so no
 version of Step 4 could have produced an F1 score above 0.770.
 
-We therefore changed the pipeline to keep a fixed number of candidate codes for
+I therefore changed the pipeline to keep a fixed number of candidate codes for
 each ICD-9-CM code rather than applying a relative cutoff, and added a second
 model that scores the retained candidates before the final selection is made.
 Measured on ICD-9-CM codes the pipeline had not seen during training, the F1
@@ -32,24 +32,24 @@ without review at a precision of 95%.
 
 ## 1. Rebuilding the Pipeline in R
 
-The original analysis was written as two Python notebooks. We ported both to R,
+The original analysis was written as two Python notebooks. I ported both to R,
 keeping the same steps in the same order, so that later changes could be
 compared against a working reproduction rather than against reported figures.
 
 Two differences had to be resolved before the original results could be
 reproduced. First, the original validated against the CIHI crosswalk table,
-which is not in the shared project folder, so we repointed the validation step
+which is not in the shared project folder, so I repointed the validation step
 at the validation sheets that are shared. Second, the range of co-occurrence Top
 N values differed between the two crosswalks in the original code, running from
-1 to 10 for ICD-10-CA and from 5 to 30 for ICDA-8. We swept 3 to 30 for both.
+1 to 10 for ICD-10-CA and from 5 to 30 for ICDA-8. I swept 3 to 30 for both.
 The best ICD-10-CA result occurs at a Top N of 30, which is beyond the point
 where the original search stopped, and this is why the F1 score of 0.427 did not
-reproduce at first. We also added 0.95 to the list of similarity thresholds,
+reproduce at first. I also added 0.95 to the list of similarity thresholds,
 since a threshold of 1.0 keeps only candidates tied with the highest score.
 
 With both corrections the R version reproduces 0.427 and 0.716 exactly.
 
-We also rewrote the chapter alignment lookup and the merging step to work on
+I also rewrote the chapter alignment lookup and the merging step to work on
 whole columns at once rather than row by row. This made the pipeline
 approximately 130 times faster with identical output, which is what made the
 larger parameter searches described below practical.
@@ -58,12 +58,12 @@ larger parameter searches described below practical.
 
 ## 2. Comparing Language Models
 
-ClinicalBERT was published in 2019. We tested two more recent models in its
+ClinicalBERT was published in 2019. I tested two more recent models in its
 place. SapBERT is trained specifically on medical vocabulary and the
 relationships between medical terms. The second, all-mpnet-base-v2, is a
 general-purpose model with no medical training at all, included as a control.
 
-So that the comparison would be fair, we regenerated the embeddings for all
+So that the comparison would be fair, I regenerated the embeddings for all
 three models with a single script, using identical text cleaning and identical
 settings, and evaluated all of them over the same 112 parameter combinations per
 crosswalk.
@@ -79,8 +79,7 @@ crosswalk.
 
 ![model comparison](results/plot_f1_accuracy_comparison.png)
 
-**Figure 1. F1 score and accuracy for ClinicalBERT and SapBERT at the best
-parameter combination for each model and crosswalk.**
+**Figure 1. F1 score and accuracy for each embedding model.**
 
 SapBERT is the stronger model, improving F1 by approximately 0.10 on both
 crosswalks. The result worth noting is that all-mpnet-base-v2, which has no
@@ -88,7 +87,7 @@ medical training, performs as well as SapBERT on ICD-10-CA. Medical
 pre-training is therefore not the deciding factor in this task, which was the
 first indication that the model was not the main constraint.
 
-During this work we found and corrected a fault in our own code, in which two
+During this work I found and corrected a fault in my own code, in which two
 conditions whose names differed only in capitalisation were written to the same
 file on Windows, so that parallel jobs overwrote one another's results. All
 eight conditions were rerun after the fix.
@@ -98,7 +97,7 @@ eight conditions were rerun after the fix.
 ## 3. Reviewing the Filler Word List
 
 The cleaning step used a hand-written list of words to remove from labels before
-embedding. We compared this list against four published stop word lists, which
+embedding. I compared this list against four published stop word lists, which
 are standard word lists distributed with the NLTK and stopwords packages.
 
 Long lists proved unsafe for this task. Two different codes can end up with
@@ -108,7 +107,7 @@ the stopwords-iso list produces 26, largely because they remove single letters
 and the words "with" and "without", so that "hepatitis a" and "hepatitis b"
 become the same string.
 
-We removed the words "other", "others", "unspecified", "with" and "without"
+I removed the words "other", "others", "unspecified", "with" and "without"
 from the local list, which between them merged 10 codes, and added an automatic
 check that stops the pipeline if any word list causes two codes to share the
 same cleaned label.
@@ -119,7 +118,7 @@ same cleaned label.
 
 This section contains the central finding of the work.
 
-Rather than only measuring the final score, we followed every manually mapped
+Rather than only measuring the final score, I followed every manually mapped
 pair through the pipeline and recorded the stage at which it was lost. A pair
 removed at an early stage cannot be recovered by a later one, so the earliest
 loss sets an upper limit on everything that follows.
@@ -140,7 +139,7 @@ before any mapping algorithm is applied. Because those pairs are gone, the best
 F1 score that Step 4 could possibly have achieved was 0.770, no matter which
 mapping algorithm was chosen or how the parameters were tuned.
 
-We then tested whether those discarded pairs were recoverable. Replacing the
+I then tested whether those discarded pairs were recoverable. Replacing the
 relative similarity cutoff with a fixed number of candidates per ICD-9-CM code,
 removing the chapter filter, and lengthening the co-occurrence list raises the
 best obtainable F1 score from 0.770 to 0.927 for ICD-10-CA and from 0.920 to
@@ -149,10 +148,15 @@ be retrieved. They were being discarded by the selection rule rather than missed
 by the model, and this is the evidence that the model was not the limiting
 factor.
 
-We also examined the chapter distance filter in Step 3 specifically, and found
-that it removes more correct pairs than incorrect ones. Chapter alignment is
-still used, but as one input to the scoring step rather than as a filter that
-deletes candidates outright.
+I also examined the chapter distance filter in Step 3 on its own. Across 168
+matched designs, on both crosswalks, there is not one in which the filter
+improves the best obtainable F1 score. It costs 0.016 on ICD-10-CA and 0.005 on
+ICDA-8, and it destroys 48 correct ICD-10-CA pairs and 3 correct ICDA-8 pairs
+outright. It does remove far more incorrect pairs than correct ones, roughly
+5,000 against 21 in a typical design, but the incorrect ones would have been
+rejected later in any case, whereas a correct pair it deletes is unrecoverable.
+Chapter alignment is therefore still used, but as one input to the scoring step
+rather than as a filter that deletes candidates outright.
 
 ---
 
@@ -166,7 +170,7 @@ second.
 
 The revised pipeline splits those two jobs apart.
 
-**Stage 1. Collect the possibilities.** For each ICD-9-CM code we gather a wide
+**Stage 1. Collect the possibilities.** For each ICD-9-CM code I gather a wide
 list of target codes that might be correct. The list contains the 10 closest
 target codes according to SapBERT, the 10 closest according to
 all-mpnet-base-v2, the 10 closest according to ClinicalBERT, and the 50 target
@@ -178,7 +182,7 @@ one cannot be undone.
 
 **Stage 2. Judge the possibilities.** Each candidate pair is then given a score
 by a second model. The model is a gradient boosted tree, which is a standard
-method that learns a sequence of yes or no rules from examples. We train it on
+method that learns a sequence of yes or no rules from examples. I train it on
 the pairs that were mapped manually, so it learns what a correct pair tends to
 look like.
 
@@ -273,7 +277,7 @@ categories it was trained on.
 
 The revised pipeline changed two things at once, the width of the candidate step
 and the addition of a scoring model, so its advantage over the original rules
-cannot be attributed to either without a further experiment. We therefore held
+cannot be attributed to either without a further experiment. I therefore held
 the scoring model fixed and varied only how candidates are selected. The narrow
 settings reproduce the original Steps 1 to 3, thresholding each pair against the
 best similarity available for its ICD-9-CM code exactly as the original does.
@@ -292,9 +296,9 @@ On ICD-9-CM to ICD-10-CA the two changes contribute comparably. Adding the
 scoring model while leaving candidate selection as the original has it raises F1
 from 0.546 to 0.621, and widening the candidate set then raises it from 0.621 to
 0.669. The scoring model accounts for rather more of the gain than the wider
-candidate set, which is the opposite of what we assumed before measuring it.
+candidate set, which is the opposite of what I assumed before measuring it.
 
-On ICD-9-CM to ICDA-8 the picture is different and less favourable to our
+On ICD-9-CM to ICDA-8 the picture is different and less favourable to my
 configuration. The scoring model is worth 0.040, from 0.824 to 0.864, but
 widening the candidate set is actively harmful, costing 0.010. The best result
 on that crosswalk uses the original candidate selection unchanged. The wide
@@ -378,7 +382,7 @@ threshold is set to give 95% precision.**
 | Sent for review, low confidence | 13.6% | 11.9% |
 | Sent for review, no candidate found | 0.3% | 4.0% |
 
-We also report how often the correct target appears among the highest scoring
+I also report how often the correct target appears among the highest scoring
 candidates. This separates the question of whether the pipeline can find the
 right answer from the question of whether the reporting rule chooses to keep it.
 
@@ -394,7 +398,7 @@ the highest scoring candidates.**
 
 ## 7. Which Parts of the Pipeline Are Doing the Work
 
-To confirm that each part of the scoring stage is earning its place, we removed
+To confirm that each part of the scoring stage is earning its place, I removed
 one group of inputs at a time and re-measured performance. A large drop means
 the group was important.
 
@@ -415,9 +419,9 @@ code's is the single most useful addition for ICD-10-CA. ClinicalBERT
 contributes nothing once SapBERT and all-mpnet-base-v2 are present, and can be
 dropped from the scoring stage.
 
-We asked two further questions about the scoring stage.
+I asked two further questions about the scoring stage.
 
-The first was whether more manually mapped codes would improve results. We
+The first was whether more manually mapped codes would improve results. I
 trained on increasing numbers of codes and measured performance each time.
 
 ![learning curve](results/plot_learning_curve.png)
@@ -428,7 +432,7 @@ Performance stops improving at between 100 and 180 training codes on both
 crosswalks. Additional manually mapped codes of the same kind would not raise
 the score.
 
-The second was whether the pipeline is simply memorising clinical areas. We
+The second was whether the pipeline is simply memorising clinical areas. I
 repeated the cross-validation with the folds divided by CCS category, so that
 whole clinical areas are absent from training. This costs 0.004 F1 on ICD-10-CA
 and nothing at all on ICDA-8, so the pipeline is not relying on having seen
@@ -440,7 +444,7 @@ similar codes.
 
 The original analysis combined each ICD code with its label into a single text
 string before embedding, so that the model received text such as "250 diabetes
-mellitus" rather than "diabetes mellitus". We tested the effect of embedding the
+mellitus" rather than "diabetes mellitus". I tested the effect of embedding the
 label alone.
 
 The tables below report retrieval results only, measured on similarity scores
@@ -485,11 +489,11 @@ relying on the code number more heavily than the others.
 ## 9. Choosing a Standard Stop Word Dictionary
 
 Stop words are common words such as "the", "of" and "and" that carry little
-meaning on their own. The original analysis did not remove them. We were asked
+meaning on their own. The original analysis did not remove them. I were asked
 to identify a suitable published dictionary and to confirm the choice before
 applying it.
 
-We compared four published English dictionaries. The important consideration is
+I compared four published English dictionaries. The important consideration is
 not the size of the dictionary but whether removing its words causes two
 different codes to end up with the same cleaned label, since the pipeline cannot
 distinguish codes in that situation.
@@ -505,7 +509,7 @@ distinguish codes in that situation.
 
 Snowball causes the fewest collisions, and the four it does cause involve codes
 that are not part of the validation data. The collisions caused by NLTK do
-involve validation codes. On that basis we recommend Snowball.
+involve validation codes. On that basis I recommend Snowball.
 
 Snowball nonetheless has one weakness for this application. It removes the
 single letters "a" and "i", so that "vitamin a deficiency" becomes "vitamin
@@ -520,7 +524,7 @@ all.
 
 ## 10. Applying Stop Word Removal to ClinicalBERT
 
-We reran ClinicalBERT under all four combinations of removing stop words and
+I reran ClinicalBERT under all four combinations of removing stop words and
 removing the code number, using the same parameter search each time, so that the
 only difference between the four results is the text given to the model.
 
@@ -551,7 +555,7 @@ giving 0.482 against 0.427 for the original ClinicalBERT configuration.
 The ICDA-8 result stays between 0.713 and 0.719 whatever is done to the text.
 Nothing in the cleaning process affects that crosswalk.
 
-We also ran both versions of the Snowball dictionary so that the choice
+I also ran both versions of the Snowball dictionary so that the choice
 described in Section 9 could be made on evidence.
 
 **Table 13. Best F1 score with each version of the Snowball dictionary.**
@@ -572,12 +576,12 @@ the letter that identifies several vitamin deficiency and hepatitis codes.
 
 Steps 1 and 2 of the original pipeline each cut a list short using a number.
 Step 1 uses the similarity score and Step 2 uses how often two codes appear
-together in the health records. We were asked to show what those two numbers
+together in the health records. I were asked to show what those two numbers
 actually look like across all the codes rather than assume it.
 
 ### The similarity score
 
-For each of the 354 ICD-9-CM codes we took its best similarity score against any
+For each of the 354 ICD-9-CM codes I took its best similarity score against any
 target code.
 
 **Table 14. Best similarity score available for each ICD-9-CM code,
