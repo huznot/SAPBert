@@ -600,13 +600,71 @@ Step 2 of the original pipeline contributes nothing.
 
 ---
 
+## 13. Applying the Method to Other Code Sets
+
+The aim of this work is a method that another group can apply to their own
+crosswalk, rather than a finished mapping or a piece of software. It is
+therefore worth stating precisely what a group would need in order to use it.
+
+The method as described above draws on three things: the code labels for both
+classifications, linked physician and hospital records from which co-occurrence
+frequencies are calculated, and a table aligning the chapters of the two
+classifications. The code labels are published and are available to anyone. The
+other two are not. Linked administrative health data covering a period when both
+classifications were in use is unusual, and a chapter alignment table has to be
+built by hand for each pair of classifications.
+
+We therefore measured what the method achieves when those two inputs are
+withheld. Each setting uses the same folds, the same scoring model and the same
+held-out test codes, so only the available inputs differ.
+
+**Table 16. Performance by what a group has available, measured on unseen
+codes.**
+
+| Available | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
+|---|---|---|
+| Labels, health records and chapter table | 0.669 | 0.854 |
+| Labels and chapter table only | 0.621 | 0.815 |
+| Labels only | 0.581 | 0.806 |
+| Original pipeline, for reference | 0.427 | 0.716 |
+
+A group with nothing beyond the published code labels of the two
+classifications, and enough manually mapped codes to train on, obtains 0.581 and
+0.806. Both are well above what the original pipeline achieved with the full
+data. The co-occurrence data is worth 0.048 on ICD-10-CA and 0.040 on ICDA-8,
+and the chapter table a further 0.040 and 0.009. Neither is essential.
+
+Three requirements remain, and they should be stated plainly.
+
+First, the method needs manually mapped codes to train on. Section 7 shows that
+between 100 and 180 are sufficient, and that dividing the folds by CCS category
+costs almost nothing, so those codes do not need to cover every clinical area.
+The intended use is to map a portion by hand and extend it, not to build a
+crosswalk from nothing.
+
+Second, every embedding model used here was trained on English text. A
+classification whose labels are in another language would need a model trained
+on that language. We have not tested this, and it is the largest untested
+assumption in any claim that the method transfers.
+
+Third, the finding in Section 8 that the code number should be excluded from the
+text does not generalise automatically. It holds when the two numbering systems
+are unrelated, as ICD-9-CM and ICD-10-CA are, and reverses when they are not, as
+with ICD-9-CM and ICDA-8. A group applying the method would need to make that
+determination for their own pair of classifications rather than adopt our
+conclusion.
+
+Run `scripts/29_portability.R`.
+
+---
+
 ## Scripts
 
 Each of the following prints its results from saved files and completes in a few
 seconds. To run them, open `icd_crosswalk.Rproj` in RStudio, then use the
 `source` command shown.
 
-**Table 16. Scripts for reproducing the results in this document.**
+**Table 17. Scripts for reproducing the results in this document.**
 
 | Script | Shows |
 |---|---|
@@ -615,6 +673,7 @@ seconds. To run them, open `icd_crosswalk.Rproj` in RStudio, then use the
 | `26_stopword_choice.R` | Section 10, including the affected labels |
 | `28_stopwords_and_codes.R` | Section 11 |
 | `25_frequency_distributions.R` | Section 12 |
+| `29_portability.R` | Section 13 |
 | `24_show_similarity_matrix.R` | A worked example of a cosine similarity matrix |
 
 For example, `source("scripts/27_show_results.R")`.
