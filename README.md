@@ -7,33 +7,41 @@ the old system. Someone has to build a crosswalk, a mapping from every old
 code to its modern equivalent and that is normally done by hand, by clinical
 coders, over months.
 
-This builds most of that mapping automatically and tells you which parts it is
-confident about, so a human only reviews the rest.
-
-It is tested on two migrations:
+This work builds on an existing pipeline and reports what changes to it are
+worth making. It is tested on two migrations:
 
 - **ICD-9-CM → ICD-10-CA** (Canadian, the modern standard)
 - **ICD-9-CM → ICDA-8** (historical, going backwards)
 
 ![Logos](results/logos.png)
 
+## Branches
+
+`main` follows the existing four-step methodology. The changes on it are a
+newer embedding model, corrections to the parameter search, an analysis of
+where correct mappings are lost, and the text-cleaning work requested in
+review. Best F1 is 0.530 and 0.821, against 0.427 and 0.716 for the original.
+
+`testing` additionally replaces the selection step with a wide candidate set
+and a trained scoring model, reaching 0.668 and 0.840 on unseen codes. It is
+kept separate because it departs from the existing methodology and has not been
+agreed. See `report.md` Section 10 on `main`.
+
 ## Running it
 
-Needs R. From `scripts/`:
+Needs R. Open `icd_crosswalk.Rproj` in RStudio, then:
 
 ```r
-source("11_rerank_features.R")   # build candidates and features
-source("12_cv_rerank.R")         # train and evaluate  (~10 min)
-source("13_precision_coverage.R")# confidence thresholds and triage
-source("14_predict_crosswalk.R") # map codes with no known answer
+source("scripts/27_show_results.R")   # every headline number, about a second
 ```
 
-Both tracks can run at once:
+To reproduce the analysis from the data, from `scripts/`:
 
-```bash
-Rscript 12_cv_rerank.R 10_9  &
-Rscript 12_cv_rerank.R 8_9   &
-Rscript 12b_merge_cv_results.R
+```r
+source("07_full_grid_comparison.R")  # parameter grid, all conditions
+source("08_assemble_full_grid.R")    # combine into summary tables
+source("09_error_analysis.R")        # where correct mappings are lost
+source("23_code_prefix_test.R")      # code number in the embedded text
 ```
 
 R packages: `dplyr`, `tidyr`, `readxl`, `writexl`, `stringr`, `purrr`,
@@ -140,7 +148,8 @@ report.md         every change from the original pipeline to now
 
 - Tested on 354 three-digit ICD-9 categories, not the full ~14,000 code set.
 - 937 and 331 manually verified pairs. Small.
-- ICD-10-CA is the harder track and 0.668 is a long way from its 0.96 ceiling.
-  Most codes map to more than one target and the boundaries are judgement
-  calls that human coders disagree on.
+- ICD-10-CA is the harder track. Most of its codes map to more than one target
+  and the boundaries are judgement calls that human coders disagree on.
+- The similarity cutoff discards 63% of correct ICD-10-CA pairs before the
+  selection step runs. Diagnosed but not yet fixed on `main`.
 - Only tested on these two migrations. Transfer to other systems is untested.
