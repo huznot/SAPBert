@@ -17,6 +17,8 @@ best <- function(tag, tr) {
 }
 tname <- function(x) ifelse(x == "10_9", "ICD-9 to ICD-10-CA", "ICD-9 to ICDA-8")
 fmt <- function(v) if (is.na(v)) "  --  " else sprintf("%.3f", v)
+# a cell that has not been generated yet should say so, not print NA
+dlt <- function(a, b) if (is.na(a) || is.na(b)) "not run yet" else sprintf("%+.3f", a - b)
 
 cat("\nall four cells use clinicalbert. only the text fed to it changes.\n")
 cat("score is the best f1 over the same parameter grid in every cell.\n")
@@ -33,11 +35,11 @@ for (tr in c("10_9", "8_9")) {
   cat(sprintf("  %-22s %14s %14s\n", "stop words removed", fmt(c1), fmt(d1)))
 
   cat("\n  effect of removing stop words:\n")
-  cat(sprintf("    with the code in text   %+.3f\n", c1 - a))
-  cat(sprintf("    with the code removed   %+.3f\n", d1 - b))
+  cat(sprintf("    with the code in text   %s\n", dlt(c1, a)))
+  cat(sprintf("    with the code removed   %s\n", dlt(d1, b)))
   cat("  effect of removing the code number:\n")
-  cat(sprintf("    stop words kept         %+.3f\n", b - a))
-  cat(sprintf("    stop words removed      %+.3f\n", d1 - c1))
+  cat(sprintf("    stop words kept         %s\n", dlt(b, a)))
+  cat(sprintf("    stop words removed      %s\n", dlt(d1, c1)))
 }
 
 cat("\n\n===== which stop word list =====\n\n")

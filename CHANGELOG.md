@@ -185,7 +185,7 @@ Labels were embedded as code plus label. Tested label only.
   so there the number is signal.
 - These are retrieval numbers, SapBERT alone, before reranking. Not the same
   measurement as the 93.3% in section 6, which is the full pipeline.
-- Label-only matrices are generated but not yet run through the pipeline.
+- Label-only matrices have since been run through the pipeline for ClinicalBERT. See section 11.
 
 ## 9. Remaining errors
 
@@ -216,6 +216,43 @@ Began exploring stopwords dictionarys:
 
 Experimented by modifying the Snowball library to not remove negations (no/not/nor) and letters. Positive result
 
-## 11.
-Implementing modified Snowball `stopwords` into the ClinicalBert model and running full pipeline again
-- 
+## 11. Stop words and code numbers, run with ClinicalBERT
+
+Four ClinicalBERT runs, same parameter grid each time. Only the text fed to the
+model changes. Best F1 per cell.
+
+ICD-9 to ICD-10-CA
+
+| | code in text | code removed |
+|---|---|---|
+| stop words kept | 0.430 | 0.465 |
+| stop words removed | 0.436 | 0.482 |
+
+ICD-9 to ICDA-8
+
+| | code in text | code removed |
+|---|---|---|
+| stop words kept | 0.716 | 0.718 |
+| stop words removed | 0.719 | 0.713 |
+
+- Removing stop words gains 0.006 on ICD-10-CA with the code in, 0.017 with the
+  code out. On ICDA-8 it moves nothing.
+- Removing the code number is the larger effect, 0.035 to 0.046 on ICD-10-CA.
+  This agrees with section 8.
+- The two changes stack. Best cell is stop words out and code out, 0.482 against
+  0.427 for the original ClinicalBERT setup.
+- ICDA-8 sits at 0.713 to 0.719 whatever is done. Nothing in the text cleaning
+  moves that track.
+
+Both versions of the dictionary were run.
+
+| | as published (175) | keeping letters (170) |
+|---|---|---|
+| ICD-10-CA | 0.439 | 0.436 |
+| ICDA-8 | 0.717 | 0.719 |
+
+- No real difference in score. The reason to keep the letters is the labels
+  themselves, not the F1. As published, "vitamin a deficiency" becomes "vitamin
+  deficiency" and "acute hepatitis a" becomes "acute hepatitis".
+- Run `scripts/28_stopwords_and_codes.R` for the tables above and
+  `scripts/26_stopword_choice.R` for the affected labels. 
