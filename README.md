@@ -72,11 +72,11 @@ still runs.
 | | |
 |---|---|
 | `02_run_comparison.R` | first ClinicalBERT vs SapBERT run |
-| `03_visualize_results.R` | makes report Figure 1 |
+| `03_visualize_results.R` | per-CCS-category charts |
 | `05_bidirectional_and_roundtrip.R` | mapping in the reverse direction |
 | `06_extended_comparison.R` | wider parameter sweep, superseded by `07` |
 | `07_full_grid_comparison.R` | full grid, one file per condition |
-| `08_assemble_full_grid.R` | combines those into the summary tables |
+| `08_assemble_full_grid.R` | combines those into the summary tables and report Figure 1 |
 
 **Diagnosing the ceiling**
 

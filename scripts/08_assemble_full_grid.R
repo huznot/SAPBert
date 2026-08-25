@@ -129,3 +129,35 @@ print(as.data.frame(sensitivity %>% select(track, model, best_f1, f1_median, f1_
                                            shared_point_f1, rank_by_best, rank_at_shared,
                                            rank_changed)))
 cat("\nDone.\n")
+
+# figure 1 in the report. built here rather than in 03_ so it comes from the
+# same table as table 1 and covers all three models
+suppressMessages(library(ggplot2))
+KEEP <- c("ClinicalBERT-original" = "ClinicalBERT",
+          "SapBERT-base"          = "SapBERT",
+          "mpnet-base"            = "all-mpnet-base-v2")
+fig <- best %>% filter(model %in% names(KEEP)) %>%
+  mutate(Model = factor(unname(KEEP[model]), levels = unname(KEEP)),
+         track_label = factor(ifelse(track == "10_9",
+                                     "ICD-9-CM to ICD-10-CA", "ICD-9-CM to ICDA-8"),
+                              levels = c("ICD-9-CM to ICD-10-CA", "ICD-9-CM to ICDA-8"))) %>%
+  select(track_label, Model, F1 = f1, Accuracy = accuracy) %>%
+  tidyr::pivot_longer(c(F1, Accuracy), names_to = "metric", values_to = "value") %>%
+  mutate(metric = factor(metric, levels = c("F1", "Accuracy")))
+if (nrow(fig)) {
+  g <- ggplot(fig, aes(metric, value, fill = Model)) +
+    geom_col(position = position_dodge(0.8), width = 0.72) +
+    geom_text(aes(label = sprintf("%.3f", value)),
+              position = position_dodge(0.8), vjust = -0.45, size = 3.1) +
+    facet_wrap(~track_label) +
+    scale_fill_manual(values = c("ClinicalBERT" = "#4E79A7", "SapBERT" = "#E1873C",
+                                 "all-mpnet-base-v2" = "#59A14F")) +
+    scale_y_continuous(limits = c(0, 1), expand = expansion(mult = c(0, 0.05))) +
+    labs(x = NULL, y = "Score", fill = NULL) +
+    theme_minimal(base_size = 12) +
+    theme(legend.position = "top", panel.grid.major.x = element_blank(),
+          strip.text = element_text(face = "bold"))
+  ggsave(file.path(OUT_DIR, "plot_f1_accuracy_comparison.png"), g,
+         width = 9, height = 4.6, dpi = 150)
+  cat("\nwrote results/plot_f1_accuracy_comparison.png\n")
+}

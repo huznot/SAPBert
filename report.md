@@ -11,24 +11,24 @@ the original analysis, in the order they were made, with the result of each one.
 
 ## 1. Rebuilding the Pipeline in R
 
-The original analysis was written as two Python notebooks. We ported both to R,
+The original analysis was written as two Python notebooks. I ported both to R,
 keeping the same steps in the same order, so that later changes could be
 compared against a working reproduction rather than against reported figures.
 
 Two differences had to be resolved before the original results could be
 reproduced. First, the original validated against the CIHI crosswalk table,
-which is not in the shared project folder, so we repointed the validation step
+which is not in the shared project folder, so I repointed the validation step
 at the validation sheets that are shared. Second, the range of co-occurrence Top
 N values differed between the two crosswalks in the original code, running from
-1 to 10 for ICD-10-CA and from 5 to 30 for ICDA-8. We swept 3 to 30 for both.
+1 to 10 for ICD-10-CA and from 5 to 30 for ICDA-8. I swept 3 to 30 for both.
 The best ICD-10-CA result occurs at a Top N of 30, which is beyond the point
 where the original search stopped, and this is why the F1 score of 0.427 did not
-reproduce at first. We also added 0.95 to the list of similarity thresholds,
+reproduce at first. I also added 0.95 to the list of similarity thresholds,
 since a threshold of 1.0 keeps only candidates tied with the highest score.
 
 With both corrections the R version reproduces 0.427 and 0.716 exactly.
 
-We also rewrote the chapter alignment lookup and the merging step to work on
+I also rewrote the chapter alignment lookup and the merging step to work on
 whole columns at once rather than row by row. This made the pipeline
 approximately 130 times faster with identical output, which is what made the
 larger parameter searches described below practical.
@@ -37,12 +37,12 @@ larger parameter searches described below practical.
 
 ## 2. Comparing Language Models
 
-ClinicalBERT was published in 2019. We tested two more recent models in its
+ClinicalBERT was published in 2019. I tested two more recent models in its
 place. SapBERT is trained specifically on medical vocabulary and the
 relationships between medical terms. The second, all-mpnet-base-v2, is a
 general-purpose model with no medical training at all, included as a control.
 
-So that the comparison would be fair, we regenerated the embeddings for all
+So that the comparison would be fair, I regenerated the embeddings for all
 three models with a single script, using identical text cleaning and identical
 settings, and evaluated all of them over the same 112 parameter combinations per
 crosswalk.
@@ -58,8 +58,7 @@ crosswalk.
 
 ![model comparison](results/plot_f1_accuracy_comparison.png)
 
-**Figure 1. F1 score and accuracy for ClinicalBERT and SapBERT at the best
-parameter combination for each model and crosswalk.**
+**Figure 1. F1 score and accuracy for each embedding model.**
 
 SapBERT is the stronger model, improving F1 by approximately 0.10 on both
 crosswalks. The result worth noting is that all-mpnet-base-v2, which has no
@@ -73,7 +72,7 @@ first indication that the model was not the main constraint.
 
 This section contains the central finding of the work.
 
-Rather than only measuring the final score, we followed every manually mapped
+Rather than only measuring the final score, I followed every manually mapped
 pair through the pipeline and recorded the stage at which it was lost. A pair
 removed at an early stage cannot be recovered by a later one, so the earliest
 loss sets an upper limit on everything that follows.
@@ -94,7 +93,7 @@ before any mapping algorithm is applied. Because those pairs are gone, the best
 F1 score that Step 4 could possibly have achieved was 0.770, no matter which
 mapping algorithm was chosen or how the parameters were tuned.
 
-We then tested whether those discarded pairs were recoverable. Replacing the
+I then tested whether those discarded pairs were recoverable. Replacing the
 relative similarity cutoff with a fixed number of candidates per ICD-9-CM code,
 removing the chapter filter, and lengthening the co-occurrence list raises the
 best obtainable F1 score from 0.770 to 0.927 for ICD-10-CA and from 0.920 to
@@ -103,10 +102,14 @@ be retrieved. They were being discarded by the selection rule rather than missed
 by the model, and this is the evidence that the model was not the limiting
 factor.
 
-We also examined the chapter distance filter in Step 3 specifically, and found
-that it removes more correct pairs than incorrect ones. Chapter alignment is
-still used, but as one input to the scoring step rather than as a filter that
-deletes candidates outright.
+I also examined the chapter distance filter in Step 3 on its own. Across 168
+matched designs, on both crosswalks, there is not one in which the filter
+improves the best obtainable F1 score. It costs 0.016 on ICD-10-CA and 0.005 on
+ICDA-8, and it destroys 48 correct ICD-10-CA pairs and 3 correct ICDA-8 pairs
+outright. It does remove far more incorrect pairs than correct ones, roughly
+5,000 against 21 in a typical design, but the incorrect ones would have been
+rejected by Step 4 in any case, whereas a correct pair it deletes is
+unrecoverable.
 
 ---
 
@@ -114,11 +117,11 @@ deletes candidates outright.
 
 The original analysis combined each ICD code with its label into a single text
 string before embedding, so that the model received text such as "250 diabetes
-mellitus" rather than "diabetes mellitus". We tested the effect of embedding the
+mellitus" rather than "diabetes mellitus". I tested the effect of embedding the
 label alone.
 
-The tables below report retrieval results only, measured on similarity scores
-before any scoring or selection takes place.
+The tables below report retrieval results only, measured on the similarity
+scores before Step 4 selects anything.
 
 **Table 3. Effect of removing the code number, ICD-9-CM to ICD-10-CA.**
 
@@ -159,11 +162,9 @@ relying on the code number more heavily than the others.
 ## 5. Choosing a Standard Stop Word Dictionary
 
 Stop words are common words such as "the", "of" and "and" that carry little
-meaning on their own. The original analysis did not remove them. We were asked
-to identify a suitable published dictionary and to confirm the choice before
-applying it.
+meaning on their own. The original analysis did not remove them.
 
-We compared four published English dictionaries. The important consideration is
+I compared four published English dictionaries. The important consideration is
 not the size of the dictionary but whether removing its words causes two
 different codes to end up with the same cleaned label, since the pipeline cannot
 distinguish codes in that situation.
@@ -194,7 +195,7 @@ all.
 
 ## 6. Applying Stop Word Removal to ClinicalBERT
 
-We reran ClinicalBERT under all four combinations of removing stop words and
+I reran ClinicalBERT under all four combinations of removing stop words and
 removing the code number, using the same parameter search each time, so that the
 only difference between the four results is the text given to the model.
 
@@ -220,12 +221,13 @@ is present and by 0.017 when it is not. It has no meaningful effect on ICDA-8.
 Removing the code number is the larger of the two changes, worth between 0.035
 and 0.046 on ICD-10-CA, which agrees with the retrieval results in Section 4.
 The two changes combine, and the best result is obtained with both applied,
-giving 0.482 against 0.427 for the original ClinicalBERT configuration.
+giving 0.482 against 0.430 for the same pipeline with the stop words and
+the code number left in.
 
 The ICDA-8 result stays between 0.713 and 0.719 whatever is done to the text.
 Nothing in the cleaning process affects that crosswalk.
 
-We also ran both versions of the Snowball dictionary so that the choice
+I also ran both versions of the Snowball dictionary so that the choice
 described in Section 5 could be made on evidence.
 
 **Table 7. Best F1 score with each version of the Snowball dictionary.**
@@ -246,12 +248,11 @@ the letter that identifies several vitamin deficiency and hepatitis codes.
 
 Steps 1 and 2 of the original pipeline each cut a list short using a number.
 Step 1 uses the similarity score and Step 2 uses how often two codes appear
-together in the health records. We were asked to show what those two numbers
-actually look like across all the codes rather than assume it.
+together in the health records.
 
 ### The similarity score
 
-For each of the 354 ICD-9-CM codes we took its best similarity score against any
+For each of the 354 ICD-9-CM codes I took its best similarity score against any
 target code.
 
 **Table 8. Best similarity score available for each ICD-9-CM code,
@@ -303,11 +304,9 @@ spread, on a scale where each step is ten times the last.**
 
 The counts differ enormously from one code to another, from single figures up to
 238,548. A count of 300 is therefore a strong signal for one code and a weak one
-for another, and the raw count is not comparable between codes. A count carries meaning only
-relative to the other counts for the same ICD-9-CM code.
+for another, and the raw count is not comparable between codes. A count
+carries meaning only relative to the other counts for the same ICD-9-CM code.
 
 The other point is that 84 ICD-9-CM codes, close to a quarter, have no ICDA-8
 co-occurrence data at all. For those codes Step 2 of the original pipeline
 contributes nothing and the mapping rests entirely on the labels.
-
----
