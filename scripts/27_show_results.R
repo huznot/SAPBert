@@ -39,8 +39,10 @@ if (!is.null(d)) {
   cat("\n  of every correct answer in the manual crosswalk, the share that\n")
   cat("  survives each stage of the original pipeline:\n\n")
   cat(sprintf("  %-36s %10s %10s\n", "", "ICD-10-CA", "ICDA-8"))
+  # pct_in_universe is 100 by construction, the matrix scores every code
+  # against every target. it is a check that no validation pair names a code
+  # missing from the label files, not a stage anything can be lost at
   rows <- list(
-    c("exists in the similarity table", "pct_in_universe"),
     c("survives the similarity cutoff",  "pct_pass_threshold"),
     c("in the co-occurrence list",       "pct_in_cooc"),
     c("kept as a candidate",             "pct_in_pool"),
@@ -50,9 +52,11 @@ if (!is.null(d)) {
                 x[x$track == "10_9", r[2]], x[x$track == "8_9", r[2]]))
   cat(sprintf("\n  %-36s %10.3f %10.3f\n", "best f1 possible from what survives",
               x[x$track == "10_9", "oracle_f1"], x[x$track == "8_9", "oracle_f1"]))
-  cat("\n  every correct answer was already in the similarity table. the cutoff\n")
-  cat("  threw most of them away before anything was ranked, and a discarded\n")
-  cat("  candidate can never be recovered. that capped the whole pipeline.\n")
+  cat(sprintf("\n  the cutoff drops %.0f%% of correct ICD-10-CA pairs before anything is\n",
+              100 - x[x$track == "10_9", "pct_pass_threshold"]))
+  cat("  ranked, and a dropped pair cannot come back. that capped the pipeline.\n")
+  cat("  widening the candidate step recovers them, which is what says the\n")
+  cat("  retrieval step was the problem and not the model.\n")
 }
 
 # ---------------------------------------------------------------- 3

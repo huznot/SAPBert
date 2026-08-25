@@ -11,10 +11,12 @@ align, and output whatever passed one of three rules. Best F1 was 0.427 on
 ICD-9 to ICD-10-CA and 0.716 on ICD-9 to ICDA-8.
 
 I rebuilt it in R and confirmed those numbers. SapBERT in place of ClinicalBERT
-took ICD-10-CA from 0.427 to 0.530. But the model was not the limit. Every
-correct target was already in the similarity matrix. The similarity cutoff threw
-out 37% of them before ranking, and a dropped pair cannot be recovered. Nothing
-downstream could have scored above 0.770.
+took ICD-10-CA from 0.427 to 0.530. But the model was not the limit. The
+similarity cutoff discarded 63% of correct ICD-10-CA pairs before anything was
+ranked, and a discarded pair cannot be recovered, so nothing downstream could
+have scored above 0.770. Those pairs come back if the cutoff is replaced with a
+fixed number of candidates per code, which is what says the retrieval step was
+the problem rather than the model.
 
 I widened the candidate step and added a second model that scores what survives.
 Held-out F1 is now 0.668 on ICD-10-CA and 0.840 on ICDA-8. Each mapping carries
@@ -97,22 +99,30 @@ comparable. 112 settings per track, eight conditions.
 
 ## 4. Error analysis
 
-Traced every correct pair through the pipeline.
+Traced every correct pair through the pipeline. Share of correct pairs still
+alive at each stage.
 
 | stage | ICD-10-CA | ICDA-8 |
 |---|---|---|
-| correct target in the similarity matrix | 100% | 100% |
 | past the similarity cutoff | 37.1% | 79.5% |
 | in the top-n co-occurrence list | 55.4% | 71.6% |
 | in the candidate pool | 62.6% | 85.2% |
 | output by the three rules | 42.9% | 78.5% |
 | best F1 reachable from the pool | 0.770 | 0.920 |
 
-- The model is not the bottleneck. Every answer is in the matrix. The cutoff
-  discards 37% of correct ICD-10-CA targets before ranking.
-- Separate study on candidate generation: fixed top-k per code instead of a
-  relative cutoff, no chapter filter, wider co-occurrence list. Ceiling goes
-  from 0.770 to 0.927 on ICD-10-CA and 0.920 to 0.976 on ICDA-8.
+Checked first that all 100% of correct pairs have a cell in the matrix. That is
+true by construction, since the matrix scores every ICD-9 code against every
+target code, so it is a check that no validation pair names a code missing from
+the label files, not a result. It only matters as the denominator for the rows
+above.
+
+- The cutoff discards 63% of correct ICD-10-CA pairs before anything is ranked,
+  and a discarded pair cannot come back.
+- Those pairs were recoverable, which is the actual evidence that the model was
+  not the limit. Replacing the relative cutoff with a fixed top-k per code,
+  dropping the chapter filter and widening the co-occurrence list moves the
+  ceiling from 0.770 to 0.927 on ICD-10-CA and 0.920 to 0.976 on ICDA-8. A
+  better model is not what unlocks that, keeping more candidates is.
 - The chapter filter discards more correct pairs than incorrect ones. Chapter
   alignment is now a feature, not a filter.
 
