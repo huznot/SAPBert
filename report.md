@@ -235,6 +235,58 @@ The revised pipeline uses all three embedding models together rather than
 choosing between them. Section 7 shows that ClinicalBERT can be removed from
 this combination without any loss.
 
+### Is it fair to compare a trained model against the original rules?
+
+The revised pipeline learns from the manually mapped pairs, which the original
+pipeline did not do in the same way. This raises a reasonable objection, so it
+is worth setting out plainly.
+
+The original pipeline also used the manually mapped pairs. It tested 96
+combinations of similarity threshold, Top N and mapping algorithm, and reported
+the combination that scored highest against those pairs. That is a smaller
+amount of fitting, three settings rather than a trained model, but it is fitting
+to the same data. The difference is that the original then reported that best
+score on the very pairs used to choose it, whereas every figure for the revised
+pipeline is measured on ICD-9-CM codes that were not used in training.
+
+The comparison that settles the question is the middle two rows of Table 3,
+where both the original rules and the revised pipeline are given the same
+embeddings, the same data and the same held-out test codes.
+
+**Table 4. Original rules and revised pipeline, both measured on unseen codes.**
+
+| | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
+|---|---|---|
+| Original rules, unseen codes | 0.546 | 0.824 |
+| Revised pipeline, unseen codes | 0.668 | 0.840 |
+
+Two further points support this being a real improvement rather than an artefact
+of training. First, the original rules score 0.547 in sample and 0.546 on unseen
+codes, so they were barely overfitting to begin with. The gap between 0.427 and
+0.546 is the change of embedding model, not the change of evaluation method.
+Second, when the cross-validation folds are divided by CCS category instead of
+by code, so that whole clinical areas are absent from training, the revised
+pipeline scores 0.657 rather than 0.661. It is not simply memorising the
+categories it was trained on.
+
+Two honest qualifications belong with this.
+
+The first is that the improvement comes from two changes made at the same time,
+a wider candidate list and a trained scoring model, and the experiments in this
+document do not separate how much each contributes. The wider candidate list is
+what raises the reachable ceiling from 0.770 to 0.927, so a meaningful part of
+the gain is likely to come from that rather than from the model.
+
+The second is that the revised pipeline genuinely requires manually mapped
+examples in order to run at all, which the original did not. Section 7 shows
+that between 100 and 180 mapped codes are enough. The intended use is therefore
+to map a portion of the codes by hand and use the pipeline to extend that work
+to the remainder, rather than to build a crosswalk from nothing.
+
+It is also worth noting that on ICD-9-CM to ICDA-8 the trained model adds only
+0.016. Almost all of the performance on that crosswalk comes from the code
+labels themselves, for the reason given in Section 12.
+
 ---
 
 ## 6. How Performance Is Measured
@@ -255,7 +307,7 @@ so that reviewer time can be directed at the cases that need it.
 
 **Figure 2. Precision against recall as the confidence threshold is varied.**
 
-**Table 4. Proportion of ICD-9-CM codes in each category when the confidence
+**Table 5. Proportion of ICD-9-CM codes in each category when the confidence
 threshold is set to give 95% precision.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
@@ -268,7 +320,7 @@ We also report how often the correct target appears among the highest scoring
 candidates. This separates the question of whether the pipeline can find the
 right answer from the question of whether the reporting rule chooses to keep it.
 
-**Table 5. Percentage of ICD-9-CM codes for which a correct target appears among
+**Table 6. Percentage of ICD-9-CM codes for which a correct target appears among
 the highest scoring candidates.**
 
 | | Highest | Top 3 | Top 5 |
@@ -284,7 +336,7 @@ To confirm that each part of the scoring stage is earning its place, we removed
 one group of inputs at a time and re-measured performance. A large drop means
 the group was important.
 
-**Table 6. F1 score with one group of inputs removed.**
+**Table 7. F1 score with one group of inputs removed.**
 
 | Group removed | ICD-10-CA | Change | ICDA-8 | Change |
 |---|---|---|---|---|
@@ -332,7 +384,7 @@ label alone.
 The tables below report retrieval results only, measured on similarity scores
 before any scoring or selection takes place.
 
-**Table 7. Effect of removing the code number, ICD-9-CM to ICD-10-CA.**
+**Table 8. Effect of removing the code number, ICD-9-CM to ICD-10-CA.**
 
 | | Correct target ranked highest | In top 10 | In top 25 | In top 50 |
 |---|---|---|---|---|
@@ -343,7 +395,7 @@ before any scoring or selection takes place.
 | all-mpnet-base-v2, code and label | 80.9% | 65.5% | 77.0% | 85.1% |
 | all-mpnet-base-v2, label only | **89.9%** | 67.7% | 77.8% | 85.8% |
 
-**Table 8. Effect of removing the code number, ICD-9-CM to ICDA-8.**
+**Table 9. Effect of removing the code number, ICD-9-CM to ICDA-8.**
 
 | | Correct target ranked highest | In top 10 | In top 25 | In top 50 |
 |---|---|---|---|---|
@@ -373,7 +425,7 @@ relying on the code number more heavily than the others.
 We examined which ICD-9-CM codes are still mapped incorrectly at the 95%
 precision operating point.
 
-**Table 9. Completeness of the automatic mapping for each ICD-9-CM code.**
+**Table 10. Completeness of the automatic mapping for each ICD-9-CM code.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
 |---|---|---|
@@ -419,7 +471,7 @@ not the size of the dictionary but whether removing its words causes two
 different codes to end up with the same cleaned label, since the pipeline cannot
 distinguish codes in that situation.
 
-**Table 10. Published stop word dictionaries compared.**
+**Table 11. Published stop word dictionaries compared.**
 
 | Dictionary | Words | Codes made identical |
 |---|---|---|
@@ -449,7 +501,7 @@ We reran ClinicalBERT under all four combinations of removing stop words and
 removing the code number, using the same parameter search each time, so that the
 only difference between the four results is the text given to the model.
 
-**Table 11. Best F1 score for ClinicalBERT under each text preparation.**
+**Table 12. Best F1 score for ClinicalBERT under each text preparation.**
 
 | ICD-9-CM to ICD-10-CA | Code number included | Code number removed |
 |---|---|---|
@@ -479,7 +531,7 @@ Nothing in the cleaning process affects that crosswalk.
 We also ran both versions of the Snowball dictionary so that the choice
 described in Section 10 could be made on evidence.
 
-**Table 12. Best F1 score with each version of the Snowball dictionary.**
+**Table 13. Best F1 score with each version of the Snowball dictionary.**
 
 | | Snowball as published (175 words) | Snowball retaining letters and negations (170 words) |
 |---|---|---|
@@ -499,7 +551,7 @@ The original pipeline applies a threshold to two quantities, the cosine
 similarity and the co-occurrence frequency. We were asked to describe how those
 two quantities are actually distributed rather than assume it.
 
-**Table 13. Highest cosine similarity available for each ICD-9-CM code,
+**Table 14. Highest cosine similarity available for each ICD-9-CM code,
 ClinicalBERT, 354 codes on each crosswalk.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
@@ -525,7 +577,7 @@ Every code has a best match above 0.85, which explains why a single fixed
 similarity cutoff cannot work and why the original analysis used a cutoff
 expressed relative to each code's own best score.
 
-**Table 14. Co-occurrence frequency of the most frequent target for each
+**Table 15. Co-occurrence frequency of the most frequent target for each
 ICD-9-CM code.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
@@ -554,7 +606,7 @@ Each of the following prints its results from saved files and completes in a few
 seconds. To run them, open `icd_crosswalk.Rproj` in RStudio, then use the
 `source` command shown.
 
-**Table 15. Scripts for reproducing the results in this document.**
+**Table 16. Scripts for reproducing the results in this document.**
 
 | Script | Shows |
 |---|---|
