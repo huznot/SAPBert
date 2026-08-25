@@ -15,70 +15,7 @@ It is tested on two migrations:
 - **ICD-9-CM → ICD-10-CA** (Canadian, the modern standard)
 - **ICD-9-CM → ICDA-8** (historical, going backwards)
 
-![Precision vs recall](results/logos.png)
-
-## Results
-
-Measured with 5-fold cross-validation grouped by code
-
-| | ICD-9 → ICD-10-CA | ICD-9 → ICDA-8 |
-|---|---|---|
-| Previous pipeline (F1) | 0.546 | 0.824 |
-| **This system (F1)** | **0.668** | **0.840** |
-
-The more useful number for actually using it; how much of the crosswalk gets
-built with no human involved, if you require 95% of those mappings to be right:
-
-| | ICD-9 → ICD-10-CA | ICD-9 → ICDA-8 |
-|---|---|---|
-| Codes given a confident mapping | 86% | 84% |
-| Mappings built automatically | 37% | 76% |
-
-The two rows measure different things. The first is how many old codes get a
-suggestion good enough to accept without checking. The second is how much of
-the full crosswalk is complete, and it is lower for ICD-10-CA because those
-codes map to 2.7 targets on average. The system finds the main mapping for
-most codes and misses some of the secondary ones.
-
-At a stricter 99% precision, ICDA-8 still builds 62% of the crosswalk.
-
-![Precision vs recall](results/plot_precision_coverage.png)
-
-## How it works
-
-Two stages.
-
-**1. Retrieve.** For each old code, gather plausible new codes from three
-embedding models (SapBERT, mpnet, ClinicalBERT) plus historical co-occurrence.
-This stage is tuned for recall, a correct answer missed here can never be
-recovered later.
-
-**2. Rerank.** Score every candidate with a gradient-boosted model and keep the
-good ones. Features include each model's similarity and rank, agreement between
-models, whether the two codes pick *each other* as best match, co-occurrence
-frequency, chapter compatibility learned from the data, and plain word overlap
-between the labels.
-
-Each mapping comes out with a confidence score, which is what makes the
-auto-accept / review split possible.
-
-### Why two stages
-
-The original pipeline kept a candidate only if its similarity was within 5% of
-the best match for that code. That sounds reasonable and is not, it threw away
-63% of correct answers before ranking even started. Since a dropped candidate
-can never be recovered, this capped the best possible F1 at **0.77**, no matter
-what model or ranker you put downstream.
-
-Every correct answer was sitting in the similarity matrix. Switching to plain top-K retrieval raised that ceiling to
-**0.96**.
-
-## Charts
-
-| | |
-|---|---|
-| ![](results/plot_f1_accuracy_comparison.png) | ![](results/plot_precision_coverage.png) |
-| Model comparison | Precision vs recall |
+![Logos](results/logos.png)
 
 ## Running it
 
@@ -109,11 +46,73 @@ Python is only needed to regenerate embeddings (`torch`, `transformers`,
 python generate_embeddings.py --model mpnet --clean base
 ```
 
-### Earlier scripts
+### All scripts
 
-`02`–`10` are the analysis that led here and still run: model comparison
-(`02`, `07`, `08`), reverse-direction mapping (`05`), and the diagnostics that
-found the ceiling problem (`09`, `10`).
+Numbering is chronological, the order the work was done in. Everything below
+still runs.
+
+**Build the inputs**
+
+| | |
+|---|---|
+| `generate_embeddings.py` | similarity matrices for any model and text cleaning |
+| `01_generate_sapbert_embeddings.R` | how `data/sapbert/` was made, superseded by the Python script |
+| `pipeline_lib.R` | shared functions, sourced by everything |
+
+**The original pipeline, reproduced and searched**
+
+| | |
+|---|---|
+| `02_run_comparison.R` | first ClinicalBERT vs SapBERT run |
+| `03_visualize_results.R` | makes report Figure 1 |
+| `05_bidirectional_and_roundtrip.R` | mapping in the reverse direction |
+| `06_extended_comparison.R` | wider parameter sweep, superseded by `07` |
+| `07_full_grid_comparison.R` | full grid, one file per condition |
+| `08_assemble_full_grid.R` | combines those into the summary tables |
+
+**Diagnosing the ceiling**
+
+| | |
+|---|---|
+| `09_error_analysis.R` | where correct pairs are lost, report Section 4 |
+| `10_candidate_generation_study.R` | what a wider candidate step would reach |
+
+**The revised pipeline**
+
+| | |
+|---|---|
+| `11_rerank_features.R` | candidates and the 52 features |
+| `12_cv_rerank.R`, `12b_merge_cv_results.R` | train and evaluate, held out |
+| `13_precision_coverage.R` | confidence thresholds and triage |
+| `14_predict_crosswalk.R` | map codes with no known answer |
+
+**Follow-up experiments**
+
+| | |
+|---|---|
+| `16_ablation.R` | which feature groups matter, report Section 7 |
+| `17_retrieval_sensitivity.R` | how much the candidate settings matter |
+| `18_learning_curve.R` | would more training data help, report Figure 3 |
+| `19_category_holdout.R` | does it work on unseen clinical areas |
+| `20_top1_accuracy.R` | is the right answer reachable at all |
+| `21_error_by_code_type.R` | single vs multi target codes |
+| `22_target_block_structure.R` | do multi-target answers sit in blocks |
+| `23_code_prefix_test.R` | code number in the text, report Section 8 |
+| `29_portability.R` | performance without health records or a chapter table |
+
+**Show the results, no recomputation, a second or two each**
+
+| | |
+|---|---|
+| `27_show_results.R` | every headline number |
+| `24_show_similarity_matrix.R` | a worked similarity matrix |
+| `25_frequency_distributions.R` | report Section 11 |
+| `26_stopword_choice.R` | which stop word dictionary, report Section 9 |
+| `28_stopwords_and_codes.R` | report Section 10 |
+
+`04` and `15` were removed. `15` compared stop word dictionaries using a
+hardcoded approximation of the word lists rather than the real ones and gave
+wrong collision counts; `26` does the same job correctly.
 
 ## Using it on other code systems
 

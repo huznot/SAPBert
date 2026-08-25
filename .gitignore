@@ -3,3 +3,6 @@
 .Rproj.user/
 *.docx
 clean_paper.txt
+__pycache__/
+*.pyc
+logs/

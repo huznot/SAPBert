@@ -130,3 +130,26 @@ for (tr in unique(res$track)) {
   }
 }
 cat("\nProjections assume the curve keeps its shape and are not measurements.\n")
+
+# figure 3 in the report. reads both tracks from disk rather than `res` so the
+# plot is correct whether this ran one track or both
+suppressMessages(library(ggplot2))
+lc_files <- file.path(OUT_DIR, sprintf("learning_curve_%s.csv", c("10_9", "8_9")))
+if (all(file.exists(lc_files))) {
+  lc <- bind_rows(lapply(lc_files, read.csv, stringsAsFactors = FALSE))
+  lc <- lc[!is.na(lc$f1_mean), ]
+  lc$track_label <- ifelse(lc$track == "10_9", "ICD-9 to ICD-10-CA", "ICD-9 to ICDA-8")
+  g <- ggplot(lc, aes(n_train, f1_mean)) +
+    geom_ribbon(aes(ymin = f1_mean - f1_sd, ymax = f1_mean + f1_sd),
+                fill = "#3182bd", alpha = 0.2) +
+    geom_line(colour = "#3182bd") + geom_point(colour = "#3182bd") +
+    facet_wrap(~track_label, scales = "free_y") +
+    labs(x = "training codes", y = "held-out F1",
+         title = "Does more manually mapped data help?") +
+    theme_minimal(base_size = 11)
+  ggsave(file.path(OUT_DIR, "plot_learning_curve.png"), g,
+         width = 8, height = 4, dpi = 150)
+  cat("\nwrote results/plot_learning_curve.png\n")
+} else {
+  cat("\nrun both tracks to regenerate plot_learning_curve.png\n")
+}
