@@ -1,11 +1,4 @@
-# Developing Automated Mapping for ICD Codes Using NLP Techniques
-
-## Report on Changes Since the Original Analysis
-
-This document records every change made to the automatic mapping pipeline since
-the original analysis, in the order the changes were made, together with the
-result of each one. It is written to be read alongside the original methods
-document and uses the same terms wherever possible.
+# Report
 
 ---
 
@@ -34,14 +27,6 @@ Measured on ICD-9-CM codes the pipeline had not seen during training, the F1
 score is now 0.668 for ICD-10-CA and 0.840 for ICDA-8. Each mapping is also
 given a confidence score, which allows 86% of ICD-9-CM codes to be accepted
 without review at a precision of 95%.
-
-The errors that remain are almost entirely one problem. ICD-9-CM codes that map
-to a single target code are mapped correctly 87% to 88% of the time on both
-crosswalks. ICD-9-CM codes that map to several target codes are mapped
-completely only 6% of the time for ICD-10-CA and 0% of the time for ICDA-8.
-Because 63% of ICD-9-CM codes have multiple ICD-10-CA targets compared with 8%
-for ICDA-8, this difference accounts for the entire gap in performance between
-the two crosswalks.
 
 ---
 
@@ -173,35 +158,69 @@ deletes candidates outright.
 
 ## 5. The Revised Pipeline
 
-The revised pipeline separates the work into two stages. The first stage
-retrieves a generous set of candidate target codes for each ICD-9-CM code, and
-is deliberately permissive because anything discarded here is lost for good. The
-second stage scores those candidates and decides which to report.
+The original pipeline used its similarity scores to do two jobs at once. It
+used them to decide which target codes to consider, and it used them to decide
+which target codes to report. Section 4 showed that this is where the problem
+was, because a code rejected by the first job could never be recovered by the
+second.
 
-**Stage 1, retrieval.** For each ICD-9-CM code we take the 10 highest scoring
-target codes from each of the three embedding models, together with the 50 most
-frequently co-occurring target codes. No chapter filter is applied.
+The revised pipeline splits those two jobs apart.
 
-**Stage 2, scoring.** A second model, a gradient boosted tree, gives each
-candidate pair a score. It is trained on the manually mapped pairs and uses 52
-pieces of information about each pair, which fall into six groups:
+**Stage 1. Collect the possibilities.** For each ICD-9-CM code we gather a wide
+list of target codes that might be correct. The list contains the 10 closest
+target codes according to SapBERT, the 10 closest according to
+all-mpnet-base-v2, the 10 closest according to ClinicalBERT, and the 50 target
+codes that most often appear alongside that ICD-9-CM code in the health records.
+No chapter filter is applied. This gives roughly 60 to 80 candidates per
+ICD-9-CM code. The list is intentionally longer than it needs to be, because
+including a wrong code at this point costs nothing, whereas leaving out a right
+one cannot be undone.
 
-1. The similarity score, its rank, and its size relative to the best score for
-   that ICD-9-CM code, from each of the three embedding models.
-2. The same three quantities calculated in the opposite direction, scoring the
-   pair from the target code's point of view. This asks whether the target code
-   also regards the ICD-9-CM code as one of its closest matches.
-3. Whether the two codes are each other's closest match, and how far the two
-   directions disagree.
-4. How many other ICD-9-CM codes are competing for the same target code.
-5. The co-occurrence frequency and its rank.
-6. Word overlap between the two labels, and chapter alignment, together with a
+**Stage 2. Judge the possibilities.** Each candidate pair is then given a score
+by a second model. The model is a gradient boosted tree, which is a standard
+method that learns a sequence of yes or no rules from examples. We train it on
+the pairs that were mapped manually, so it learns what a correct pair tends to
+look like.
+
+To judge a pair, the model is given 52 pieces of information about that pair.
+They answer six questions.
+
+1. *How similar are the two labels?* The similarity score from each of the three
+   models, where that score ranks among the candidates for this ICD-9-CM code,
+   and how it compares with the best score that ICD-9-CM code achieved.
+
+2. *Does the target code agree?* The same three measurements taken the other way
+   round. Being close to an ICD-9-CM code is not the same as being its match.
+   Take ICD-9-CM 141, malignant neoplasm of tongue. Its second closest ICD-10-CA
+   code is C01, malignant neoplasm of base of tongue, and looking back the other
+   way, 141 is the closest ICD-9-CM code to C01. That agreement in both
+   directions is what a correct pair looks like, and C01 is indeed a correct
+   answer. Its sixth closest is C61, malignant neoplasm of prostate, but looking
+   back the other way 141 is only the ninth closest ICD-9-CM code to C61, because
+   the genuine prostate codes are nearer. The disagreement is the signal that
+   C61 is a false match. This turned out to be the most useful single addition,
+   as shown in Section 7.
+
+3. *Are the two codes each other's first choice?* Whether each is the other's
+   closest match, and by how much the two directions disagree.
+
+4. *Is this target code popular with everything?* How many other ICD-9-CM codes
+   are also competing for it. A target code that looks like a good match for
+   dozens of different ICD-9-CM codes is usually a vague label rather than a real
+   match for any of them.
+
+5. *Do the two codes actually occur together?* The co-occurrence frequency, and
+   where that frequency ranks among the candidates for this ICD-9-CM code.
+
+6. *Do the labels and chapters line up?* How many words the two labels share, how
+   close the spellings are, and whether the two chapters align, together with a
    figure learned from the training data for how often that particular pair of
-   chapters actually maps.
+   chapters produces a real mapping.
 
-**Reporting.** A pair is reported if its score passes a fixed threshold, or if
-it is close to the best score for that ICD-9-CM code, or if it is the best score
-for that code. Both thresholds are chosen using the training data only.
+**Deciding what to report.** A pair is reported if its score is above a fixed
+cutoff, or if it is close to the best score for that ICD-9-CM code, or if it is
+the best score for that code. Both cutoffs are chosen using only the training
+codes, never the codes being tested.
 
 **Table 3. F1 score at each stage of development.**
 
@@ -210,7 +229,11 @@ for that code. Both thresholds are chosen using the training data only.
 | Original pipeline, ClinicalBERT | 0.427 | 0.716 |
 | Original pipeline, SapBERT | 0.530 | 0.821 |
 | Original pipeline, SapBERT, unseen codes | 0.546 | 0.824 |
-| Revised pipeline, unseen codes | **0.668** | **0.840** |
+| Revised pipeline, SapBERT with all-mpnet-base-v2 and ClinicalBERT, unseen codes | **0.668** | **0.840** |
+
+The revised pipeline uses all three embedding models together rather than
+choosing between them. Section 7 shows that ClinicalBERT can be removed from
+this combination without any loss.
 
 ---
 
