@@ -285,7 +285,7 @@ to the remainder, rather than to build a crosswalk from nothing.
 
 It is also worth noting that on ICD-9-CM to ICDA-8 the trained model adds only
 0.016. Almost all of the performance on that crosswalk comes from the code
-labels themselves, for the reason given in Section 12.
+labels themselves, for the reason given in Section 11.
 
 ---
 
@@ -420,46 +420,7 @@ relying on the code number more heavily than the others.
 
 ---
 
-## 9. The Errors That Remain
-
-We examined which ICD-9-CM codes are still mapped incorrectly at the 95%
-precision operating point.
-
-**Table 10. Completeness of the automatic mapping for each ICD-9-CM code.**
-
-| | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
-|---|---|---|
-| All manual targets found | 39.5% | 81.6% |
-| Some but not all found | 46.2% | 4.4% |
-| None found | 14.2% | 14.0% |
-| Codes with one target, mapped correctly | 86.7% (n=143) | 88.2% (n=271) |
-| Codes with several targets, mapped completely | 6.0% (n=201) | 0.0% (n=22) |
-
-Performance on codes with a single target is essentially the same for both
-crosswalks. The entire difference between the two crosswalks comes from how many
-codes have several targets. An ICD-9-CM code maps to an average of 2.72
-ICD-10-CA codes, and 63.2% of codes have more than one. For ICDA-8 the average
-is 1.10 and only 7.9% have more than one. These counts agree with the original
-methods document, which reports 127 one-to-one against 218 one-to-many for
-ICD-10-CA and 278 against 24 for ICDA-8.
-
-The practical consequence is that the remaining problem is not recognising the
-right clinical concept, which the pipeline does well, but deciding how many
-target codes a single ICD-9-CM code should expand into. We checked whether the
-additional targets of a multi-target code tend to sit in consecutive blocks,
-which would suggest a way of predicting them, and found that they partly do.
-This has not been implemented.
-
-![per category change](results/plot_ccs_breakdown_10_9.png)
-
-**Figure 4. Change in F1 score by CCS category when ClinicalBERT is replaced by
-SapBERT, ICD-9-CM to ICD-10-CA.** Of the 130 categories scored by both models,
-114 improved and 16 declined, so the improvement is spread across the
-classification rather than driven by a few categories.
-
----
-
-## 10. Choosing a Standard Stop Word Dictionary
+## 9. Choosing a Standard Stop Word Dictionary
 
 Stop words are common words such as "the", "of" and "and" that carry little
 meaning on their own. The original analysis did not remove them. We were asked
@@ -471,7 +432,7 @@ not the size of the dictionary but whether removing its words causes two
 different codes to end up with the same cleaned label, since the pipeline cannot
 distinguish codes in that situation.
 
-**Table 11. Published stop word dictionaries compared.**
+**Table 10. Published stop word dictionaries compared.**
 
 | Dictionary | Words | Codes made identical |
 |---|---|---|
@@ -495,13 +456,13 @@ all.
 
 ---
 
-## 11. Applying Stop Word Removal to ClinicalBERT
+## 10. Applying Stop Word Removal to ClinicalBERT
 
 We reran ClinicalBERT under all four combinations of removing stop words and
 removing the code number, using the same parameter search each time, so that the
 only difference between the four results is the text given to the model.
 
-**Table 12. Best F1 score for ClinicalBERT under each text preparation.**
+**Table 11. Best F1 score for ClinicalBERT under each text preparation.**
 
 | ICD-9-CM to ICD-10-CA | Code number included | Code number removed |
 |---|---|---|
@@ -515,7 +476,7 @@ only difference between the four results is the text given to the model.
 
 ![stop words and code numbers](results/plot_stopwords_codes.png)
 
-**Figure 5. Best F1 score for ClinicalBERT under each combination of text
+**Figure 4. Best F1 score for ClinicalBERT under each combination of text
 preparation.**
 
 Removing stop words improves the ICD-10-CA result by 0.006 when the code number
@@ -529,9 +490,9 @@ The ICDA-8 result stays between 0.713 and 0.719 whatever is done to the text.
 Nothing in the cleaning process affects that crosswalk.
 
 We also ran both versions of the Snowball dictionary so that the choice
-described in Section 10 could be made on evidence.
+described in Section 9 could be made on evidence.
 
-**Table 13. Best F1 score with each version of the Snowball dictionary.**
+**Table 12. Best F1 score with each version of the Snowball dictionary.**
 
 | | Snowball as published (175 words) | Snowball retaining letters and negations (170 words) |
 |---|---|---|
@@ -545,135 +506,71 @@ the letter that identifies several vitamin deficiency and hepatitis codes.
 
 ---
 
-## 12. Distributions of the Two Pipeline Inputs
+## 11. What the Similarity and Co-occurrence Numbers Look Like
 
-The original pipeline applies a threshold to two quantities, the cosine
-similarity and the co-occurrence frequency. We were asked to describe how those
-two quantities are actually distributed rather than assume it.
+Steps 1 and 2 of the original pipeline each cut a list short using a number.
+Step 1 uses the similarity score and Step 2 uses how often two codes appear
+together in the health records. We were asked to show what those two numbers
+actually look like across all the codes rather than assume it.
 
-**Table 14. Highest cosine similarity available for each ICD-9-CM code,
-ClinicalBERT, 354 codes on each crosswalk.**
+### The similarity score
+
+For each of the 354 ICD-9-CM codes we took its best similarity score against any
+target code.
+
+**Table 13. Best similarity score available for each ICD-9-CM code,
+ClinicalBERT.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
 |---|---|---|
 | Lowest | 0.853 | 0.865 |
-| Median | 0.930 | 0.968 |
-| Codes whose best match has an identical label | 0 | 98 (27.7%) |
+| Middle value | 0.930 | 0.968 |
+| Codes whose best match is a word for word identical label | 0 | 98 |
 
 ![max similarity distribution](results/plot_freq_dist_max_similarity.png)
 
-**Figure 6. Distribution of the highest cosine similarity available for each
-ICD-9-CM code.**
+**Figure 5. How the best available similarity score is spread across the 354
+ICD-9-CM codes.**
 
-The ICDA-8 distribution is shifted upwards and has a pronounced spike at 1.0.
-This is because 98 ICD-9-CM codes have an ICDA-8 code whose label is word for
-word identical, so those mappings are found without any inference. No ICD-10-CA
-code has an identical label to any ICD-9-CM code, because ICD-10-CA was
-rewritten while ICDA-8 was not. This is the clearest single explanation for why
-the ICDA-8 crosswalk scores higher throughout this document, and it is a
-property of the code sets rather than of the method.
+Two things follow from this.
 
-Every code has a best match above 0.85, which explains why a single fixed
-similarity cutoff cannot work and why the original analysis used a cutoff
-expressed relative to each code's own best score.
+The first is that every code has a best match above 0.85, so there is no single
+score that separates good matches from bad ones. A score of 0.90 might be the
+best match one code has and only the tenth best another code has. This is why
+the original analysis compared each candidate against that code's own best score
+instead of using one fixed cutoff, and that was the right decision.
 
-**Table 15. Co-occurrence frequency of the most frequent target for each
-ICD-9-CM code.**
+The second is that ICDA-8 scores higher across the board. Of the 354 ICD-9-CM
+codes, 98 have an ICDA-8 code whose label is word for word identical, so those
+mappings need no interpretation at all. Not one ICD-9-CM code has an identical
+label to an ICD-10-CA code, because ICD-10-CA was rewritten while ICDA-8 was
+not. This is the simplest explanation for why every ICDA-8 result in this
+document is higher than the matching ICD-10-CA result. It is a difference
+between the code sets, not between the methods.
+
+### How often two codes appear together
+
+**Table 14. How often the most frequent partner of each ICD-9-CM code appears
+alongside it.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
 |---|---|---|
 | Codes with co-occurrence data | 347 of 354 | 270 of 354 |
-| Codes with none | 7 (2.0%) | 84 (23.7%) |
-| Median frequency | 1,296 | 326 |
-| Highest frequency | 238,548 | 19,099 |
+| Codes with none | 7 | 84 |
+| Middle value | 1,296 | 326 |
+| Highest | 238,548 | 19,099 |
 
 ![co-occurrence distribution](results/plot_freq_dist_top_cooccurrence.png)
 
-**Figure 7. Distribution of the co-occurrence frequency of the most frequent
-target for each ICD-9-CM code, on a logarithmic scale.**
+**Figure 6. How the co-occurrence count of each code's most frequent partner is
+spread, on a scale where each step is ten times the last.**
 
-The frequencies span five orders of magnitude, so a raw count is not comparable
-between one code and another. The scoring stage therefore uses the rank of a
-target within its own ICD-9-CM code as well as the raw count. Almost a quarter
-of ICD-9-CM codes have no ICDA-8 co-occurrence data at all, and for those codes
-Step 2 of the original pipeline contributes nothing.
+The counts differ enormously from one code to another, from single figures up to
+238,548. A count of 300 is therefore a strong signal for one code and a weak one
+for another, and the raw count cannot be compared between codes. The scoring
+stage in the revised pipeline uses where a target ranks within its own ICD-9-CM
+code as well as the count itself.
 
----
-
-## 13. Applying the Method to Other Code Sets
-
-The aim of this work is a method that another group can apply to their own
-crosswalk, rather than a finished mapping or a piece of software. It is
-therefore worth stating precisely what a group would need in order to use it.
-
-The method as described above draws on three things: the code labels for both
-classifications, linked physician and hospital records from which co-occurrence
-frequencies are calculated, and a table aligning the chapters of the two
-classifications. The code labels are published and are available to anyone. The
-other two are not. Linked administrative health data covering a period when both
-classifications were in use is unusual, and a chapter alignment table has to be
-built by hand for each pair of classifications.
-
-We therefore measured what the method achieves when those two inputs are
-withheld. Each setting uses the same folds, the same scoring model and the same
-held-out test codes, so only the available inputs differ.
-
-**Table 16. Performance by what a group has available, measured on unseen
-codes.**
-
-| Available | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
-|---|---|---|
-| Labels, health records and chapter table | 0.669 | 0.854 |
-| Labels and chapter table only | 0.621 | 0.815 |
-| Labels only | 0.581 | 0.806 |
-| Original pipeline, for reference | 0.427 | 0.716 |
-
-A group with nothing beyond the published code labels of the two
-classifications, and enough manually mapped codes to train on, obtains 0.581 and
-0.806. Both are well above what the original pipeline achieved with the full
-data. The co-occurrence data is worth 0.048 on ICD-10-CA and 0.040 on ICDA-8,
-and the chapter table a further 0.040 and 0.009. Neither is essential.
-
-Three requirements remain, and they should be stated plainly.
-
-First, the method needs manually mapped codes to train on. Section 7 shows that
-between 100 and 180 are sufficient, and that dividing the folds by CCS category
-costs almost nothing, so those codes do not need to cover every clinical area.
-The intended use is to map a portion by hand and extend it, not to build a
-crosswalk from nothing.
-
-Second, every embedding model used here was trained on English text. A
-classification whose labels are in another language would need a model trained
-on that language. We have not tested this, and it is the largest untested
-assumption in any claim that the method transfers.
-
-Third, the finding in Section 8 that the code number should be excluded from the
-text does not generalise automatically. It holds when the two numbering systems
-are unrelated, as ICD-9-CM and ICD-10-CA are, and reverses when they are not, as
-with ICD-9-CM and ICDA-8. A group applying the method would need to make that
-determination for their own pair of classifications rather than adopt our
-conclusion.
-
-Run `scripts/29_portability.R`.
-
----
-
-## Scripts
-
-Each of the following prints its results from saved files and completes in a few
-seconds. To run them, open `icd_crosswalk.Rproj` in RStudio, then use the
-`source` command shown.
-
-**Table 17. Scripts for reproducing the results in this document.**
-
-| Script | Shows |
-|---|---|
-| `27_show_results.R` | Every headline figure in this document |
-| `23_code_prefix_test.R` | Section 8 |
-| `26_stopword_choice.R` | Section 10, including the affected labels |
-| `28_stopwords_and_codes.R` | Section 11 |
-| `25_frequency_distributions.R` | Section 12 |
-| `29_portability.R` | Section 13 |
-| `24_show_similarity_matrix.R` | A worked example of a cosine similarity matrix |
-
-For example, `source("scripts/27_show_results.R")`.
+The other point is that 84 ICD-9-CM codes, close to a quarter, have no ICDA-8
+co-occurrence data at all. For those codes Step 2 of the original pipeline
+contributes nothing and the mapping rests entirely on the labels.
