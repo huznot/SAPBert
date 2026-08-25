@@ -4,12 +4,10 @@
 
 ## Summary
 
-The original pipeline converted each ICD code label into a numeric
-representation using ClinicalBERT, selected candidate target codes whose
-similarity scores were close to the highest score for that code, added the most
-frequently co-occurring target codes, removed pairs whose chapters did not
-align, and reported whatever passed one of four mapping algorithms. The best F1
-score was 0.427 for ICD-9-CM to ICD-10-CA and 0.716 for ICD-9-CM to ICDA-8.
+This document records the changes made to the automatic mapping pipeline since
+the original analysis, in the order they were made, with the result of each one.
+The pipeline itself is unchanged in structure. The original best F1 score was
+0.427 for ICD-9-CM to ICD-10-CA and 0.716 for ICD-9-CM to ICDA-8.
 
 We rebuilt the pipeline in R and reproduced both of those figures exactly. We
 then replaced ClinicalBERT with a newer model, SapBERT, which raised the
@@ -20,14 +18,12 @@ in Step 1 removed 63% of the correct ICD-10-CA pairs before any selection took
 place. Once a pair is removed at that step it cannot be recovered later, so no
 version of Step 4 could have produced an F1 score above 0.770.
 
-That finding sets the direction for the work that follows. Widening Step 1 so
-that a fixed number of candidates is kept for each ICD-9-CM code, rather than a
-number that depends on that code's best similarity score, would raise the
-reachable limit from 0.770 to 0.927. Nothing in this document changes Step 4,
-and the remaining sections address the specific questions raised in review:
-whether the code number belongs in the embedded text, which standard stop word
-dictionary to use, and how the two quantities the pipeline thresholds on are
-actually distributed. Section 10 sets out what we propose to do next.
+Widening Step 1 so that a fixed number of candidates is kept for each ICD-9-CM
+code, rather than a number that depends on that code's best similarity score,
+raises that limit from 0.770 to 0.927. Nothing here changes Step 4. The
+remaining sections cover the questions raised in review: the code number in the
+embedded text, the choice of stop word dictionary, and the distributions of the
+two quantities Steps 1 and 2 threshold on. Section 9 lists what is unfinished.
 
 ---
 
@@ -157,40 +153,7 @@ deletes candidates outright.
 
 ---
 
-## 5. How Performance Is Measured
-
-The figures in the original analysis were calculated on the same pairs that were
-used to choose the parameters. The search over 96 combinations of similarity
-threshold, Top N and mapping algorithm selected whichever combination scored
-highest against the manual crosswalk, and that score was then reported. This
-tends to overstate performance, because the search can settle on values that
-happen to suit the particular codes being scored rather than values that would
-hold for codes it has not seen.
-
-We therefore re-measured the original pipeline using five-fold cross-validation
-in which the folds are divided by ICD-9-CM code, so that the parameters are
-chosen on one set of codes and the score is calculated on a different set.
-
-**Table 3. The original pipeline scored in sample and on unseen codes, using
-SapBERT embeddings.**
-
-| | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
-|---|---|---|
-| Parameters chosen and scored on the same codes | 0.547 | 0.824 |
-| Parameters chosen on one set, scored on unseen codes | 0.546 | 0.824 |
-
-The difference is negligible. Because the pipeline has only three parameters to
-tune, there is very little scope for it to fit itself to the particular codes
-being scored, and the original figures are not inflated by the way they were
-measured. This is worth establishing explicitly, since it means the improvement
-from 0.427 to 0.530 in Section 2 is attributable to the change of embedding
-model and not to the evaluation procedure.
-
-We recommend that cross-validation of this kind be used for any future
-comparison, since a method with more parameters than the present one would not
-be as forgiving.
-
-## 6. Including the Code Number in the Text
+## 5. Including the Code Number in the Text
 
 The original analysis combined each ICD code with its label into a single text
 string before embedding, so that the model received text such as "250 diabetes
@@ -200,7 +163,7 @@ label alone.
 The tables below report retrieval results only, measured on similarity scores
 before any scoring or selection takes place.
 
-**Table 4. Effect of removing the code number, ICD-9-CM to ICD-10-CA.**
+**Table 3. Effect of removing the code number, ICD-9-CM to ICD-10-CA.**
 
 | | Correct target ranked highest | In top 10 | In top 25 | In top 50 |
 |---|---|---|---|---|
@@ -211,7 +174,7 @@ before any scoring or selection takes place.
 | all-mpnet-base-v2, code and label | 80.9% | 65.5% | 77.0% | 85.1% |
 | all-mpnet-base-v2, label only | **89.9%** | 67.7% | 77.8% | 85.8% |
 
-**Table 5. Effect of removing the code number, ICD-9-CM to ICDA-8.**
+**Table 4. Effect of removing the code number, ICD-9-CM to ICDA-8.**
 
 | | Correct target ranked highest | In top 10 | In top 25 | In top 50 |
 |---|---|---|---|---|
@@ -236,7 +199,7 @@ relying on the code number more heavily than the others.
 
 ---
 
-## 7. Choosing a Standard Stop Word Dictionary
+## 6. Choosing a Standard Stop Word Dictionary
 
 Stop words are common words such as "the", "of" and "and" that carry little
 meaning on their own. The original analysis did not remove them. We were asked
@@ -248,7 +211,7 @@ not the size of the dictionary but whether removing its words causes two
 different codes to end up with the same cleaned label, since the pipeline cannot
 distinguish codes in that situation.
 
-**Table 6. Published stop word dictionaries compared.**
+**Table 5. Published stop word dictionaries compared.**
 
 | Dictionary | Words | Codes made identical |
 |---|---|---|
@@ -259,7 +222,7 @@ distinguish codes in that situation.
 
 Snowball causes the fewest collisions, and the four it does cause involve codes
 that are not part of the validation data. The collisions caused by NLTK do
-involve validation codes. On that basis we recommend Snowball.
+involve validation codes.
 
 Snowball nonetheless has one weakness for this application. It removes the
 single letters "a" and "i", so that "vitamin a deficiency" becomes "vitamin
@@ -272,13 +235,13 @@ all.
 
 ---
 
-## 8. Applying Stop Word Removal to ClinicalBERT
+## 7. Applying Stop Word Removal to ClinicalBERT
 
 We reran ClinicalBERT under all four combinations of removing stop words and
 removing the code number, using the same parameter search each time, so that the
 only difference between the four results is the text given to the model.
 
-**Table 7. Best F1 score for ClinicalBERT under each text preparation.**
+**Table 6. Best F1 score for ClinicalBERT under each text preparation.**
 
 | ICD-9-CM to ICD-10-CA | Code number included | Code number removed |
 |---|---|---|
@@ -298,7 +261,7 @@ preparation.**
 Removing stop words improves the ICD-10-CA result by 0.006 when the code number
 is present and by 0.017 when it is not. It has no meaningful effect on ICDA-8.
 Removing the code number is the larger of the two changes, worth between 0.035
-and 0.046 on ICD-10-CA, which agrees with the retrieval results in Section 6.
+and 0.046 on ICD-10-CA, which agrees with the retrieval results in Section 5.
 The two changes combine, and the best result is obtained with both applied,
 giving 0.482 against 0.427 for the original ClinicalBERT configuration.
 
@@ -306,9 +269,9 @@ The ICDA-8 result stays between 0.713 and 0.719 whatever is done to the text.
 Nothing in the cleaning process affects that crosswalk.
 
 We also ran both versions of the Snowball dictionary so that the choice
-described in Section 7 could be made on evidence.
+described in Section 6 could be made on evidence.
 
-**Table 8. Best F1 score with each version of the Snowball dictionary.**
+**Table 7. Best F1 score with each version of the Snowball dictionary.**
 
 | | Snowball as published (175 words) | Snowball retaining letters and negations (170 words) |
 |---|---|---|
@@ -322,7 +285,7 @@ the letter that identifies several vitamin deficiency and hepatitis codes.
 
 ---
 
-## 9. What the Similarity and Co-occurrence Numbers Look Like
+## 8. What the Similarity and Co-occurrence Numbers Look Like
 
 Steps 1 and 2 of the original pipeline each cut a list short using a number.
 Step 1 uses the similarity score and Step 2 uses how often two codes appear
@@ -334,7 +297,7 @@ actually look like across all the codes rather than assume it.
 For each of the 354 ICD-9-CM codes we took its best similarity score against any
 target code.
 
-**Table 9. Best similarity score available for each ICD-9-CM code,
+**Table 8. Best similarity score available for each ICD-9-CM code,
 ClinicalBERT.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
@@ -366,7 +329,7 @@ between the code sets, not between the methods.
 
 ### How often two codes appear together
 
-**Table 10. How often the most frequent partner of each ICD-9-CM code appears
+**Table 9. How often the most frequent partner of each ICD-9-CM code appears
 alongside it.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
@@ -383,9 +346,8 @@ spread, on a scale where each step is ten times the last.**
 
 The counts differ enormously from one code to another, from single figures up to
 238,548. A count of 300 is therefore a strong signal for one code and a weak one
-for another, and the raw count cannot be compared between codes. Any use of the count
-should therefore take account of where a target ranks within its own ICD-9-CM
-code, rather than comparing counts across codes.
+for another, and the raw count is not comparable between codes. A count carries meaning only
+relative to the other counts for the same ICD-9-CM code.
 
 The other point is that 84 ICD-9-CM codes, close to a quarter, have no ICDA-8
 co-occurrence data at all. For those codes Step 2 of the original pipeline
@@ -393,38 +355,27 @@ contributes nothing and the mapping rests entirely on the labels.
 
 ---
 
-## 10. Proposed Next Steps
+## 9. Not Yet Done
 
-Three things follow from the results above. They are listed in the order we
-would propose to address them, and none has been adopted.
+**Widening Step 1.** Section 4 shows the similarity cutoff discards 63% of the
+correct ICD-10-CA pairs before Step 4 is reached, and that keeping a fixed
+number of candidates per ICD-9-CM code instead raises the reachable limit from
+0.770 to 0.927. Not implemented. Step 4 would have to be re-tuned, since the
+four mapping algorithms were chosen against a much smaller candidate set.
 
-**Widening Step 1.** Section 4 shows that the similarity cutoff discards 63% of
-the correct ICD-10-CA pairs before Step 4 is reached, and that keeping a fixed
-number of candidates per ICD-9-CM code instead would raise the reachable limit
-from 0.770 to 0.927. This is a change to one step of the existing pipeline
-rather than a replacement for it, and it is the single change with the most to
-gain. It would need Step 4 to be re-tuned, since the four mapping algorithms
-were chosen against a much smaller candidate set.
+**Codes with several correct targets.** ICD-9-CM codes with a single correct
+target are mapped correctly 87% to 88% of the time on both crosswalks. Codes
+with several correct targets are mapped completely 6% of the time for ICD-10-CA
+and 0% for ICDA-8. Since 63% of ICD-9-CM codes have more than one ICD-10-CA
+target against 8% for ICDA-8, this accounts for essentially the whole difference
+between the two crosswalks. The open problem is not recognising the right
+clinical concept but deciding how many target codes one ICD-9-CM code expands
+into. The additional targets partly fall in consecutive blocks of the target
+classification. Not implemented.
 
-**Codes with several correct targets.** At the operating points used above,
-ICD-9-CM codes with a single correct target are mapped correctly 87% to 88% of
-the time on both crosswalks, while codes with several correct targets are mapped
-completely 6% of the time for ICD-10-CA and 0% for ICDA-8. Since 63% of ICD-9-CM
-codes have more than one ICD-10-CA target against 8% for ICDA-8, this accounts
-for essentially the whole difference in performance between the two crosswalks.
-The remaining problem is therefore not recognising the right clinical concept
-but deciding how many target codes one ICD-9-CM code should expand into. We have
-checked whether the additional targets tend to fall in consecutive blocks of the
-target classification, and they partly do, which may offer a way in.
-
-**A scoring step between retrieval and reporting.** We have separately
-prototyped a version that keeps a wide candidate set and then scores each
-candidate pair with a model trained on the manually mapped pairs, before the
-reporting rule is applied. Measured on unseen codes it reaches F1 0.668 for
-ICD-10-CA and 0.840 for ICDA-8, against 0.546 and 0.824 for the original rules
-measured the same way. It is not presented here because it departs from the
-existing methodology in a way that should be discussed before it is adopted, and
-because the improvement combines two changes, the wider candidate set and the
-scoring model, which we have not yet separated. It also requires manually mapped
-codes in order to train, which the present pipeline does not. The work is kept
-on the `testing` branch of the repository.
+**A scoring step between retrieval and reporting.** A version that keeps a wide
+candidate set and scores each candidate pair with a model trained on the
+manually mapped pairs reaches F1 0.668 for ICD-10-CA and 0.840 for ICDA-8 on
+unseen codes, against 0.546 and 0.824 for the existing rules measured the same
+way. It departs from the existing methodology and requires manually mapped codes
+in order to train. Kept on the `testing` branch, not merged.
