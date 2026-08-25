@@ -146,12 +146,3 @@ scripts/          pipeline code
 results/          csv output and charts
 report.md         every change from the original pipeline to now
 ```
-
-## Limitations
-
-- Tested on 354 three-digit ICD-9 categories, not the full ~14,000 code set.
-- 937 and 331 manually verified pairs. Small.
-- ICD-10-CA is the harder track and 0.668 is a long way from its 0.96 ceiling.
-  Most codes map to more than one target and the boundaries are judgement
-  calls that human coders disagree on.
-- Only tested on these two migrations. Transfer to other systems is untested.
