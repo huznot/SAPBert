@@ -1,4 +1,6 @@
-# Change log
+# ICD crosswalk automation: report
+
+Every change from the original pipeline to the current one, in order.
 
 ## Abstract
 
@@ -22,6 +24,26 @@ The remaining errors are one problem. Codes with a single correct target are
 solved 87-88% of the time on both tracks. Codes with several are solved 6% on
 ICD-10-CA and 0% on ICDA-8. 63% of ICD-9 codes have multiple ICD-10-CA targets
 against 8% for ICDA-8, so that accounts for the whole gap between tracks.
+
+---
+
+## What the similarity matrix is
+
+Every code label is turned into a vector by the model. Cosine similarity is the
+angle between two vectors, from 0 to 1. The matrix holds that number for every
+ICD-9 code against every candidate target.
+
+![similarity matrix](results/plot_similarity_matrix_example.png)
+
+Columns are ICD-9-CM codes, rows are ICD-10-CA candidates, each cell is one
+cosine similarity. An x marks a pair the manual crosswalk says is correct. For
+ICD-9 141, malignant neoplasm of tongue, the top scores are C04 at 0.653, C01 at
+0.643 and C02 at 0.542. C01 and C02 are the correct answers, C04 is not.
+
+The full ICD-10-CA matrix is 354 columns by 2038 rows, 721,452 numbers, split
+across one sheet per CCS group. The pipeline never sees the whole thing at once.
+
+Run `scripts/24_show_similarity_matrix.R` to print this for any code.
 
 ---
 
@@ -53,6 +75,8 @@ comparable. 112 settings per track, eight conditions.
 | SapBERT, filler stripped | 0.534 | 0.806 |
 | all-mpnet-base-v2 | 0.533 | 0.769 |
 | all-mpnet-base-v2, filler stripped | 0.523 | 0.766 |
+
+![model comparison](results/plot_f1_accuracy_comparison.png)
 
 - SapBERT is the best single model, +0.10 and +0.11 over ClinicalBERT.
 - all-mpnet-base-v2 has no medical training and ties SapBERT on ICD-10-CA.
@@ -125,7 +149,15 @@ Both cutoffs tuned on inner folds.
 - Original numbers were in-sample: the grid picked settings on the same pairs it
   scored against. Everything now uses 5-fold cross validation with folds split
   by ICD-9 code, so no code is in both training and test.
-- Added confidence scores. At a 95% precision target:
+- Added confidence scores. Every mapping now carries one, so the output can be
+  sorted instead of taken whole.
+
+![precision and coverage](results/plot_precision_coverage.png)
+
+  Precision against recall as the confidence cutoff moves. ICDA-8 holds near
+  perfect precision out to 80% recall. ICD-10-CA starts falling at 45%.
+
+- At a 95% precision target:
 
 | | ICD-10-CA | ICDA-8 |
 |---|---|---|
@@ -162,6 +194,8 @@ One feature group removed at a time, held out.
   slightly better on ICDA-8, 0.862 against 0.854.
 - Learning curve: plateaus at 100-180 training codes on both tracks. More
   manually mapped pairs of the same kind would not help.
+
+![learning curve](results/plot_learning_curve.png)
 - Category holdout: folds split by CCS category so whole clinical areas are
   unseen. Costs 0.004 on ICD-10-CA, 0.000 on ICDA-8. Not memorizing categories.
 - Retrieval sensitivity: 24 settings, results flat. Nothing is finely tuned.
@@ -208,7 +242,14 @@ Completeness per source code at the 95% precision point.
 - Checked whether the extra targets of a multi-target code sit in contiguous
   blocks. They partly do. Not implemented.
 
-## 10. 
+![per category change](results/plot_ccs_breakdown_10_9.png)
+
+Per CCS category, SapBERT minus ClinicalBERT on ICD-10-CA. 114 categories
+improved, 16 got worse, out of 130 scored by both. The gain is broad, not driven
+by a few categories.
+
+## 10. Choosing a stop word dictionary
+
 Began exploring stopwords dictionarys:
 - R's SMART `stopwords`, largest library but removes all single letters and negations
 - R's Snowball `stopwords`, moderately large and removes negations as well as letters i and a when as a word
@@ -235,6 +276,8 @@ ICD-9 to ICDA-8
 | stop words kept | 0.716 | 0.718 |
 | stop words removed | 0.719 | 0.713 |
 
+![stop words and code numbers](results/plot_stopwords_codes.png)
+
 - Removing stop words gains 0.006 on ICD-10-CA with the code in, 0.017 with the
   code out. On ICDA-8 it moves nothing.
 - Removing the code number is the larger effect, 0.035 to 0.046 on ICD-10-CA.
@@ -256,3 +299,60 @@ Both versions of the dictionary were run.
   deficiency" and "acute hepatitis a" becomes "acute hepatitis".
 - Run `scripts/28_stopwords_and_codes.R` for the tables above and
   `scripts/26_stopword_choice.R` for the affected labels. 
+## 12. Frequency distributions
+
+Both inputs the original pipeline thresholds on, described rather than assumed.
+
+Maximum cosine similarity per ICD-9 code, ClinicalBERT, 354 codes on each track.
+
+| | ICD-10-CA | ICDA-8 |
+|---|---|---|
+| minimum | 0.853 | 0.865 |
+| median | 0.930 | 0.968 |
+| codes whose best match is an identical label | 0 | 98 (27.7%) |
+
+![max similarity distribution](results/plot_freq_dist_max_similarity.png)
+
+- ICDA-8 is shifted right and has a spike at 1.0. 98 ICD-9 codes have an ICDA-8
+  code with the exact same label, so the match is free.
+- No ICD-10-CA code has that. ICD-10-CA was rewritten, ICDA-8 was not.
+- This is the cleanest single explanation for the gap between the two tracks.
+  It is a property of the code sets, not of the method.
+- Every code scores above 0.85, which is why a fixed cutoff does not work and
+  the original used a cutoff relative to each code's own best score.
+
+Co-occurrence count of the most frequent target per ICD-9 code.
+
+| | ICD-10-CA | ICDA-8 |
+|---|---|---|
+| codes with any co-occurrence data | 347 of 354 | 270 of 354 |
+| codes with none | 7 (2.0%) | 84 (23.7%) |
+| median count | 1,296 | 326 |
+| maximum count | 238,548 | 19,099 |
+
+![co-occurrence distribution](results/plot_freq_dist_top_cooccurrence.png)
+
+- Counts span five orders of magnitude, so raw frequency is not comparable
+  across codes. The reranker uses rank within a code as well as the raw count.
+- A quarter of ICD-9 codes have no ICDA-8 co-occurrence data at all. For those
+  the co-occurrence step contributes nothing and the model is on its own.
+
+Run `scripts/25_frequency_distributions.R`.
+
+---
+
+## Scripts to run
+
+Each of these prints its own results from cached files. None recompute anything,
+all finish in a second or two.
+
+| script | shows |
+|---|---|
+| `24_show_similarity_matrix.R` | what a similarity matrix looks like, with the correct answers marked |
+| `25_frequency_distributions.R` | section 12 |
+| `26_stopword_choice.R` | which dictionary deletes what, and which labels break |
+| `27_show_results.R` | every headline number in this report |
+| `28_stopwords_and_codes.R` | section 11 |
+
+Open `icd_crosswalk.Rproj` in RStudio first so the working directory is the
+repo root, then `source("scripts/27_show_results.R")`.

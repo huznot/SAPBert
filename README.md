@@ -134,7 +134,7 @@ data/sapbert/     SapBERT similarity matrices
 data/generated/   regenerated / filler-stripped / mpnet matrices
 scripts/          pipeline code
 results/          csv output and charts
-CHANGELOG.md      every change from the original pipeline to now
+report.md         every change from the original pipeline to now
 ```
 
 ## Limitations

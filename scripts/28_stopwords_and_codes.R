@@ -55,3 +55,33 @@ for (tr in c("10_9", "8_9")) {
 cat("\n  keeping the letters matters because 'vitamin a deficiency' and\n")
 cat("  'acute hepatitis a' lose the letter that identifies them otherwise.\n")
 cat("  see 26_stopword_choice.R for the labels this affects.\n")
+
+# bar chart of the four cells, one panel per track
+suppressMessages({library(ggplot2)})
+cells <- expand.grid(track = c("10_9", "8_9"),
+                     stop = c("stop words kept", "stop words removed"),
+                     code = c("code in text", "code removed"),
+                     stringsAsFactors = FALSE)
+tag_of <- function(stop, code) {
+  base <- if (stop == "stop words kept") "clinicalbert_base" else "clinicalbert_stopwords"
+  if (code == "code removed") paste0(base, "_nocode") else base
+}
+cells$f1 <- mapply(function(tr, s, cd) best(tag_of(s, cd), tr),
+                   cells$track, cells$stop, cells$code)
+cells <- cells[!is.na(cells$f1), ]
+if (nrow(cells)) {
+  cells$track_label <- tname(cells$track)
+  g <- ggplot(cells, aes(code, f1, fill = stop)) +
+    geom_col(position = position_dodge(0.8), width = 0.7) +
+    geom_text(aes(label = sprintf("%.3f", f1)),
+              position = position_dodge(0.8), vjust = -0.4, size = 3.2) +
+    facet_wrap(~track_label, scales = "free_y") +
+    scale_fill_manual(values = c("stop words kept" = "#6a9fd4",
+                                 "stop words removed" = "#e08a4b")) +
+    labs(x = NULL, y = "best F1", fill = NULL,
+         title = "ClinicalBERT: stop words and code numbers",
+         subtitle = "same parameter grid in every cell, only the input text changes") +
+    theme_minimal(base_size = 11) + theme(legend.position = "top")
+  ggsave("results/plot_stopwords_codes.png", g, width = 8, height = 4.5, dpi = 150)
+  cat("\nwrote results/plot_stopwords_codes.png\n")
+}
