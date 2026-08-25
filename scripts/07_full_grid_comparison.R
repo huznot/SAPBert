@@ -41,7 +41,19 @@ CONDITIONS <- list(
   sapbert_base          = list(model = "SapBERT-base-regen",    family = "SapBERT",      stripping = "base"),
   sapbert_stripped      = list(model = "SapBERT-stripped",      family = "SapBERT",      stripping = "stripped"),
   mpnet_base            = list(model = "mpnet-base",            family = "mpnet",        stripping = "base"),
-  mpnet_stripped        = list(model = "mpnet-stripped",        family = "mpnet",        stripping = "stripped")
+  mpnet_stripped        = list(model = "mpnet-stripped",        family = "mpnet",        stripping = "stripped"),
+  # the 2x2 asked for: stopwords in or out, code number in or out of the text.
+  # clinicalbert_base is the top left cell of that square, it already exists above
+  clinicalbert_base_nocode = list(
+    model = "ClinicalBERT-base-nocode", family = "ClinicalBERT", stripping = "base"),
+  clinicalbert_stopwords = list(
+    model = "ClinicalBERT-stopwords", family = "ClinicalBERT", stripping = "stopwords"),
+  clinicalbert_stopwords_nocode = list(
+    model = "ClinicalBERT-stopwords-nocode", family = "ClinicalBERT", stripping = "stopwords"),
+  # the snowball list exactly as published, including single letters, for
+  # comparison against the version that keeps them
+  clinicalbert_stopwords_raw = list(
+    model = "ClinicalBERT-stopwords-raw", family = "ClinicalBERT", stripping = "stopwords_raw")
 )
 dupe <- names(CONDITIONS)[duplicated(tolower(names(CONDITIONS)))]
 if (length(dupe)) {
