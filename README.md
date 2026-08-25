@@ -143,13 +143,3 @@ scripts/          pipeline code
 results/          csv output and charts
 report.md         every change from the original pipeline to now
 ```
-
-## Limitations
-
-- Tested on 354 three-digit ICD-9 categories, not the full ~14,000 code set.
-- 937 and 331 manually verified pairs. Small.
-- ICD-10-CA is the harder track. Most of its codes map to more than one target
-  and the boundaries are judgement calls that human coders disagree on.
-- The similarity cutoff discards 63% of correct ICD-10-CA pairs before the
-  selection step runs. Diagnosed but not yet fixed on `main`.
-- Only tested on these two migrations. Transfer to other systems is untested.
