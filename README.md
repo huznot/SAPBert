@@ -17,6 +17,16 @@ It is tested on two migrations:
 
 ![Logos](results/logos.png)
 
+## Branches
+
+This is the `testing` branch. It keeps the two-stage pipeline: a wide candidate
+set followed by a trained scoring model, reaching F1 0.668 and 0.840 on unseen
+codes against 0.546 and 0.824 for the original rules measured the same way.
+
+`main` follows the existing four-step methodology and does not include the
+scoring model. Work here should not be merged into `main` until the change of
+methodology has been agreed.
+
 ## Running it
 
 Needs R. From `scripts/`:
@@ -99,6 +109,7 @@ still runs.
 | `22_target_block_structure.R` | do multi-target answers sit in blocks |
 | `23_code_prefix_test.R` | code number in the text, report Section 8 |
 | `29_portability.R` | performance without health records or a chapter table |
+| `30_retrieval_vs_model.R` | separates the wider candidate set from the scoring model |
 
 **Show the results, no recomputation, a second or two each**
 

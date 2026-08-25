@@ -269,23 +269,85 @@ by code, so that whole clinical areas are absent from training, the revised
 pipeline scores 0.657 rather than 0.661. It is not simply memorising the
 categories it was trained on.
 
-Two honest qualifications belong with this.
+### Separating the two changes
 
-The first is that the improvement comes from two changes made at the same time,
-a wider candidate list and a trained scoring model, and the experiments in this
-document do not separate how much each contributes. The wider candidate list is
-what raises the reachable ceiling from 0.770 to 0.927, so a meaningful part of
-the gain is likely to come from that rather than from the model.
+The revised pipeline changed two things at once, the width of the candidate step
+and the addition of a scoring model, so its advantage over the original rules
+cannot be attributed to either without a further experiment. We therefore held
+the scoring model fixed and varied only how candidates are selected. The narrow
+settings reproduce the original Steps 1 to 3, thresholding each pair against the
+best similarity available for its ICD-9-CM code exactly as the original does.
 
-The second is that the revised pipeline genuinely requires manually mapped
-examples in order to run at all, which the original did not. Section 7 shows
-that between 100 and 180 mapped codes are enough. The intended use is therefore
-to map a portion of the codes by hand and use the pipeline to extend that work
-to the remainder, rather than to build a crosswalk from nothing.
+**Table 5. Scoring model held fixed, candidate selection varied.**
 
-It is also worth noting that on ICD-9-CM to ICDA-8 the trained model adds only
-0.016. Almost all of the performance on that crosswalk comes from the code
-labels themselves, for the reason given in Section 11.
+| Candidate selection | Correct pairs retained | ICD-10-CA F1 | ICDA-8 F1 |
+|---|---|---|---|
+| Original rules, no scoring model | | 0.546 | 0.824 |
+| Original Steps 1 to 3, threshold 0.99, Top N 10 | 59.8% / 90.3% | 0.618 | 0.847 |
+| Original Steps 1 to 3, threshold 0.995, Top N 30 | 67.4% / 88.8% | 0.621 | **0.864** |
+| Original Steps 1 to 3, threshold 0.95, Top N 30 | 79.6% / 94.2% | 0.650 | 0.839 |
+| Wide candidate set, as used above | 91.3% / 97.3% | **0.669** | 0.854 |
+
+On ICD-9-CM to ICD-10-CA the two changes contribute comparably. Adding the
+scoring model while leaving candidate selection as the original has it raises F1
+from 0.546 to 0.621, and widening the candidate set then raises it from 0.621 to
+0.669. The scoring model accounts for rather more of the gain than the wider
+candidate set, which is the opposite of what we assumed before measuring it.
+
+On ICD-9-CM to ICDA-8 the picture is different and less favourable to our
+configuration. The scoring model is worth 0.040, from 0.824 to 0.864, but
+widening the candidate set is actively harmful, costing 0.010. The best result
+on that crosswalk uses the original candidate selection unchanged. The wide
+setting was chosen for ICD-10-CA and carried over to ICDA-8 without being
+re-examined, and Table 6 shows that was a mistake. A pipeline adopting this work
+should tune the candidate width per crosswalk.
+
+### Limitations
+
+Three limitations belong with the results above.
+
+The revised pipeline requires manually mapped codes in order to train, which the
+original does not. Section 7 shows that between 100 and 180 are sufficient and
+that holding out whole CCS categories costs almost nothing, so those codes need
+not cover every clinical area. The intended use is to map a portion by hand and
+extend it, not to build a crosswalk from nothing.
+
+The reported figures are point estimates from a single fold assignment. Repeating
+the same design with different fold assignments gives 0.661 with a standard
+deviation of 0.010 for ICD-10-CA and 0.842 with a standard deviation of 0.002
+for ICDA-8, over three repeats. Across the five independent runs in this document
+the ICD-10-CA figure falls between 0.661 and 0.669. Differences smaller than
+about 0.01 on that crosswalk should not be interpreted.
+
+The validation data is small. There are 937 manually mapped pairs across 345
+ICD-9-CM codes for ICD-10-CA and 331 pairs across 302 codes for ICDA-8, so each
+test fold contains roughly 60 to 70 codes. The comparisons in this document are
+paired, in that every arm is evaluated on the same folds, which removes the
+largest source of variance between arms, but the absolute figures carry the
+uncertainty above.
+
+### How training and test data were kept apart
+
+Because the scoring model is trained on the manually mapped pairs, every point
+at which those pairs influence the pipeline is listed here.
+
+1. Folds are divided by ICD-9-CM code, not by pair, so all of a code's target
+   codes fall on the same side of the split. Dividing by pair would place some
+   of a code's answers in training and the rest in test.
+2. The two reporting cutoffs are chosen on a three-fold inner split of the
+   training codes only, never on the outer test fold.
+3. The chapter pair mapping rate is a learned quantity and is fitted on the
+   training folds alone, then applied unchanged to the test fold. Chapter pairs
+   not seen in training fall back to the training set base rate.
+4. Recall is calculated against every manually mapped pair for the test codes,
+   taken before candidate selection runs. A pair that candidate selection never
+   retrieved therefore counts as a miss. Calculating recall against the retrieved
+   set instead would make a narrower candidate step look better simply by being
+   scored against fewer answers.
+5. The embedding models are pre-trained and are not fitted to this data at any
+   point.
+
+Run `scripts/30_retrieval_vs_model.R` for Table 5.
 
 ---
 
@@ -307,7 +369,7 @@ so that reviewer time can be directed at the cases that need it.
 
 **Figure 2. Precision against recall as the confidence threshold is varied.**
 
-**Table 5. Proportion of ICD-9-CM codes in each category when the confidence
+**Table 6. Proportion of ICD-9-CM codes in each category when the confidence
 threshold is set to give 95% precision.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
@@ -320,7 +382,7 @@ We also report how often the correct target appears among the highest scoring
 candidates. This separates the question of whether the pipeline can find the
 right answer from the question of whether the reporting rule chooses to keep it.
 
-**Table 6. Percentage of ICD-9-CM codes for which a correct target appears among
+**Table 7. Percentage of ICD-9-CM codes for which a correct target appears among
 the highest scoring candidates.**
 
 | | Highest | Top 3 | Top 5 |
@@ -336,7 +398,7 @@ To confirm that each part of the scoring stage is earning its place, we removed
 one group of inputs at a time and re-measured performance. A large drop means
 the group was important.
 
-**Table 7. F1 score with one group of inputs removed.**
+**Table 8. F1 score with one group of inputs removed.**
 
 | Group removed | ICD-10-CA | Change | ICDA-8 | Change |
 |---|---|---|---|---|
@@ -384,7 +446,7 @@ label alone.
 The tables below report retrieval results only, measured on similarity scores
 before any scoring or selection takes place.
 
-**Table 8. Effect of removing the code number, ICD-9-CM to ICD-10-CA.**
+**Table 9. Effect of removing the code number, ICD-9-CM to ICD-10-CA.**
 
 | | Correct target ranked highest | In top 10 | In top 25 | In top 50 |
 |---|---|---|---|---|
@@ -395,7 +457,7 @@ before any scoring or selection takes place.
 | all-mpnet-base-v2, code and label | 80.9% | 65.5% | 77.0% | 85.1% |
 | all-mpnet-base-v2, label only | **89.9%** | 67.7% | 77.8% | 85.8% |
 
-**Table 9. Effect of removing the code number, ICD-9-CM to ICDA-8.**
+**Table 10. Effect of removing the code number, ICD-9-CM to ICDA-8.**
 
 | | Correct target ranked highest | In top 10 | In top 25 | In top 50 |
 |---|---|---|---|---|
@@ -432,7 +494,7 @@ not the size of the dictionary but whether removing its words causes two
 different codes to end up with the same cleaned label, since the pipeline cannot
 distinguish codes in that situation.
 
-**Table 10. Published stop word dictionaries compared.**
+**Table 11. Published stop word dictionaries compared.**
 
 | Dictionary | Words | Codes made identical |
 |---|---|---|
@@ -462,7 +524,7 @@ We reran ClinicalBERT under all four combinations of removing stop words and
 removing the code number, using the same parameter search each time, so that the
 only difference between the four results is the text given to the model.
 
-**Table 11. Best F1 score for ClinicalBERT under each text preparation.**
+**Table 12. Best F1 score for ClinicalBERT under each text preparation.**
 
 | ICD-9-CM to ICD-10-CA | Code number included | Code number removed |
 |---|---|---|
@@ -492,7 +554,7 @@ Nothing in the cleaning process affects that crosswalk.
 We also ran both versions of the Snowball dictionary so that the choice
 described in Section 9 could be made on evidence.
 
-**Table 12. Best F1 score with each version of the Snowball dictionary.**
+**Table 13. Best F1 score with each version of the Snowball dictionary.**
 
 | | Snowball as published (175 words) | Snowball retaining letters and negations (170 words) |
 |---|---|---|
@@ -518,7 +580,7 @@ actually look like across all the codes rather than assume it.
 For each of the 354 ICD-9-CM codes we took its best similarity score against any
 target code.
 
-**Table 13. Best similarity score available for each ICD-9-CM code,
+**Table 14. Best similarity score available for each ICD-9-CM code,
 ClinicalBERT.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
@@ -550,7 +612,7 @@ between the code sets, not between the methods.
 
 ### How often two codes appear together
 
-**Table 14. How often the most frequent partner of each ICD-9-CM code appears
+**Table 15. How often the most frequent partner of each ICD-9-CM code appears
 alongside it.**
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
