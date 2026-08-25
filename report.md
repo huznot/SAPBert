@@ -311,28 +311,3 @@ co-occurrence data at all. For those codes Step 2 of the original pipeline
 contributes nothing and the mapping rests entirely on the labels.
 
 ---
-
-## 8. Not Yet Done
-
-**Widening Step 1.** Section 3 shows the similarity cutoff discards 63% of the
-correct ICD-10-CA pairs before Step 4 is reached, and that keeping a fixed
-number of candidates per ICD-9-CM code instead raises the reachable limit from
-0.770 to 0.927. Not implemented. Step 4 would have to be re-tuned, since the
-four mapping algorithms were chosen against a much smaller candidate set.
-
-**Codes with several correct targets.** ICD-9-CM codes with a single correct
-target are mapped correctly 87% to 88% of the time on both crosswalks. Codes
-with several correct targets are mapped completely 6% of the time for ICD-10-CA
-and 0% for ICDA-8. Since 63% of ICD-9-CM codes have more than one ICD-10-CA
-target against 8% for ICDA-8, this accounts for essentially the whole difference
-between the two crosswalks. The open problem is not recognising the right
-clinical concept but deciding how many target codes one ICD-9-CM code expands
-into. The additional targets partly fall in consecutive blocks of the target
-classification. Not implemented.
-
-**A scoring step between retrieval and reporting.** A version that keeps a wide
-candidate set and scores each candidate pair with a model trained on the
-manually mapped pairs reaches F1 0.668 for ICD-10-CA and 0.840 for ICDA-8 on
-unseen codes, against 0.546 and 0.824 for the existing rules measured the same
-way. It departs from the existing methodology and requires manually mapped codes
-in order to train. Kept on the `testing` branch, not merged.
