@@ -3,7 +3,11 @@
 "10_9","sapbert label only",0.9014,0.6478,0.7375,0.8154
 "10_9","mpnet with code",0.8087,0.6553,0.7695,0.8506
 "10_9","mpnet label only",0.8986,0.6766,0.778,0.8581
+"10_9","clinicalbert with code",0.3478,0.2775,0.3501,0.4344
+"10_9","clinicalbert label only",0.5855,0.3394,0.412,0.4845
 "8_9","sapbert with code",0.8411,0.9305,0.9547,0.9758
 "8_9","sapbert label only",0.8179,0.9063,0.9245,0.9396
 "8_9","mpnet with code",0.7781,0.8731,0.9305,0.9577
 "8_9","mpnet label only",0.745,0.852,0.9094,0.9486
+"8_9","clinicalbert with code",0.5828,0.6918,0.7674,0.8036
+"8_9","clinicalbert label only",0.5497,0.6254,0.6949,0.7372

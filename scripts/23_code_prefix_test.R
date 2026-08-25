@@ -24,7 +24,9 @@ ARMS <- list(
   `sapbert with code`  = "cosine_similarity_matrices_%s_SapBERT.xlsx",
   `sapbert label only` = "cosine_similarity_matrices_%s_sapbert_base_nocode.xlsx",
   `mpnet with code`    = "cosine_similarity_matrices_%s_mpnet_base.xlsx",
-  `mpnet label only`   = "cosine_similarity_matrices_%s_mpnet_base_nocode.xlsx"
+  `mpnet label only`   = "cosine_similarity_matrices_%s_mpnet_base_nocode.xlsx",
+  `clinicalbert with code`  = "cosine_similarity_matrices_%s_clinicalbert_base.xlsx",
+  `clinicalbert label only` = "cosine_similarity_matrices_%s_clinicalbert_base_nocode.xlsx"
 )
 
 long_sim <- function(path) {
@@ -70,7 +72,7 @@ res <- bind_rows(rows)
 write.csv(res, "../results/code_prefix_test.csv", row.names = FALSE)
 
 cat("\n===== label only minus with code =====\n")
-for (m in c("sapbert", "mpnet")) {
+for (m in c("sapbert", "mpnet", "clinicalbert")) {
   for (tr in unique(res$track)) {
     a <- res %>% filter(track == tr, arm == paste(m, "with code"))
     b <- res %>% filter(track == tr, arm == paste(m, "label only"))

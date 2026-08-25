@@ -29,26 +29,6 @@ against 8% for ICDA-8, so that accounts for the whole gap between tracks.
 
 ---
 
-## What the similarity matrix is
-
-Every code label is turned into a vector by the model. Cosine similarity is the
-angle between two vectors, from 0 to 1. The matrix holds that number for every
-ICD-9 code against every candidate target.
-
-![similarity matrix](results/plot_similarity_matrix_example.png)
-
-Columns are ICD-9-CM codes, rows are ICD-10-CA candidates, each cell is one
-cosine similarity. An x marks a pair the manual crosswalk says is correct. For
-ICD-9 141, malignant neoplasm of tongue, the top scores are C04 at 0.653, C01 at
-0.643 and C02 at 0.542. C01 and C02 are the correct answers, C04 is not.
-
-The full ICD-10-CA matrix is 354 columns by 2038 rows, 721,452 numbers, split
-across one sheet per CCS group. The pipeline never sees the whole thing at once.
-
-Run `scripts/24_show_similarity_matrix.R` to print this for any code.
-
----
-
 ## 1. Reimplementation
 
 - Ported both Python notebooks to R. Same steps, same order.
@@ -212,24 +192,41 @@ One feature group removed at a time, held out.
 
 ## 8. Code numbers in the model input
 
-Labels were embedded as code plus label. Tested label only.
+Labels were embedded as code plus label, for example "250 diabetes mellitus".
+Tested label only. Similarity alone, before any reranking.
+
+ICD-9 to ICD-10-CA
 
 | | top-1 | recall@10 | recall@25 | recall@50 |
 |---|---|---|---|---|
-| SapBERT, code + label, ICD-10-CA | 79.7% | 58.5% | 68.3% | 73.5% |
-| SapBERT, label only, ICD-10-CA | **90.1%** | 64.8% | 73.8% | 81.5% |
-| mpnet, code + label, ICD-10-CA | 80.9% | 65.5% | 77.0% | 85.1% |
-| mpnet, label only, ICD-10-CA | **89.9%** | 67.7% | 77.8% | 85.8% |
-| SapBERT, code + label, ICDA-8 | **84.1%** | 93.1% | 95.5% | 97.6% |
-| SapBERT, label only, ICDA-8 | 81.8% | 90.6% | 92.5% | 94.0% |
+| ClinicalBERT, code + label | 34.8% | 27.7% | 35.0% | 43.4% |
+| ClinicalBERT, label only | **58.6%** | 33.9% | 41.2% | 48.5% |
+| SapBERT, code + label | 79.7% | 58.5% | 68.3% | 73.5% |
+| SapBERT, label only | **90.1%** | 64.8% | 73.8% | 81.5% |
+| mpnet, code + label | 80.9% | 65.5% | 77.0% | 85.1% |
+| mpnet, label only | **89.9%** | 67.7% | 77.8% | 85.8% |
 
-- ICD-10-CA gains 10 points of top-1. ICD-9 and ICD-10 numbering are unrelated,
-  so the number was noise.
-- ICDA-8 loses slightly. 69.8% of ICDA-8 pairs share the source code's number,
-  so there the number is signal.
-- These are retrieval numbers, SapBERT alone, before reranking. Not the same
-  measurement as the 93.3% in section 6, which is the full pipeline.
-- Label-only matrices have since been run through the pipeline for ClinicalBERT. See section 11.
+ICD-9 to ICDA-8
+
+| | top-1 | recall@10 | recall@25 | recall@50 |
+|---|---|---|---|---|
+| ClinicalBERT, code + label | **58.3%** | 69.2% | 76.7% | 80.4% |
+| ClinicalBERT, label only | 55.0% | 62.5% | 69.5% | 73.7% |
+| SapBERT, code + label | **84.1%** | 93.1% | 95.5% | 97.6% |
+| SapBERT, label only | 81.8% | 90.6% | 92.5% | 94.0% |
+| mpnet, code + label | **77.8%** | 87.3% | 93.1% | 95.8% |
+| mpnet, label only | 74.5% | 85.2% | 90.9% | 94.9% |
+
+- Every model gains on ICD-10-CA and loses on ICDA-8. Same direction, same
+  reason, so it is the code sets and not the model.
+- ICD-9 and ICD-10 numbering are unrelated, so the number is noise there. 69.8%
+  of ICDA-8 pairs share the source code's number, so there it is signal.
+- ClinicalBERT gains the most, +23.8 points of top-1 on ICD-10-CA against +10.4
+  for SapBERT and +9.0 for mpnet. It is the weakest model on the labels
+  themselves, so it was leaning on the number hardest.
+- These are retrieval numbers. Section 11 has the end-to-end F1 for the same
+  ClinicalBERT comparison.
+- Run `scripts/23_code_prefix_test.R`.
 
 ## 9. Remaining errors
 
