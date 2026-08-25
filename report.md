@@ -67,34 +67,9 @@ medical training, performs as well as SapBERT on ICD-10-CA. Medical
 pre-training is therefore not the deciding factor in this task, which was the
 first indication that the model was not the main constraint.
 
-During this work we found and corrected a fault in our own code, in which two
-conditions whose names differed only in capitalisation were written to the same
-file on Windows, so that parallel jobs overwrote one another's results. All
-eight conditions were rerun after the fix.
-
 ---
 
-## 3. Reviewing the Filler Word List
-
-The cleaning step used a hand-written list of words to remove from labels before
-embedding. We compared this list against four published stop word lists, which
-are standard word lists distributed with the NLTK and stopwords packages.
-
-Long lists proved unsafe for this task. Two different codes can end up with
-identical text once enough words are removed, and when that happens the pipeline
-cannot tell them apart at all. The SMART list produces 23 such collisions and
-the stopwords-iso list produces 26, largely because they remove single letters
-and the words "with" and "without", so that "hepatitis a" and "hepatitis b"
-become the same string.
-
-We removed the words "other", "others", "unspecified", "with" and "without"
-from the local list, which between them merged 10 codes, and added an automatic
-check that stops the pipeline if any word list causes two codes to share the
-same cleaned label.
-
----
-
-## 4. Finding Where Correct Mappings Were Lost
+## 3. Finding Where Correct Mappings Were Lost
 
 This section contains the central finding of the work.
 
@@ -135,7 +110,7 @@ deletes candidates outright.
 
 ---
 
-## 5. Including the Code Number in the Text
+## 4. Including the Code Number in the Text
 
 The original analysis combined each ICD code with its label into a single text
 string before embedding, so that the model received text such as "250 diabetes
@@ -181,7 +156,7 @@ relying on the code number more heavily than the others.
 
 ---
 
-## 6. Choosing a Standard Stop Word Dictionary
+## 5. Choosing a Standard Stop Word Dictionary
 
 Stop words are common words such as "the", "of" and "and" that carry little
 meaning on their own. The original analysis did not remove them. We were asked
@@ -217,7 +192,7 @@ all.
 
 ---
 
-## 7. Applying Stop Word Removal to ClinicalBERT
+## 6. Applying Stop Word Removal to ClinicalBERT
 
 We reran ClinicalBERT under all four combinations of removing stop words and
 removing the code number, using the same parameter search each time, so that the
@@ -243,7 +218,7 @@ preparation.**
 Removing stop words improves the ICD-10-CA result by 0.006 when the code number
 is present and by 0.017 when it is not. It has no meaningful effect on ICDA-8.
 Removing the code number is the larger of the two changes, worth between 0.035
-and 0.046 on ICD-10-CA, which agrees with the retrieval results in Section 5.
+and 0.046 on ICD-10-CA, which agrees with the retrieval results in Section 4.
 The two changes combine, and the best result is obtained with both applied,
 giving 0.482 against 0.427 for the original ClinicalBERT configuration.
 
@@ -251,7 +226,7 @@ The ICDA-8 result stays between 0.713 and 0.719 whatever is done to the text.
 Nothing in the cleaning process affects that crosswalk.
 
 We also ran both versions of the Snowball dictionary so that the choice
-described in Section 6 could be made on evidence.
+described in Section 5 could be made on evidence.
 
 **Table 7. Best F1 score with each version of the Snowball dictionary.**
 
@@ -267,7 +242,7 @@ the letter that identifies several vitamin deficiency and hepatitis codes.
 
 ---
 
-## 8. What the Similarity and Co-occurrence Numbers Look Like
+## 7. What the Similarity and Co-occurrence Numbers Look Like
 
 Steps 1 and 2 of the original pipeline each cut a list short using a number.
 Step 1 uses the similarity score and Step 2 uses how often two codes appear
@@ -337,9 +312,9 @@ contributes nothing and the mapping rests entirely on the labels.
 
 ---
 
-## 9. Not Yet Done
+## 8. Not Yet Done
 
-**Widening Step 1.** Section 4 shows the similarity cutoff discards 63% of the
+**Widening Step 1.** Section 3 shows the similarity cutoff discards 63% of the
 correct ICD-10-CA pairs before Step 4 is reached, and that keeping a fixed
 number of candidates per ICD-9-CM code instead raises the reachable limit from
 0.770 to 0.927. Not implemented. Step 4 would have to be re-tuned, since the
