@@ -2,8 +2,15 @@
 # top 50 similarity per model plus top 50 co-occurrence, no chapter filter
 # narrower settings are just row filters on this so 12_ can sweep them
 # writes results/rerank_features_<track>.rds
+#
+# usage: Rscript 11_rerank_features.R           code and label in the embedding
+#        Rscript 11_rerank_features.R nocode    label only embeddings
 
 source("pipeline_lib.R")
+
+.args <- commandArgs(trailingOnly = TRUE)
+SIM_VARIANT <- if (length(.args) && .args[1] == "nocode") "nocode" else "base"
+cat(sprintf("similarity variant: %s\n", SIM_VARIANT))
 
 ORIG_BASE    <- "../data/original"
 SAPBERT_BASE <- "../data/sapbert"
@@ -46,6 +53,28 @@ TRACKS <- list(
                   mpnet        = file.path(GEN_BASE, "cosine_similarity_matrices_8_9_mpnet_base.xlsx"),
                   clinicalbert = file.path(ORIG_BASE, "Cosine_Similarity_Matrices/cosine_similarity_matrices_8_9_ClinicalBERT.xlsx")))
 )
+
+# label only embeddings. these gained about 10 points of top-1 on icd-10-ca at
+# the retrieval stage in 23_ but had never been through the reranker. the code
+# identity features below are what stops icda-8 losing the shared code number
+if (SIM_VARIANT == "nocode") {
+  for (tr in names(TRACKS)) {
+    TRACKS[[tr]]$sim <- list(
+      sapbert      = file.path(GEN_BASE, sprintf("cosine_similarity_matrices_%s_sapbert_base_nocode.xlsx", tr)),
+      mpnet        = file.path(GEN_BASE, sprintf("cosine_similarity_matrices_%s_mpnet_base_nocode.xlsx", tr)),
+      clinicalbert = file.path(GEN_BASE, sprintf("cosine_similarity_matrices_%s_clinicalbert_base_nocode.xlsx", tr)))
+    for (p in TRACKS[[tr]]$sim) if (!file.exists(p)) stop("missing ", p)
+  }
+}
+
+# codes that sit next to each other in the target system. icd-10 split many
+# icd-9 categories across several neighbouring codes, e.g. icd-9 250 diabetes
+# becomes E10 E11 E13 E14, so the first two characters are the useful grouping
+# on both tracks: "E1" for icd-10-ca and "25" for the numeric icda-8 codes
+code_block  <- function(x) substr(as.character(x), 1, 2)
+code_letter <- function(x) substr(as.character(x), 1, 1)
+code_number <- function(x) suppressWarnings(as.numeric(gsub("[^0-9]", "", as.character(x))))
+head_term   <- function(x) sub("^([a-z0-9]+).*$", "\\1", as.character(x))
 
 long_similarity <- function(path) {
   sheets <- load_similarity_sheets(path)
@@ -229,6 +258,51 @@ for (tr in names(TRACKS)) {
            target_rank_here    = rank(-ens_mean_rel, ties.method = "first"),
            target_is_best_here = as.integer(target_rank_here == 1)) %>%
     ungroup()
+
+  # --- block features ---------------------------------------------------
+  # the system solves codes with one correct target and almost never completes
+  # codes with several, and 22_ showed those several nearly always sit in the
+  # same block. these describe each candidate relative to the best candidate for
+  # its own code, so the model can learn when to take siblings rather than being
+  # told to always take them
+  feat <- feat %>%
+    mutate(.blk = code_block(target), .let = code_letter(target),
+           .num = code_number(target), .head = head_term(target_label))
+
+  feat <- feat %>% group_by(ICD_9_CM) %>%
+    mutate(.top_i    = which.min(ens_rrf_rank),
+           .top_blk  = .blk[.top_i], .top_let = .let[.top_i],
+           .top_num  = .num[.top_i], .top_head = .head[.top_i],
+
+           blk_same_as_top   = as.integer(.blk == .top_blk),
+           blk_letter_as_top = as.integer(.let == .top_let),
+           # how far this candidate sits from the best one in code order
+           blk_num_dist_top  = ifelse(is.na(.num) | is.na(.top_num), 99,
+                                      pmin(abs(.num - .top_num), 99)),
+           blk_head_as_top   = as.integer(.head == .top_head & nzchar(.head)),
+           # a dense block means the target system really did split this code
+           blk_n_in_top_blk  = sum(.blk == .top_blk),
+           blk_n_in_own_blk  = ave(rep(1L, n()), .blk, FUN = length),
+           # how good this candidate is against the best of its own block
+           blk_rel_in_blk    = ens_mean_rel / ave(ens_mean_rel, .blk, FUN = max),
+           blk_rank_in_blk   = ave(-ens_mean_rel, .blk, FUN = function(v) rank(v, ties.method = "first")),
+           # how confident the anchor itself is, siblings are only worth taking
+           # when the code has a clear best candidate to begin with
+           blk_top_margin    = max(ens_mean_rel) -
+                               max(c(ens_mean_rel[ens_mean_rel < max(ens_mean_rel)], -1))) %>%
+    ungroup()
+
+  # the source and target code strings being equal is most of the icda-8 track
+  # and never happens on icd-10-ca. kept as a feature so label only embeddings
+  # can be used without losing that signal
+  feat <- feat %>%
+    mutate(code_str_equal = as.integer(as.character(ICD_9_CM) == as.character(target)),
+           code_num_dist  = ifelse(is.na(.num) | is.na(code_number(ICD_9_CM)), 99,
+                                   pmin(abs(code_number(ICD_9_CM) - .num), 99))) %>%
+    select(-.blk, -.let, -.num, -.head, -.top_i, -.top_blk, -.top_let, -.top_num, -.top_head)
+
+  cat(sprintf("  block features: %.1f%% of candidates share the top candidates block\n",
+              100 * mean(feat$blk_same_as_top)))
 
   # --- label ------------------------------------------------------------
   manual <- read_excel(VAL_XLSX, sheet = tk$manual_sheet)

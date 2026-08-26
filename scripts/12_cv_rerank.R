@@ -78,6 +78,20 @@ for (tr in SELECTED_TRACKS) {
   feat <- feat_all %>% filter(has_truth == 1)
   truth <- feat %>% filter(y == 1) %>% select(ICD_9_CM, target)
   codes <- sort(unique(feat$ICD_9_CM))
+
+  # truth restricted to pairs the candidate pool can reach, which is what the
+  # recall denominator has always been here. a pair the pool never retrieved is
+  # a miss either way, so the full crosswalk is scored alongside it and both are
+  # reported. the pool one is the favourable choice and should not stand alone
+  manual_full <- read_excel(VAL_XLSX, sheet = tk$manual_sheet)
+  excl_full   <- as.character(read_excel(VAL_XLSX, sheet = tk$excl_sheet)$`ICD-9-CM`)
+  truth_full <- manual_full %>%
+    transmute(ICD_9_CM = as.character(`ICD-9-CM`),
+              target = as.character(.data[[tk$manual_target_col]])) %>%
+    filter(!(ICD_9_CM %in% excl_full), ICD_9_CM %in% codes) %>%
+    distinct()
+  cat(sprintf("truth pairs: %d reachable in the pool, %d in the full crosswalk\n",
+              nrow(truth), nrow(truth_full)))
   cat(sprintf("%d candidates, %d codes, %d positives (pool ceiling %.4f of %d true pairs)\n",
               nrow(feat), length(codes), sum(feat$y), sum(feat$y)/n_true_pairs, n_true_pairs))
 
@@ -287,10 +301,20 @@ for (tr in SELECTED_TRACKS) {
   cat(sprintf("  RERANKER, held-out CV              : P %.3f R %.3f F1 %.3f Acc %.3f\n",
               m_rr_all["precision"], m_rr_all["recall"], m_rr_all["f1"], m_rr_all["accuracy"]))
 
+  # the same two held-out outputs scored against the whole crosswalk
+  m_bl_full <- score_pairs(bl_pairs, truth_full, codes)
+  m_rr_full <- score_pairs(em_all,   truth_full, codes)
+  cat(sprintf("  baseline, full crosswalk denominator: P %.3f R %.3f F1 %.3f Acc %.3f\n",
+              m_bl_full["precision"], m_bl_full["recall"], m_bl_full["f1"], m_bl_full["accuracy"]))
+  cat(sprintf("  RERANKER, full crosswalk denominator: P %.3f R %.3f F1 %.3f Acc %.3f\n",
+              m_rr_full["precision"], m_rr_full["recall"], m_rr_full["f1"], m_rr_full["accuracy"]))
+
   all_rows[[length(all_rows)+1]] <- bind_rows(
     tibble(track = tr, method = "baseline_in_sample",  t(m_bl_insample)),
     tibble(track = tr, method = "baseline_heldout_cv", t(m_bl_all)),
-    tibble(track = tr, method = "rerank_heldout_cv",   t(m_rr_all)))
+    tibble(track = tr, method = "rerank_heldout_cv",   t(m_rr_all)),
+    tibble(track = tr, method = "baseline_heldout_cv_fullden", t(m_bl_full)),
+    tibble(track = tr, method = "rerank_heldout_cv_fullden",   t(m_rr_full)))
   pred_rows[[length(pred_rows)+1]] <- oof %>%
     select(ICD_9_CM, target, y, .p_score, fold) %>% mutate(track = tr)
 }

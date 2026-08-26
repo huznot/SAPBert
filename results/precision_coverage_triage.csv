@@ -1,7 +1,7 @@
 "bucket","n","pct","track","tau"
-"auto-accept",297,86.1,"10_9",0.88
-"review (candidates, low confidence)",47,13.6,"10_9",0.88
-"review (no plausible candidate)",1,0.3,"10_9",0.88
-"auto-accept",254,84.1,"8_9",0.77
-"review (candidates, low confidence)",36,11.9,"8_9",0.77
-"review (no plausible candidate)",12,4,"8_9",0.77
+"auto-accept",299,86.7,"10_9",0.87
+"review (candidates, low confidence)",44,12.8,"10_9",0.87
+"review (no plausible candidate)",2,0.6,"10_9",0.87
+"auto-accept",265,87.7,"8_9",0.72
+"review (candidates, low confidence)",33,10.9,"8_9",0.72
+"review (no plausible candidate)",4,1.3,"8_9",0.72
