@@ -144,6 +144,38 @@ for (tr in c("10_9", "8_9")) {
 cat("\n  holding out whole CCS categories costs almost nothing, so it is not\n")
 cat("  memorising categories.\n")
 
+# ---------------------------------------------------------------- 9
+hdr(9, "how much would these numbers move on a different set of codes")
+d <- get("bootstrap_variability.csv")
+if (!is.null(d)) {
+  d <- d[d$metric == "f1", ]
+  for (tr in c("10_9", "8_9")) {
+    x <- d[d$track == tr, ]
+    cat(sprintf("\n%s\n", tname(tr)))
+    for (i in seq_len(nrow(x)))
+      cat(sprintf("  %-22s f1 %.3f  (sd %.3f, 95%% %.3f to %.3f)\n",
+                  x$model[i], x$estimate[i], x$sd[i], x$ci_low[i], x$ci_high[i]))
+  }
+  cat("\n  2000 bootstrap draws, resampling whole icd-9 codes. the sd is about\n")
+  cat("  0.015 and 0.022, so the ~0.10 gain from sapbert is far bigger than noise.\n")
+}
+
+# ---------------------------------------------------------------- 10
+hdr(10, "how evenly it works across the 130 ccs categories")
+d <- get("ccs_category_summary.csv")
+if (!is.null(d)) {
+  for (tr in c("10_9", "8_9")) {
+    x <- d[d$track == tr, ]
+    cat(sprintf("\n%s\n", tname(tr)))
+    for (i in seq_len(nrow(x)))
+      cat(sprintf("  %-22s mean %.3f  sd %.3f  median %.3f  perfect %d  zero %d\n",
+                  x$model[i], x$mean_f1[i], x$sd_f1[i], x$median_f1[i],
+                  x$n_perfect[i], x$n_zero[i]))
+  }
+  cat("\n  spread between categories (sd ~0.25) dwarfs the noise on the overall\n")
+  cat("  number. 59 of 130 categories hold a single code, so treat those gently.\n")
+}
+
 cat("\n\n=========== related scripts ===========\n")
 cat("  24_show_similarity_matrix.R   what a similarity table looks like\n")
 cat("  25_frequency_distributions.R  max similarity and co-occurrence spread\n")

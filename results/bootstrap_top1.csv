@@ -1,0 +1,13 @@
+"track","arm","estimate","sd","ci_low","ci_high"
+"10_9","ClinicalBERT, code and label",0.3478,0.0256,0.2986,0.4
+"10_9","ClinicalBERT, label only",0.5855,0.0267,0.5333,0.6377
+"10_9","SapBERT, code and label",0.7971,0.0215,0.7565,0.8435
+"10_9","SapBERT, label only",0.9014,0.016,0.8667,0.9333
+"10_9","mpnet, code and label",0.8087,0.0216,0.7652,0.8493
+"10_9","mpnet, label only",0.8986,0.0162,0.8667,0.9304
+"8_9","ClinicalBERT, code and label",0.5828,0.0288,0.5297,0.6424
+"8_9","ClinicalBERT, label only",0.5497,0.0288,0.4934,0.606
+"8_9","SapBERT, code and label",0.8411,0.021,0.8013,0.8808
+"8_9","SapBERT, label only",0.8179,0.0224,0.7748,0.8609
+"8_9","mpnet, code and label",0.7781,0.0237,0.7318,0.8245
+"8_9","mpnet, label only",0.745,0.0247,0.6954,0.7915

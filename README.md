@@ -25,7 +25,7 @@ review. Best F1 is 0.530 and 0.821, against 0.427 and 0.716 for the original.
 `testing` additionally replaces the selection step with a wide candidate set
 and a trained scoring model, reaching 0.668 and 0.840 on unseen codes. It is
 kept separate because it departs from the existing methodology and has not been
-agreed. See `report.md` Section 10 on `main`.
+agreed.
 
 ## Running it
 
@@ -107,6 +107,8 @@ still runs.
 | `22_target_block_structure.R` | do multi-target answers sit in blocks |
 | `23_code_prefix_test.R` | code number in the text, report Section 8 |
 | `29_portability.R` | performance without health records or a chapter table |
+| `30_variability.R` | bootstrap standard deviation on every reported score and difference, report Sections 4, 6 and 8 |
+| `31_category_breakdown.R` | performance across all 130 CCS categories, every condition, report Section 9 |
 
 **Show the results, no recomputation, a second or two each**
 
