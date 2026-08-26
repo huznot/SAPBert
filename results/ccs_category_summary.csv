@@ -1,0 +1,5 @@
+"track","system","n_categories","n_scored","mean_f1","sd_f1","median_f1","q1_f1","q3_f1","n_perfect","n_zero","pooled_f1"
+"10_9","original rules",130,130,0.642,0.246,0.629,0.5,0.825,28,2,0.546
+"10_9","two stage system",130,130,0.727,0.2,0.703,0.581,0.881,30,0,0.668
+"8_9","original rules",130,129,0.877,0.232,1,0.8,1,91,4,0.824
+"8_9","two stage system",130,129,0.886,0.229,1,0.857,1,93,4,0.84

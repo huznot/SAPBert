@@ -19,7 +19,9 @@ worth making. It is tested on two migrations:
 
 This is the `testing` branch. It keeps the two-stage pipeline: a wide candidate
 set followed by a trained scoring model, reaching F1 0.668 and 0.840 on unseen
-codes against 0.546 and 0.824 for the original rules measured the same way.
+codes against 0.546 and 0.824 for the original rules measured the same way. The
+ICD-10-CA gain is well outside the measurement noise; the ICDA-8 gain is not,
+see `report.md` Section 12.
 
 `main` follows the existing four-step methodology and does not include the
 scoring model. Work here should not be merged into `main` until the change of
@@ -106,6 +108,8 @@ still runs.
 | `23_code_prefix_test.R` | code number in the text, report Section 8 |
 | `29_portability.R` | performance without health records or a chapter table |
 | `30_retrieval_vs_model.R` | separates the wider candidate set from the scoring model |
+| `31_variability.R` | bootstrap standard deviation on the held-out scores and on the gap between the two systems, report Section 12 |
+| `32_category_breakdown.R` | performance across all 130 CCS categories, both systems, report Section 13 |
 
 **Show the results, no recomputation, a second or two each**
 

@@ -24,9 +24,12 @@ I therefore changed the pipeline to keep a fixed number of candidate codes for
 each ICD-9-CM code rather than applying a relative cutoff, and added a second
 model that scores the retained candidates before the final selection is made.
 Measured on ICD-9-CM codes the pipeline had not seen during training, the F1
-score is now 0.668 for ICD-10-CA and 0.840 for ICDA-8. Each mapping is also
-given a confidence score, which allows 86% of ICD-9-CM codes to be accepted
-without review at a precision of 95%.
+score is now 0.668 for ICD-10-CA and 0.840 for ICDA-8, against 0.546 and 0.824
+for the original rules measured the same way. On ICD-10-CA that gain of 0.122 is
+well outside the measurement noise. On ICDA-8 the gain of 0.016 is not, and the
+two systems should be reported as equivalent on that crosswalk; Section 12 gives
+the figures. Each mapping is also given a confidence score, which allows 86% of
+ICD-9-CM codes to be accepted without review at a precision of 95%.
 
 ---
 
@@ -261,11 +264,24 @@ embeddings, the same data and the same held-out test codes.
 
 | | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
 |---|---|---|
-| Original rules, unseen codes | 0.546 | 0.824 |
-| Revised pipeline, unseen codes | 0.668 | 0.840 |
+| Original rules, unseen codes | 0.546 ± 0.016 | 0.824 ± 0.021 |
+| Revised pipeline, unseen codes | 0.668 ± 0.015 | 0.840 ± 0.021 |
+| Difference | **+0.122 ± 0.015** | +0.016 ± 0.014 |
 
-Two further points support this being a real improvement rather than an artefact
-of training. First, the original rules score 0.547 in sample and 0.546 on unseen
+The plus or minus figures are bootstrap standard deviations, and the difference
+is measured inside each bootstrap draw, both as described in Section 12.
+
+The two crosswalks give different answers and they should be reported
+differently. On ICD-10-CA the revised pipeline is ahead by 0.122, with a 95%
+interval of +0.093 to +0.150, and it wins in 2,000 of the 2,000 bootstrap draws.
+On ICDA-8 it is ahead by 0.016 with an interval of -0.011 to +0.045, which
+includes zero. On that crosswalk the revised pipeline cannot be claimed to beat
+the original rules from this evidence. Section 11 explains why ICDA-8 leaves so
+little room: 98 of its codes have a word for word identical label, so the rules
+already solve most of it.
+
+Two further points support the ICD-10-CA improvement being real rather than an
+artefact of training. First, the original rules score 0.547 in sample and 0.546 on unseen
 codes, so they were barely overfitting to begin with. The gap between 0.427 and
 0.546 is the change of embedding model, not the change of evaluation method.
 Second, when the cross-validation folds are divided by CCS category instead of
@@ -640,3 +656,194 @@ code as well as the count itself.
 The other point is that 84 ICD-9-CM codes, close to a quarter, have no ICDA-8
 co-occurrence data at all. For those codes Step 2 of the original pipeline
 contributes nothing and the mapping rests entirely on the labels.
+
+---
+
+## 12. How Much These Numbers Move
+
+Every score in this document is measured on one set of ICD-9-CM codes, 345 on
+ICD-10-CA and 302 on ICDA-8 after exclusions. That leaves the question of how
+much of a difference is a real difference and how much is the particular codes
+that happen to be in the set.
+
+I measured it with a bootstrap. Treat the codes as a sample, draw the same
+number of codes at random with replacement so some appear twice and some not at
+all, recompute the score on that draw, repeat 2,000 times. The spread of those
+2,000 scores is the standard deviation of the reported score. Codes are drawn
+whole, with all of their pairs, because two pairs from the same ICD-9-CM code
+are not independent.
+
+Everything below is rebuilt from the out-of-fold predictions saved by the
+cross-validation run, so these are the same held-out numbers reported in
+Section 5, not a refit. The rebuild reproduces 0.668 and 0.840 exactly, which is
+the check that the emit rule and the fold assignment were applied as they were
+during evaluation.
+
+**Table 16. Held-out scores with their bootstrap standard deviation and 95%
+interval.**
+
+| | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
+|---|---|---|
+| Original rules, F1 | 0.546 ± 0.016 (0.517 to 0.576) | 0.824 ± 0.021 (0.783 to 0.866) |
+| Revised pipeline, F1 | 0.668 ± 0.015 (0.639 to 0.697) | 0.840 ± 0.021 (0.800 to 0.879) |
+| Revised pipeline, precision | 0.742 ± 0.020 (0.703 to 0.781) | 0.867 ± 0.020 (0.826 to 0.905) |
+| Revised pipeline, recall | 0.607 ± 0.020 (0.569 to 0.646) | 0.815 ± 0.025 (0.767 to 0.863) |
+
+Comparing the two systems by whether their intervals overlap is the wrong test,
+because both are scored on the same codes and a draw holding hard codes pulls
+both down together. The comparison that matters subtracts one from the other
+inside each draw.
+
+**Table 17. Revised pipeline minus the original rules, measured inside each
+bootstrap draw.**
+
+| | ICD-9-CM to ICD-10-CA | ICD-9-CM to ICDA-8 |
+|---|---|---|
+| Precision | +0.050 ± 0.022 (+0.009 to +0.093) | +0.006 ± 0.018 (-0.028 to +0.040) |
+| Recall | +0.156 ± 0.016 (+0.126 to +0.187) | +0.024 ± 0.014 (0.000 to +0.053) |
+| F1 | **+0.122 ± 0.015 (+0.093 to +0.150)** | +0.016 ± 0.014 (-0.011 to +0.045) |
+| Accuracy | +0.126 ± 0.015 (+0.096 to +0.157) | +0.024 ± 0.021 (-0.016 to +0.065) |
+
+On ICD-10-CA every one of the four intervals sits above zero, and the gain is
+mostly recall: the revised pipeline finds 0.156 more of the correct pairs while
+also being slightly more precise. That is the expected shape given Section 4,
+where the problem was correct pairs being discarded before selection.
+
+On ICDA-8 only recall clears zero, and it only just does. The F1 gain of 0.016
+is larger than nothing but smaller than its own standard deviation of 0.014
+would need it to be, and the pipeline wins in 87% of draws rather than 100%. The
+honest statement for that crosswalk is that the revised pipeline matches the
+original rules rather than beats them.
+
+The folds give a second, independent read on the same spread. Across the five
+folds the revised pipeline scores 0.669 ± 0.040 on ICD-10-CA and 0.841 ± 0.057
+on ICDA-8. Fold-to-fold spread is wider than the bootstrap spread because each
+fold is scored on only a fifth of the codes.
+
+---
+
+## 13. Performance Across All 130 CCS Categories
+
+The ICD-9-CM codes are grouped into 130 CCS categories, clinical groupings such
+as breast cancer, asthma or other nervous system conditions. I scored each
+category separately, from the same held-out predictions, to see whether the
+overall figure is carried by a few areas.
+
+Category sizes are uneven: 59 of the 130 hold a single ICD-9-CM code and the
+largest holds 18. A one-code category is scored on one or two pairs, so its F1
+swings between 0 and 1 on a single decision. The code count is shown in every
+table and chart below.
+
+**Table 18. Spread of F1 across the 130 categories.**
+
+| | Mean over categories | SD | Median | Q1 to Q3 | Perfect | Zero | Pooled F1 |
+|---|---|---|---|---|---|---|---|
+| ICD-10-CA, original rules | 0.642 | 0.246 | 0.629 | 0.500-0.825 | 28 | 2 | 0.546 |
+| ICD-10-CA, revised pipeline | 0.727 | 0.200 | 0.703 | 0.581-0.881 | 30 | 0 | 0.668 |
+| ICDA-8, original rules | 0.877 | 0.232 | 1.000 | 0.800-1.000 | 91 | 4 | 0.824 |
+| ICDA-8, revised pipeline | 0.886 | 0.229 | 1.000 | 0.857-1.000 | 93 | 4 | 0.840 |
+
+The last column is the figure quoted everywhere else in this document, and it is
+lower than the first in every row. Pooled F1 counts every code once; the mean
+over categories counts every category once, whatever its size. Two categories,
+one holding a single code that is mapped correctly and one holding ten codes of
+which five are mapped, give a mean over categories of 0.75 and a pooled F1 of
+0.55. The small categories are the easy ones, so weighting them equally flatters
+the result. Pooled F1 stays the headline number.
+
+Two things in this table are worth reading directly. The revised pipeline lowers
+the SD across categories on ICD-10-CA from 0.246 to 0.200 and empties the
+zero-scoring column, from 2 categories to none. It is not only scoring higher on
+average, it is failing outright in fewer clinical areas. On ICDA-8 both columns
+barely move, which is the category-level version of the Section 12 result.
+
+![f1 spread across categories](results/plot_ccs_f1_distribution.png)
+
+**Figure 7. How F1 is spread across the CCS categories.** Each bar counts the
+categories scoring in that range; the dashed lines are the averages.
+
+The spread between categories, an SD of about 0.20 to 0.25, is much larger than
+the uncertainty on the overall score in Section 12, about 0.015. The differences
+between clinical areas are real, not measurement noise, and one number for the
+whole crosswalk hides a range running from 0 to 1.
+
+**Table 19. Mean F1 by how many ICD-9-CM codes the category holds.**
+
+| | 1 code | 2 codes | 3 to 4 codes | 5 or more |
+|---|---|---|---|---|
+| ICD-10-CA, original rules | 0.721 | 0.607 | 0.592 | 0.520 |
+| ICD-10-CA, revised pipeline | 0.776 | 0.710 | 0.683 | 0.666 |
+| ICDA-8, original rules | 0.920 | 0.903 | 0.831 | 0.793 |
+| ICDA-8, revised pipeline | 0.914 | 0.970 | 0.814 | 0.808 |
+
+The columns hold 59, 23, 27 and 21 categories on ICD-10-CA, and 58, 23, 27 and
+21 on ICDA-8.
+
+The more codes a category holds, the worse both systems do in it. A large
+category is a clinical area ICD-9-CM divided into many closely related codes,
+such as the 18 under other nervous system conditions. Their labels are similar
+and they appear together in the same records, so both signals point at several
+codes at once. This is the multi-target problem in a second form.
+
+The useful part is how the two systems differ across that gradient. On ICD-10-CA
+the original rules fall by 0.201 from the smallest categories to the largest,
+while the revised pipeline falls by only 0.110, and the gap between the systems
+widens from 0.055 in the one-code categories to 0.146 in the largest. The
+scoring model earns most of its advantage exactly where the task is hardest,
+which is the argument for it that does not rest on the headline number alone.
+
+### The charts
+
+One bar per category, ranked best to worst and dealt into three columns so all
+130 fit on a page. The bracketed number after each name is how many ICD-9-CM
+codes that category holds.
+
+![rules icd-10-ca](results/plot_ccs_f1_all_10_9_rules.png)
+
+**Figure 8. F1 for every CCS category, ICD-9-CM to ICD-10-CA, original rules.**
+
+![two stage icd-10-ca](results/plot_ccs_f1_all_10_9_twostage.png)
+
+**Figure 9. F1 for every CCS category, ICD-9-CM to ICD-10-CA, revised
+pipeline.**
+
+![rules icda-8](results/plot_ccs_f1_all_8_9_rules.png)
+
+**Figure 10. F1 for every CCS category, ICD-9-CM to ICDA-8, original rules.**
+
+![two stage icda-8](results/plot_ccs_f1_all_8_9_twostage.png)
+
+**Figure 11. F1 for every CCS category, ICD-9-CM to ICDA-8, revised pipeline.**
+
+The ICDA-8 charts have a long flat top of categories at 1.000, which is the
+identity mapping described in Section 11 showing up category by category, and
+the two systems produce almost the same chart.
+
+The next two subtract one system from the other, so a bar to the right means the
+revised pipeline did better in that category.
+
+![change, icd-10-ca](results/plot_ccs_delta_twostage_vs_rules_10_9.png)
+
+**Figure 12. Change in F1 by category, revised pipeline minus original rules,
+ICD-9-CM to ICD-10-CA.**
+
+![change, icda-8](results/plot_ccs_delta_twostage_vs_rules_8_9.png)
+
+**Figure 13. Change in F1 by category, revised pipeline minus original rules,
+ICD-9-CM to ICDA-8.**
+
+On ICD-10-CA the revised pipeline is better in 71 categories, level in 36 and
+worse in 23, for a mean gain of 0.085 per category. The improvement is spread
+across the crosswalk rather than coming from a few categories, so no clinical
+area is carrying it.
+
+On ICDA-8 it changes nothing at all in 104 of the 129 categories, is better in
+14 and worse in 11, for a mean of 0.008. This is worth stating because a small
+aggregate gain can always be a few large gains cancelling a few large losses,
+and here it is not: on that crosswalk the two systems mostly produce the same
+answer, category by category.
+
+Per-category numbers for both systems, with the counts each score is built from,
+are in `results/ccs_all_categories_10_9.csv` and
+`results/ccs_all_categories_8_9.csv`, and the category counts behind Figures 12
+and 13 are in `results/ccs_delta_summary.csv`.

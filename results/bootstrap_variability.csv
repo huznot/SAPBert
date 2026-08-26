@@ -1,0 +1,17 @@
+"track","system","metric","estimate","sd","ci_low","ci_high"
+"10_9","two stage system","precision",0.7418,0.02,0.7025,0.7806
+"10_9","two stage system","recall",0.6074,0.02,0.5692,0.6461
+"10_9","two stage system","f1",0.6679,0.0151,0.6386,0.6974
+"10_9","two stage system","accuracy",0.5014,0.0171,0.4691,0.5354
+"10_9","original rules","precision",0.6914,0.0185,0.6548,0.7281
+"10_9","original rules","recall",0.4511,0.0179,0.4178,0.4875
+"10_9","original rules","f1",0.5459,0.0155,0.517,0.576
+"10_9","original rules","accuracy",0.3755,0.0146,0.3486,0.4045
+"8_9","two stage system","precision",0.8673,0.0196,0.8262,0.9052
+"8_9","two stage system","recall",0.8146,0.0251,0.7668,0.8629
+"8_9","two stage system","f1",0.8401,0.0205,0.8,0.8794
+"8_9","two stage system","accuracy",0.7243,0.0305,0.6667,0.7847
+"8_9","original rules","precision",0.8609,0.0194,0.8237,0.8984
+"8_9","original rules","recall",0.7903,0.0259,0.7416,0.8406
+"8_9","original rules","f1",0.8241,0.0213,0.7827,0.8662
+"8_9","original rules","accuracy",0.7008,0.0308,0.643,0.764

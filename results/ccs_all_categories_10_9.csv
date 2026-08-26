@@ -1,0 +1,261 @@
+"CCS_ID","description","n_codes","system","n_codes_evaluated","n_true_pairs","TP","FP","FN","precision","recall","f1","accuracy"
+1,"cancer of head and neck",12,"original rules",12,18,16,2,2,0.889,0.889,0.889,0.8
+1,"cancer of head and neck",12,"two stage system",12,18,16,2,2,0.889,0.889,0.889,0.8
+2,"cancer of esophagus",1,"original rules",1,1,1,0,0,1,1,1,1
+2,"cancer of esophagus",1,"two stage system",1,1,1,0,0,1,1,1,1
+3,"cancer of stomach",1,"original rules",1,1,1,0,0,1,1,1,1
+3,"cancer of stomach",1,"two stage system",1,1,1,0,0,1,1,1,1
+4,"cancer of other gi organs peritoneum",5,"original rules",5,8,6,5,2,0.545,0.75,0.632,0.462
+4,"cancer of other gi organs peritoneum",5,"two stage system",5,8,8,1,0,0.889,1,0.941,0.889
+5,"colon cancer",1,"original rules",1,1,1,0,0,1,1,1,1
+5,"colon cancer",1,"two stage system",1,1,1,0,0,1,1,1,1
+6,"cancer of rectum and anus",1,"original rules",1,3,2,0,1,1,0.667,0.8,0.667
+6,"cancer of rectum and anus",1,"two stage system",1,3,3,0,0,1,1,1,1
+7,"cancer of liver and intrahepatic bile duct",1,"original rules",1,1,1,0,0,1,1,1,1
+7,"cancer of liver and intrahepatic bile duct",1,"two stage system",1,1,1,0,0,1,1,1,1
+8,"pancreas cancer",1,"original rules",1,1,1,0,0,1,1,1,1
+8,"pancreas cancer",1,"two stage system",1,1,1,0,0,1,1,1,1
+9,"lung and other respiratory cancer",4,"original rules",4,6,4,3,2,0.571,0.667,0.615,0.444
+9,"lung and other respiratory cancer",4,"two stage system",4,6,6,2,0,0.75,1,0.857,0.75
+10,"other cancers",8,"original rules",7,15,8,7,7,0.533,0.533,0.533,0.364
+10,"other cancers",8,"two stage system",7,15,8,3,7,0.727,0.533,0.615,0.444
+11,"cancer of bone and connective tissue",2,"original rules",2,4,2,0,2,1,0.5,0.667,0.5
+11,"cancer of bone and connective tissue",2,"two stage system",2,4,3,1,1,0.75,0.75,0.75,0.6
+12,"skin melanoma",1,"original rules",1,1,1,0,0,1,1,1,1
+12,"skin melanoma",1,"two stage system",1,1,1,0,0,1,1,1,1
+13,"breast cancer",2,"original rules",1,1,1,0,0,1,1,1,1
+13,"breast cancer",2,"two stage system",1,1,1,2,0,0.333,1,0.5,0.333
+14,"uterus cancer",2,"original rules",2,2,2,2,0,0.5,1,0.667,0.5
+14,"uterus cancer",2,"two stage system",2,2,2,3,0,0.4,1,0.571,0.4
+15,"cervix cancer",1,"original rules",1,1,1,0,0,1,1,1,1
+15,"cervix cancer",1,"two stage system",1,1,1,1,0,0.5,1,0.667,0.5
+16,"cancer of other female genital organs",3,"original rules",3,6,4,0,2,1,0.667,0.8,0.667
+16,"cancer of other female genital organs",3,"two stage system",3,6,3,1,3,0.75,0.5,0.6,0.429
+17,"prostate cancer",1,"original rules",1,1,1,0,0,1,1,1,1
+17,"prostate cancer",1,"two stage system",1,1,1,0,0,1,1,1,1
+18,"testis cancer",1,"original rules",1,1,1,0,0,1,1,1,1
+18,"testis cancer",1,"two stage system",1,1,1,0,0,1,1,1,1
+19,"cancer of other male genital organs",1,"original rules",1,2,2,0,0,1,1,1,1
+19,"cancer of other male genital organs",1,"two stage system",1,2,2,0,0,1,1,1,1
+20,"bladder cancer",1,"original rules",1,1,1,0,0,1,1,1,1
+20,"bladder cancer",1,"two stage system",1,1,1,0,0,1,1,1,1
+21,"cancer of kidney and other urinary organs",1,"original rules",1,4,1,0,3,1,0.25,0.4,0.25
+21,"cancer of kidney and other urinary organs",1,"two stage system",1,4,3,0,1,1,0.75,0.857,0.75
+22,"cancer of brain and nervous system",2,"original rules",2,3,2,1,1,0.667,0.667,0.667,0.5
+22,"cancer of brain and nervous system",2,"two stage system",2,3,2,0,1,1,0.667,0.8,0.667
+23,"thyroid cancer",1,"original rules",1,1,1,0,0,1,1,1,1
+23,"thyroid cancer",1,"two stage system",1,1,1,0,0,1,1,1,1
+24,"secondary malignancy",3,"original rules",3,3,3,1,0,0.75,1,0.857,0.75
+24,"secondary malignancy",3,"two stage system",3,3,3,0,0,1,1,1,1
+25,"malignant neoplasm without specification of site",1,"original rules",1,3,0,2,3,0,0,0,0
+25,"malignant neoplasm without specification of site",1,"two stage system",1,3,1,1,2,0.5,0.333,0.4,0.25
+26,"nonhodgkins lymphoma",2,"original rules",2,9,4,0,5,1,0.444,0.615,0.444
+26,"nonhodgkins lymphoma",2,"two stage system",2,9,4,2,5,0.667,0.444,0.533,0.364
+27,"hodgkins disease",1,"original rules",1,1,1,0,0,1,1,1,1
+27,"hodgkins disease",1,"two stage system",1,1,1,0,0,1,1,1,1
+28,"multiple myeloma and leukemias",6,"original rules",6,7,6,4,1,0.6,0.857,0.706,0.545
+28,"multiple myeloma and leukemias",6,"two stage system",6,7,6,1,1,0.857,0.857,0.857,0.75
+29,"other and unspecified benign neoplasm",1,"original rules",1,2,2,0,0,1,1,1,1
+29,"other and unspecified benign neoplasm",1,"two stage system",1,2,2,0,0,1,1,1,1
+30,"neoplasms of unspecified nature",3,"original rules",2,8,3,2,5,0.6,0.375,0.462,0.3
+30,"neoplasms of unspecified nature",3,"two stage system",2,8,2,1,6,0.667,0.25,0.364,0.222
+31,"thyroid disorders",7,"original rules",7,15,7,4,8,0.636,0.467,0.538,0.368
+31,"thyroid disorders",7,"two stage system",7,15,9,4,6,0.692,0.6,0.643,0.474
+32,"diabetes mellitus",2,"original rules",1,4,3,0,1,1,0.75,0.857,0.75
+32,"diabetes mellitus",2,"two stage system",1,4,3,0,1,1,0.75,0.857,0.75
+33,"other endocrine disorders",9,"original rules",9,23,9,5,14,0.643,0.391,0.486,0.321
+33,"other endocrine disorders",9,"two stage system",9,23,14,3,9,0.824,0.609,0.7,0.538
+34,"nutritional deficiencies",5,"original rules",5,11,5,4,6,0.556,0.455,0.5,0.333
+34,"nutritional deficiencies",5,"two stage system",5,11,8,2,3,0.8,0.727,0.762,0.615
+35,"other nutritional endocrine immunity and metabolic disorders",7,"original rules",7,31,8,5,23,0.615,0.258,0.364,0.222
+35,"other nutritional endocrine immunity and metabolic disorders",7,"two stage system",7,31,12,2,19,0.857,0.387,0.533,0.364
+36,"disorders of lipid metabolism",1,"original rules",1,4,1,1,3,0.5,0.25,0.333,0.2
+36,"disorders of lipid metabolism",1,"two stage system",1,4,2,0,2,1,0.5,0.667,0.5
+37,"gout and other crystal arthropathies",2,"original rules",2,2,1,1,1,0.5,0.5,0.5,0.333
+37,"gout and other crystal arthropathies",2,"two stage system",2,2,2,0,0,1,1,1,1
+38,"anemia",5,"original rules",5,12,6,1,6,0.857,0.5,0.632,0.462
+38,"anemia",5,"two stage system",5,12,9,4,3,0.692,0.75,0.72,0.562
+39,"other hematologic conditions",4,"original rules",4,16,6,0,10,1,0.375,0.545,0.375
+39,"other hematologic conditions",4,"two stage system",4,16,7,0,9,1,0.438,0.609,0.438
+40,"delirium dementia and other cognitive disorders",3,"original rules",3,14,3,2,11,0.6,0.214,0.316,0.188
+40,"delirium dementia and other cognitive disorders",3,"two stage system",3,14,6,3,8,0.667,0.429,0.522,0.353
+41,"alcohol and substancerelated disorders",5,"original rules",5,28,6,3,22,0.667,0.214,0.324,0.194
+41,"alcohol and substancerelated disorders",5,"two stage system",5,28,11,2,17,0.846,0.393,0.537,0.367
+42,"schizophrenia and other psychotic disorders",3,"original rules",3,11,5,0,6,1,0.455,0.625,0.455
+42,"schizophrenia and other psychotic disorders",3,"two stage system",3,11,9,3,2,0.75,0.818,0.783,0.643
+43,"mood and anxiety disorders",4,"original rules",4,20,6,0,14,1,0.3,0.462,0.3
+43,"mood and anxiety disorders",4,"two stage system",4,20,12,3,8,0.8,0.6,0.686,0.522
+44,"disorders usually diagnosed in infancy childhood or adolescence",1,"original rules",1,1,1,0,0,1,1,1,1
+44,"disorders usually diagnosed in infancy childhood or adolescence",1,"two stage system",1,1,1,1,0,0.5,1,0.667,0.5
+45,"personality disorders",1,"original rules",1,6,1,1,5,0.5,0.167,0.25,0.143
+45,"personality disorders",1,"two stage system",1,6,4,1,2,0.8,0.667,0.727,0.571
+46,"miscellaneous mental health disorders",4,"original rules",4,9,4,2,5,0.667,0.444,0.533,0.364
+46,"miscellaneous mental health disorders",4,"two stage system",4,9,6,3,3,0.667,0.667,0.667,0.5
+47,"adjustment disorders",1,"original rules",1,2,1,0,1,1,0.5,0.667,0.5
+47,"adjustment disorders",1,"two stage system",1,2,1,0,1,1,0.5,0.667,0.5
+48,"attentiondeficit conduct and disruptive behavior disorders",2,"original rules",2,4,2,0,2,1,0.5,0.667,0.5
+48,"attentiondeficit conduct and disruptive behavior disorders",2,"two stage system",2,4,2,0,2,1,0.5,0.667,0.5
+49,"developmental disorders",4,"original rules",4,12,6,4,6,0.6,0.5,0.545,0.375
+49,"developmental disorders",4,"two stage system",4,12,4,7,8,0.364,0.333,0.348,0.211
+50,"other nervous system conditions",18,"original rules",16,40,20,6,20,0.769,0.5,0.606,0.435
+50,"other nervous system conditions",18,"two stage system",16,40,24,6,16,0.8,0.6,0.686,0.522
+51,"parkinsons disease",1,"original rules",1,3,1,0,2,1,0.333,0.5,0.333
+51,"parkinsons disease",1,"two stage system",1,3,2,0,1,1,0.667,0.8,0.667
+52,"headache including migraine",2,"original rules",1,2,1,0,1,1,0.5,0.667,0.5
+52,"headache including migraine",2,"two stage system",1,2,1,0,1,1,0.5,0.667,0.5
+53,"multiple sclerosis",1,"original rules",1,1,1,0,0,1,1,1,1
+53,"multiple sclerosis",1,"two stage system",1,1,1,0,0,1,1,1,1
+54,"paralysis",3,"original rules",3,4,4,0,0,1,1,1,1
+54,"paralysis",3,"two stage system",3,4,3,0,1,1,0.75,0.857,0.75
+55,"epilepsyconvulsions",1,"original rules",1,2,1,0,1,1,0.5,0.667,0.5
+55,"epilepsyconvulsions",1,"two stage system",1,2,2,0,0,1,1,1,1
+56,"other eye disorders",9,"original rules",9,30,15,2,15,0.882,0.5,0.638,0.469
+56,"other eye disorders",9,"two stage system",9,30,20,2,10,0.909,0.667,0.769,0.625
+57,"retinal detachments defects vascular occlusion and retinopathy",2,"original rules",2,5,3,1,2,0.75,0.6,0.667,0.5
+57,"retinal detachments defects vascular occlusion and retinopathy",2,"two stage system",2,5,4,1,1,0.8,0.8,0.8,0.667
+58,"glaucoma",1,"original rules",1,3,1,0,2,1,0.333,0.5,0.333
+58,"glaucoma",1,"two stage system",1,3,2,0,1,1,0.667,0.8,0.667
+59,"cataract",1,"original rules",1,3,2,0,1,1,0.667,0.8,0.667
+59,"cataract",1,"two stage system",1,3,2,0,1,1,0.667,0.8,0.667
+60,"blindness and vision defects",1,"original rules",1,1,1,2,0,0.333,1,0.5,0.333
+60,"blindness and vision defects",1,"two stage system",1,1,1,1,0,0.5,1,0.667,0.5
+61,"other ear and sense organ disorders",3,"original rules",3,7,6,0,1,1,0.857,0.923,0.857
+61,"other ear and sense organ disorders",3,"two stage system",3,7,6,1,1,0.857,0.857,0.857,0.75
+62,"otitis media and related conditions",3,"original rules",3,8,3,1,5,0.75,0.375,0.5,0.333
+62,"otitis media and related conditions",3,"two stage system",3,8,3,2,5,0.6,0.375,0.462,0.3
+63,"conditions associated with dizziness or vertigo",1,"original rules",1,3,2,0,1,1,0.667,0.8,0.667
+63,"conditions associated with dizziness or vertigo",1,"two stage system",1,3,2,0,1,1,0.667,0.8,0.667
+64,"peri endo and myocarditis cardiomyopathy",4,"original rules",4,8,3,4,5,0.429,0.375,0.4,0.25
+64,"peri endo and myocarditis cardiomyopathy",4,"two stage system",4,8,4,2,4,0.667,0.5,0.571,0.4
+65,"heart valve disorders",5,"original rules",5,14,2,8,12,0.2,0.143,0.167,0.091
+65,"heart valve disorders",5,"two stage system",5,14,3,5,11,0.375,0.214,0.273,0.158
+66,"hypertension",1,"original rules",1,1,1,0,0,1,1,1,1
+66,"hypertension",1,"two stage system",1,1,1,0,0,1,1,1,1
+67,"hypertension complications",4,"original rules",4,4,3,5,1,0.375,0.75,0.5,0.333
+67,"hypertension complications",4,"two stage system",4,4,4,0,0,1,1,1,1
+68,"acute myocardial infarction",1,"original rules",1,3,1,0,2,1,0.333,0.5,0.333
+68,"acute myocardial infarction",1,"two stage system",1,3,1,1,2,0.5,0.333,0.4,0.25
+69,"coronary atherosclerosis and other heart disease",4,"original rules",4,5,3,4,2,0.429,0.6,0.5,0.333
+69,"coronary atherosclerosis and other heart disease",4,"two stage system",4,5,3,2,2,0.6,0.6,0.6,0.429
+70,"pulmonary heart disease",3,"original rules",3,4,3,4,1,0.429,0.75,0.545,0.375
+70,"pulmonary heart disease",3,"two stage system",3,4,3,1,1,0.75,0.75,0.75,0.6
+71,"conduction disorders",1,"original rules",1,2,2,1,0,0.667,1,0.8,0.667
+71,"conduction disorders",1,"two stage system",1,2,2,0,0,1,1,1,1
+72,"cardiac dysrhythmias arrest chf and ventricular fibrillation",2,"original rules",2,6,3,0,3,1,0.5,0.667,0.5
+72,"cardiac dysrhythmias arrest chf and ventricular fibrillation",2,"two stage system",2,6,3,0,3,1,0.5,0.667,0.5
+73,"other and illdefined heart disease",1,"original rules",1,6,1,2,5,0.333,0.167,0.222,0.125
+73,"other and illdefined heart disease",1,"two stage system",1,6,1,0,5,1,0.167,0.286,0.167
+74,"acute cerebrovascular disease",6,"original rules",6,11,5,4,6,0.556,0.455,0.5,0.333
+74,"acute cerebrovascular disease",6,"two stage system",6,11,7,2,4,0.778,0.636,0.7,0.538
+75,"transient cerebral ischemia",1,"original rules",1,1,0,3,1,0,0,0,0
+75,"transient cerebral ischemia",1,"two stage system",1,1,1,2,0,0.333,1,0.5,0.333
+76,"other and illdefined cerebrovascular disease",2,"original rules",2,5,2,2,3,0.5,0.4,0.444,0.286
+76,"other and illdefined cerebrovascular disease",2,"two stage system",2,5,3,1,2,0.75,0.6,0.667,0.5
+77,"other circulatory disease",8,"original rules",8,13,7,3,6,0.7,0.538,0.609,0.438
+77,"other circulatory disease",8,"two stage system",8,13,8,0,5,1,0.615,0.762,0.615
+78,"aortic and peripheral arterial embolism or thrombosis",2,"original rules",1,1,1,1,0,0.5,1,0.667,0.5
+78,"aortic and peripheral arterial embolism or thrombosis",2,"two stage system",1,1,1,0,0,1,1,1,1
+79,"phlebitis thrombophlebitis and thromboembolism",1,"original rules",1,1,1,1,0,0.5,1,0.667,0.5
+79,"phlebitis thrombophlebitis and thromboembolism",1,"two stage system",1,1,1,1,0,0.5,1,0.667,0.5
+80,"other diseases of veins and lymphatics",3,"original rules",3,6,4,1,2,0.8,0.667,0.727,0.571
+80,"other diseases of veins and lymphatics",3,"two stage system",3,6,4,2,2,0.667,0.667,0.667,0.5
+81,"other upper respiratory disease",4,"original rules",4,7,4,5,3,0.444,0.571,0.5,0.333
+81,"other upper respiratory disease",4,"two stage system",4,7,6,4,1,0.6,0.857,0.706,0.545
+82,"other upper respiratory infections",1,"original rules",1,1,1,0,0,1,1,1,1
+82,"other upper respiratory infections",1,"two stage system",1,1,1,3,0,0.25,1,0.4,0.25
+83,"acute and chronic tonsillitis",1,"original rules",1,1,1,0,0,1,1,1,1
+83,"acute and chronic tonsillitis",1,"two stage system",1,1,1,0,0,1,1,1,1
+84,"chronic obstructive pulmonary disease copd",4,"original rules",4,6,5,1,1,0.833,0.833,0.833,0.714
+84,"chronic obstructive pulmonary disease copd",4,"two stage system",4,6,4,1,2,0.8,0.667,0.727,0.571
+85,"asthma",1,"original rules",1,1,1,0,0,1,1,1,1
+85,"asthma",1,"two stage system",1,1,1,0,0,1,1,1,1
+86,"lung disease due to external agents",9,"original rules",9,10,8,5,2,0.615,0.8,0.696,0.533
+86,"lung disease due to external agents",9,"two stage system",9,10,8,2,2,0.8,0.8,0.8,0.667
+87,"other lower respiratory disease",5,"original rules",4,5,2,5,3,0.286,0.4,0.333,0.2
+87,"other lower respiratory disease",5,"two stage system",4,5,3,2,2,0.6,0.6,0.6,0.429
+88,"respiratory failure pulmonary collapse",1,"original rules",1,6,2,0,4,1,0.333,0.5,0.333
+88,"respiratory failure pulmonary collapse",1,"two stage system",1,6,4,4,2,0.5,0.667,0.571,0.4
+89,"disorders of teeth and jaw",2,"original rules",2,4,2,2,2,0.5,0.5,0.5,0.333
+89,"disorders of teeth and jaw",2,"two stage system",2,4,3,6,1,0.333,0.75,0.462,0.3
+90,"esophageal disorders",1,"original rules",1,4,1,0,3,1,0.25,0.4,0.25
+90,"esophageal disorders",1,"two stage system",1,4,3,0,1,1,0.75,0.857,0.75
+91,"gasduo ulcer without hemorrhage",4,"original rules",4,4,4,4,0,0.5,1,0.667,0.5
+91,"gasduo ulcer without hemorrhage",4,"two stage system",4,4,4,1,0,0.8,1,0.889,0.8
+92,"gastritis and duodenitis",1,"original rules",1,1,1,0,0,1,1,1,1
+92,"gastritis and duodenitis",1,"two stage system",1,1,1,1,0,0.5,1,0.667,0.5
+93,"other disorders of stomach and duodenum",1,"original rules",1,1,1,0,0,1,1,1,1
+93,"other disorders of stomach and duodenum",1,"two stage system",1,1,1,1,0,0.5,1,0.667,0.5
+94,"regional enteritis and ulcerative colitis",2,"original rules",2,2,2,0,0,1,1,1,1
+94,"regional enteritis and ulcerative colitis",2,"two stage system",2,2,2,0,0,1,1,1,1
+95,"noninfectious gastroenteritis",1,"original rules",1,2,1,0,1,1,0.5,0.667,0.5
+95,"noninfectious gastroenteritis",1,"two stage system",1,2,1,0,1,1,0.5,0.667,0.5
+96,"diverticulosis and diverticulitis",1,"original rules",1,1,1,0,0,1,1,1,1
+96,"diverticulosis and diverticulitis",1,"two stage system",1,1,1,0,0,1,1,1,1
+97,"other gastrointestinal disorders",2,"original rules",2,6,2,0,4,1,0.333,0.5,0.333
+97,"other gastrointestinal disorders",2,"two stage system",2,6,3,0,3,1,0.5,0.667,0.5
+98,"hepatitis and other liver diseases",3,"original rules",3,13,5,3,8,0.625,0.385,0.476,0.312
+98,"hepatitis and other liver diseases",3,"two stage system",3,13,9,4,4,0.692,0.692,0.692,0.529
+99,"biliary tract disease",2,"original rules",2,5,2,2,3,0.5,0.4,0.444,0.286
+99,"biliary tract disease",2,"two stage system",2,5,4,2,1,0.667,0.8,0.727,0.571
+100,"pancreatic disorders excluding diabetes",1,"original rules",1,3,2,0,1,1,0.667,0.8,0.667
+100,"pancreatic disorders excluding diabetes",1,"two stage system",1,3,3,0,0,1,1,1,1
+101,"chronic kideny disease and related conditions",6,"original rules",6,16,5,10,11,0.333,0.312,0.323,0.192
+101,"chronic kideny disease and related conditions",6,"two stage system",6,16,7,5,9,0.583,0.438,0.5,0.333
+102,"other diseases of kidney and ureters",1,"original rules",1,1,1,2,0,0.333,1,0.5,0.333
+102,"other diseases of kidney and ureters",1,"two stage system",1,1,1,0,0,1,1,1,1
+103,"urinary tract infections",2,"original rules",2,9,2,2,7,0.5,0.222,0.308,0.182
+103,"urinary tract infections",2,"two stage system",2,9,3,1,6,0.75,0.333,0.462,0.3
+104,"other diseases of bladder and urethra",2,"original rules",2,8,3,1,5,0.75,0.375,0.5,0.333
+104,"other diseases of bladder and urethra",2,"two stage system",2,8,6,1,2,0.857,0.75,0.8,0.667
+105,"hyperplasia of prostate",1,"original rules",1,1,1,0,0,1,1,1,1
+105,"hyperplasia of prostate",1,"two stage system",1,1,1,0,0,1,1,1,1
+106,"other male genital disorders",2,"original rules",2,3,2,0,1,1,0.667,0.8,0.667
+106,"other male genital disorders",2,"two stage system",2,3,2,0,1,1,0.667,0.8,0.667
+107,"nonmalignant breast conditions",1,"original rules",1,1,1,1,0,0.5,1,0.667,0.5
+107,"nonmalignant breast conditions",1,"two stage system",1,1,1,0,0,1,1,1,1
+108,"other female genital disorders",7,"original rules",7,13,7,3,6,0.7,0.538,0.609,0.438
+108,"other female genital disorders",7,"two stage system",7,13,8,9,5,0.471,0.615,0.533,0.364
+109,"menstrual disorders",1,"original rules",1,4,2,0,2,1,0.5,0.667,0.5
+109,"menstrual disorders",1,"two stage system",1,4,2,0,2,1,0.5,0.667,0.5
+110,"prolapse of female genital organs",1,"original rules",1,2,1,0,1,1,0.5,0.667,0.5
+110,"prolapse of female genital organs",1,"two stage system",1,2,1,0,1,1,0.5,0.667,0.5
+111,"menopausal disorders",1,"original rules",1,2,1,1,1,0.5,0.5,0.5,0.333
+111,"menopausal disorders",1,"two stage system",1,2,1,0,1,1,0.5,0.667,0.5
+112,"female infertility",1,"original rules",1,1,1,2,0,0.333,1,0.5,0.333
+112,"female infertility",1,"two stage system",1,1,1,2,0,0.333,1,0.5,0.333
+113,"allergic reactions",1,"original rules",1,1,1,1,0,0.5,1,0.667,0.5
+113,"allergic reactions",1,"two stage system",1,1,1,6,0,0.143,1,0.25,0.143
+114,"other inflammatory condition of skin",3,"original rules",3,18,5,0,13,1,0.278,0.435,0.278
+114,"other inflammatory condition of skin",3,"two stage system",3,18,9,4,9,0.692,0.5,0.581,0.409
+115,"other skin disorders",2,"original rules",2,14,2,1,12,0.667,0.143,0.235,0.133
+115,"other skin disorders",2,"two stage system",2,14,5,0,9,1,0.357,0.526,0.357
+116,"chronic ulcer of skin",1,"original rules",1,3,1,0,2,1,0.333,0.5,0.333
+116,"chronic ulcer of skin",1,"two stage system",1,3,3,5,0,0.375,1,0.545,0.375
+117,"systemic lupus erythematosus and connective tissue disorders",1,"original rules",1,5,2,0,3,1,0.4,0.571,0.4
+117,"systemic lupus erythematosus and connective tissue disorders",1,"two stage system",1,5,3,0,2,1,0.6,0.75,0.6
+118,"joint disorders",5,"original rules",5,16,5,4,11,0.556,0.312,0.4,0.25
+118,"joint disorders",5,"two stage system",5,16,8,15,8,0.348,0.5,0.41,0.258
+119,"rheumatoid arthritis and related disease",1,"original rules",1,5,2,0,3,1,0.4,0.571,0.4
+119,"rheumatoid arthritis and related disease",1,"two stage system",1,5,2,2,3,0.5,0.4,0.444,0.286
+120,"osteoarthritis",1,"original rules",1,6,1,1,5,0.5,0.167,0.25,0.143
+120,"osteoarthritis",1,"two stage system",1,6,2,1,4,0.667,0.333,0.444,0.286
+121,"spondylosis intervertebral disc disorders other back problems",3,"original rules",3,10,6,1,4,0.857,0.6,0.706,0.545
+121,"spondylosis intervertebral disc disorders other back problems",3,"two stage system",3,10,7,7,3,0.5,0.7,0.583,0.412
+122,"infective arthritis and osteomyelitis",1,"original rules",1,5,1,0,4,1,0.2,0.333,0.2
+122,"infective arthritis and osteomyelitis",1,"two stage system",1,5,2,0,3,1,0.4,0.571,0.4
+123,"osteoporosis and other bone disease",3,"original rules",3,20,5,0,15,1,0.25,0.4,0.25
+123,"osteoporosis and other bone disease",3,"two stage system",3,20,8,0,12,1,0.4,0.571,0.4
+124,"acquired foot deformities",1,"original rules",1,1,1,0,0,1,1,1,1
+124,"acquired foot deformities",1,"two stage system",1,1,1,1,0,0.5,1,0.667,0.5
+125,"other acquired deformities",1,"original rules",1,4,1,0,3,1,0.25,0.4,0.25
+125,"other acquired deformities",1,"two stage system",1,4,1,0,3,1,0.25,0.4,0.25
+126,"nervous system congenital anomalies",3,"original rules",3,7,4,0,3,1,0.571,0.727,0.571
+126,"nervous system congenital anomalies",3,"two stage system",3,7,4,0,3,1,0.571,0.727,0.571
+127,"other congenital anomalies",10,"original rules",10,54,16,3,38,0.842,0.296,0.438,0.281
+127,"other congenital anomalies",10,"two stage system",10,54,36,5,18,0.878,0.667,0.758,0.61
+128,"cardiac and circulatory congenital anomalies",3,"original rules",3,11,3,2,8,0.6,0.273,0.375,0.231
+128,"cardiac and circulatory congenital anomalies",3,"two stage system",3,11,8,2,3,0.8,0.727,0.762,0.615
+129,"digestive congenital anomalies",2,"original rules",2,8,3,0,5,1,0.375,0.545,0.375
+129,"digestive congenital anomalies",2,"two stage system",2,8,6,0,2,1,0.75,0.857,0.75
+130,"genitourinary congenital anomalies",2,"original rules",2,13,3,0,10,1,0.231,0.375,0.231
+130,"genitourinary congenital anomalies",2,"two stage system",2,13,5,0,8,1,0.385,0.556,0.385

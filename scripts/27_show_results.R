@@ -144,6 +144,54 @@ for (tr in c("10_9", "8_9")) {
 cat("\n  holding out whole CCS categories costs almost nothing, so it is not\n")
 cat("  memorising categories.\n")
 
+# ---------------------------------------------------------------- 9
+hdr(9, "how much would these numbers move on a different set of codes")
+d <- get("bootstrap_variability.csv")
+if (!is.null(d)) {
+  d <- d[d$metric == "f1", ]
+  for (tr in c("10_9", "8_9")) {
+    x <- d[d$track == tr, ]
+    cat(sprintf("\n%s\n", tname(tr)))
+    for (i in seq_len(nrow(x)))
+      cat(sprintf("  %-18s f1 %.3f  (sd %.3f, 95%% %.3f to %.3f)\n",
+                  x$system[i], x$estimate[i], x$sd[i], x$ci_low[i], x$ci_high[i]))
+  }
+  e <- get("bootstrap_deltas.csv")
+  if (!is.null(e)) {
+    e <- e[e$metric == "f1", ]
+    cat("\n  two stage system minus the rules, paired inside each draw:\n")
+    for (i in seq_len(nrow(e)))
+      cat(sprintf("  %-20s %+.3f  (sd %.3f, 95%% %+.3f to %+.3f) %s\n", tname(e$track[i]),
+                  e$delta[i], e$sd[i], e$ci_low[i], e$ci_high[i],
+                  ifelse(e$crosses_zero[i], "<- includes zero", "")))
+  }
+  cat("\n  2000 bootstrap draws, resampling whole icd-9 codes. the icd-10-ca gain\n")
+  cat("  is far bigger than the noise, the icda-8 gain is not.\n")
+}
+
+# ---------------------------------------------------------------- 10
+hdr(10, "how evenly it works across the 130 ccs categories")
+d <- get("ccs_category_summary.csv")
+if (!is.null(d)) {
+  for (tr in c("10_9", "8_9")) {
+    x <- d[d$track == tr, ]
+    cat(sprintf("\n%s\n", tname(tr)))
+    for (i in seq_len(nrow(x)))
+      cat(sprintf("  %-18s mean %.3f  sd %.3f  median %.3f  perfect %d  zero %d\n",
+                  x$system[i], x$mean_f1[i], x$sd_f1[i], x$median_f1[i],
+                  x$n_perfect[i], x$n_zero[i]))
+  }
+  e <- get("ccs_delta_summary.csv")
+  if (!is.null(e)) {
+    cat("\n  category by category, two stage system against the rules:\n")
+    for (i in seq_len(nrow(e)))
+      cat(sprintf("  %-20s %d better, %d unchanged, %d worse (mean %+.3f)\n",
+                  tname(e$track[i]), e$n_better[i], e$n_same[i], e$n_worse[i], e$mean_delta[i]))
+  }
+  cat("\n  spread between categories (sd ~0.2) dwarfs the noise on the overall\n")
+  cat("  number. 59 of 130 categories hold a single code, so treat those gently.\n")
+}
+
 cat("\n\n=========== related scripts ===========\n")
 cat("  24_show_similarity_matrix.R   what a similarity table looks like\n")
 cat("  25_frequency_distributions.R  max similarity and co-occurrence spread\n")

@@ -1,0 +1,17 @@
+"track","system","size_group","n_categories","mean_f1","sd_f1"
+"10_9","original rules","1 code",59,0.721,0.289
+"10_9","original rules","2 codes",23,0.607,0.193
+"10_9","original rules","3-4 codes",27,0.592,0.177
+"10_9","original rules","5+ codes",21,0.52,0.166
+"10_9","two stage system","1 code",59,0.776,0.228
+"10_9","two stage system","2 codes",23,0.71,0.167
+"10_9","two stage system","3-4 codes",27,0.683,0.166
+"10_9","two stage system","5+ codes",21,0.666,0.163
+"8_9","original rules","1 code",58,0.92,0.236
+"8_9","original rules","2 codes",23,0.903,0.181
+"8_9","original rules","3-4 codes",27,0.831,0.259
+"8_9","original rules","5+ codes",21,0.793,0.217
+"8_9","two stage system","1 code",58,0.914,0.238
+"8_9","two stage system","2 codes",23,0.97,0.111
+"8_9","two stage system","3-4 codes",27,0.814,0.267
+"8_9","two stage system","5+ codes",21,0.808,0.212
