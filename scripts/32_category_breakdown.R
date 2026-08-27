@@ -8,11 +8,12 @@
 #
 # needs heldout_counts_<track>.rds from 31_variability.R
 # usage: Rscript 32_category_breakdown.R
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 library(ggplot2)
 
-ORIG_BASE <- "../data/original"
-OUT_DIR   <- "../results"
+ORIG_BASE <- "data/original"
+OUT_DIR   <- "results"
 SYSTEMS   <- c("two stage system", "original rules")
 TRACKS    <- list(`10_9` = "ICD-9-CM to ICD-10-CA", `8_9` = "ICD-9-CM to ICDA-8")
 

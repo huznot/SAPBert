@@ -29,19 +29,30 @@ methodology has been agreed.
 
 ## Running it
 
-Needs R. Open `icd_crosswalk.Rproj` in RStudio, then:
+Needs R. All the data is in the repo, so nothing has to be downloaded or
+requested. Scripts find the repo root themselves, so it does not matter which
+directory you start them from.
 
-```r
-source("scripts/27_show_results.R")   # every headline number, about a second
+Every headline number, read from the committed results, about a second:
+
+```bash
+Rscript scripts/27_show_results.R
 ```
 
-To reproduce the analysis from the data, from `scripts/`:
+To rebuild everything from the data instead, in dependency order:
 
-```r
-source("07_full_grid_comparison.R")  # parameter grid, all conditions
-source("08_assemble_full_grid.R")    # combine into summary tables
-source("09_error_analysis.R")        # where correct mappings are lost
-source("23_code_prefix_test.R")      # code number in the embedded text
+```bash
+Rscript run_all.R           # about 45 minutes
+Rscript run_all.R --quick   # ~10 minutes, skips the parameter searches
+```
+
+Or run a single stage:
+
+```bash
+Rscript scripts/07_full_grid_comparison.R   # parameter grid, all conditions
+Rscript scripts/08_assemble_full_grid.R     # combine into summary tables
+Rscript scripts/09_error_analysis.R         # where correct mappings are lost
+Rscript scripts/23_code_prefix_test.R       # code number in the embedded text
 ```
 
 R packages: `dplyr`, `tidyr`, `readxl`, `writexl`, `stringr`, `purrr`,
@@ -51,7 +62,7 @@ Python is only needed to regenerate embeddings (`torch`, `transformers`,
 `sentence-transformers`, `pandas`, `openpyxl`):
 
 ```bash
-python generate_embeddings.py --model mpnet --clean base
+python scripts/generate_embeddings.py --model mpnet --clean base
 ```
 
 ### All scripts
@@ -66,6 +77,7 @@ still runs.
 | `generate_embeddings.py` | similarity matrices for any model and text cleaning |
 | `01_generate_sapbert_embeddings.R` | how `data/sapbert/` was made, superseded by the Python script |
 | `pipeline_lib.R` | shared functions, sourced by everything |
+| `paths.R` | finds the repo root so scripts run from any directory |
 
 **The original pipeline, reproduced and searched**
 
@@ -116,6 +128,7 @@ still runs.
 | | |
 |---|---|
 | `27_show_results.R` | every headline number |
+| `34_export_rds_as_csv.R` | the held-out predictions as csv, for reading without R |
 | `24_show_similarity_matrix.R` | a worked similarity matrix |
 | `25_frequency_distributions.R` | report Section 11 |
 | `26_stopword_choice.R` | which stop word dictionary, report Section 9 |
@@ -144,5 +157,7 @@ data/sapbert/     SapBERT similarity matrices
 data/generated/   regenerated / filler-stripped / mpnet matrices
 scripts/          pipeline code
 results/          csv output and charts
+results/csv_export/  the held-out predictions as csv
+run_all.R         rebuilds everything in dependency order
 report.md         every change from the original pipeline to now
 ```

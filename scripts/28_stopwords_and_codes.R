@@ -2,6 +2,8 @@
 # out of the text, all with clinicalbert, everything else held fixed.
 # reads the cached grids, nothing is recomputed, takes about a second.
 
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 R <- "results/full_grid"
 get <- function(tag) {
   p <- file.path(R, paste0(tag, ".csv"))

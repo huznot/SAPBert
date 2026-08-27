@@ -1,9 +1,16 @@
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 library(reticulate)
 library(readxl)
 library(dplyr)
 library(stringr)
 
-use_python("/usr/bin/python3", required = TRUE)
+# set RETICULATE_PYTHON if your python is somewhere else. superseded by
+# generate_embeddings.py, which finds its own paths and needs no reticulate
+.py <- Sys.getenv("RETICULATE_PYTHON", unset = Sys.which("python3"))
+if (!nzchar(.py)) .py <- Sys.which("python")
+if (!nzchar(.py)) stop("no python found, set RETICULATE_PYTHON")
+use_python(.py, required = TRUE)
 py_config()
 
 py_run_string("
@@ -31,8 +38,8 @@ def embed_batch(texts, max_length=64):
     return cls.numpy()
 ")
 
-BASE <- "../data/original"
-OUT  <- "../data/sapbert"
+BASE <- "data/original"
+OUT  <- "data/sapbert"
 dir.create(OUT, showWarnings = FALSE, recursive = TRUE)
 
 clean_label <- function(s) {

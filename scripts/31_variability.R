@@ -12,10 +12,11 @@
 # numbers here are the same held out numbers, not a refit
 #
 # usage: Rscript 31_variability.R
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 set.seed(42)
 
-OUT_DIR <- "../results"
+OUT_DIR <- "results"
 B <- 2000
 TRACKS <- c("10_9", "8_9")
 

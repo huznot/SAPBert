@@ -8,10 +8,11 @@
 # and cv_rerank_folds.csv
 #
 # usage: Rscript 33_block_feature_effect.R
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 set.seed(42)
 
-OUT_DIR <- "../results"
+OUT_DIR <- "results"
 OLD_DIR <- file.path(OUT_DIR, "baseline_prefeat")
 B <- 2000
 TRACKS <- c("10_9", "8_9")

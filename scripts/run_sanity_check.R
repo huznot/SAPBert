@@ -1,6 +1,7 @@
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-BASE <- "../data/original"
+BASE <- "data/original"
 
 cat("Loading 10_9 ClinicalBERT similarity sheets...\n")
 sheets_10_9 <- load_similarity_sheets(file.path(BASE, "Cosine_Similarity_Matrices/cosine_similarity_matrices_10_9_ClinicalBERT.xlsx"))

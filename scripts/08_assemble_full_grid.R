@@ -7,10 +7,11 @@
 #
 # the sensitivity table is the point, comparing models at one arbitrary operating
 # point cant tell "A is better" from "A wins at this one spot"
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-GRID_DIR <- "../results/full_grid"
-OUT_DIR  <- "../results"
+GRID_DIR <- "results/full_grid"
+OUT_DIR  <- "results"
 
 files <- list.files(GRID_DIR, pattern = "\\.csv$", full.names = TRUE)
 if (length(files) == 0) stop("no per-condition grid CSVs in ", GRID_DIR,

@@ -10,9 +10,10 @@
 #
 # uses the out of fold predictions from 12_ so it is held out
 
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-OUT_DIR <- "../results"
+OUT_DIR <- "results"
 preds <- readRDS(file.path(OUT_DIR, "cv_rerank_predictions.rds"))
 
 rows <- list()

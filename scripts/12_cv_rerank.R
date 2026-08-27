@@ -7,15 +7,16 @@
 # usage: Rscript 12_cv_rerank.R          both tracks
 #        Rscript 12_cv_rerank.R 10_9     one track, run both in parallel then 12b_
 
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 suppressMessages(library(xgboost))
 
 set.seed(20260819)
 
-ORIG_BASE    <- "../data/original"
-SAPBERT_BASE <- "../data/sapbert"
-GEN_BASE     <- "../data/generated"
-OUT_DIR      <- "../results"
+ORIG_BASE    <- "data/original"
+SAPBERT_BASE <- "data/sapbert"
+GEN_BASE     <- "data/generated"
+OUT_DIR      <- "results"
 N_OUTER <- 5
 N_INNER <- 3
 

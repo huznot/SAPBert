@@ -6,11 +6,12 @@
 #
 # compares recall ceiling of the pool at a few top-K values plus top-1 hit rate
 # on similarity alone
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-ORIG <- "../data/original"
-GEN  <- "../data/generated"
-SAP  <- "../data/sapbert"
+ORIG <- "data/original"
+GEN  <- "data/generated"
+SAP  <- "data/sapbert"
 VAL  <- file.path(ORIG, "ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx")
 
 TRACKS <- list(
@@ -69,7 +70,7 @@ for (tr in names(TRACKS)) {
 }
 
 res <- bind_rows(rows)
-write.csv(res, "../results/code_prefix_test.csv", row.names = FALSE)
+write.csv(res, "results/code_prefix_test.csv", row.names = FALSE)
 
 cat("\n===== label only minus with code =====\n")
 for (m in c("sapbert", "mpnet", "clinicalbert")) {

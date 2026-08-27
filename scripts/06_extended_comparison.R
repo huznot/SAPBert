@@ -1,4 +1,5 @@
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
 # superseded by 07_full_grid_comparison.R which runs the full grid for every
 # condition instead of the single operating point used here. kept for reference
@@ -6,9 +7,9 @@ source("pipeline_lib.R")
 # compares filler stripping and the mpnet arm against the baseline at one fixed
 # threshold/top_n per track, sweeping only the flag rules
 
-ORIG_BASE <- "../data/original"
-GEN_BASE  <- "../data/generated"
-OUT_DIR   <- "../results"
+ORIG_BASE <- "data/original"
+GEN_BASE  <- "data/generated"
+OUT_DIR   <- "results"
 
 thresholds_10_9 <- c(0.995)
 top_ns_10_9     <- c(30)
@@ -93,8 +94,8 @@ for (cond in conditions) {
 
 # SapBERT / base is the existing, already-validated data/sapbert matrices --
 # no need to regenerate, use exactly what 02_run_comparison.R already used.
-sheets_sap_10_9 <- load_similarity_sheets("../data/sapbert/cosine_similarity_matrices_10_9_SapBERT.xlsx")
-sheets_sap_8_9  <- load_similarity_sheets("../data/sapbert/cosine_similarity_matrices_8_9_SapBERT.xlsx")
+sheets_sap_10_9 <- load_similarity_sheets("data/sapbert/cosine_similarity_matrices_10_9_SapBERT.xlsx")
+sheets_sap_8_9  <- load_similarity_sheets("data/sapbert/cosine_similarity_matrices_8_9_SapBERT.xlsx")
 all_results[[length(all_results) + 1]] <- run_grid_reduced(
   "10_9", "SapBERT-base", sheets_sap_10_9, cooc_10_9, manual_10_9, excl_10_9,
   target_col_name = "ICD_10_CA", icd9_col = "ICD_9_CM_Code3", target_col = "ICD_10_CA_Code3",

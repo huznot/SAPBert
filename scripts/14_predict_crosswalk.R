@@ -8,11 +8,12 @@
 # 13_ which derives it from out of fold predictions, so it isnt tuned on
 # anything this script sees
 
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 suppressMessages(library(xgboost))
 set.seed(20260819)
 
-OUT_DIR <- "../results"
+OUT_DIR <- "results"
 TRACKS <- c("10_9", "8_9")
 
 curve <- read.csv(file.path(OUT_DIR, "precision_coverage_curve.csv"))

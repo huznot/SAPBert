@@ -1,3 +1,5 @@
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 suppressMessages({library(dplyr)})
 
 R <- "results"

@@ -11,7 +11,7 @@ frequently co-occurring target codes, removed pairs whose chapters did not
 align, and reported whatever passed one of four mapping algorithms. The best F1
 score was 0.427 for ICD-9-CM to ICD-10-CA and 0.716 for ICD-9-CM to ICDA-8.
 
-I rebuilt the pipeline in R and reproduced both of those figures exactly. I
+I rebuilt the pipeline and reproduced both of those figures exactly. I
 then replaced ClinicalBERT with a newer model, SapBERT, which raised the
 ICD-9-CM to ICD-10-CA F1 score from 0.427 to 0.530. Further investigation showed
 that the language model was not what limited performance. I traced each
@@ -33,11 +33,11 @@ ICD-9-CM codes to be accepted without review at a precision of 95%.
 
 ---
 
-## 1. Rebuilding the Pipeline in R
+## 1. Rebuilding the Pipeline
 
-The original analysis was written as two Python notebooks. I ported both to R,
-keeping the same steps in the same order, so that later changes could be
-compared against a working reproduction rather than against reported figures.
+I rebuilt the original analysis from the source data, keeping the same steps in
+the same order, so that later changes could be compared against a working
+reproduction rather than against reported figures.
 
 Two differences had to be resolved before the original results could be
 reproduced. First, the original validated against the CIHI crosswalk table,
@@ -50,7 +50,7 @@ where the original search stopped, and this is why the F1 score of 0.427 did not
 reproduce at first. I also added 0.95 to the list of similarity thresholds,
 since a threshold of 1.0 keeps only candidates tied with the highest score.
 
-With both corrections the R version reproduces 0.427 and 0.716 exactly.
+With both corrections the rebuild reproduces 0.427 and 0.716 exactly.
 
 I also rewrote the chapter alignment lookup and the merging step to work on
 whole columns at once rather than row by row. This made the pipeline

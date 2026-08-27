@@ -1,8 +1,10 @@
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-OUT_DIR <- "../results"
+OUT_DIR <- "results"
 
 best_by_model <- read.csv(file.path(OUT_DIR, "best_by_model.csv"))
 ccs_10_9 <- read.csv(file.path(OUT_DIR, "ccs_breakdown_10_9.csv"))

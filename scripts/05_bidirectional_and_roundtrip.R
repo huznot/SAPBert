@@ -1,12 +1,13 @@
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
 # reverse mapping (target -> icd-9-cm) and round trip consistency
 # reuses the forward parameters from best_by_model.csv instead of running a
 # separate reverse grid search
 
-ORIG_BASE    <- "../data/original"
-SAPBERT_BASE <- "../data/sapbert"
-OUT_DIR      <- "../results"
+ORIG_BASE    <- "data/original"
+SAPBERT_BASE <- "data/sapbert"
+OUT_DIR      <- "results"
 
 best_by_model <- read.csv(file.path(OUT_DIR, "best_by_model.csv"), stringsAsFactors = FALSE)
 

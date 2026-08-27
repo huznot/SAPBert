@@ -1,3 +1,5 @@
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 suppressMessages({library(readxl); library(dplyr); library(tidyr); library(ggplot2)})
 
 ORIG <- "data/original"
@@ -12,7 +14,7 @@ TRACKS <- list(
   `8_9` = list(
     label = "ICD-9-CM to ICDA-8",
     sim   = file.path(ORIG, "Cosine_Similarity_Matrices/cosine_similarity_matrices_8_9_ClinicalBERT.xlsx"),
-    cooc  = file.path(ORIG, "Co_occurrence/icd_8_9_co_occurrence_3d.xSlsx"),
+    cooc  = file.path(ORIG, "Co_occurrence/icd_8_9_co_occurrence_3d.xlsx"),
     icd9  = "ICD_9_CM_Code", tgt = "ICDA_8_Code")
 )
 

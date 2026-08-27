@@ -7,10 +7,11 @@
 # the reranker scores candidates independently and has no notion of a block,
 # which is why it emits the strongest target and stops. if the true sets really
 # are contiguous, expanding around a confident prediction should recover the rest
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-OUT_DIR <- "../results"
-ORIG <- "../data/original/ICD_Codes_Files_and_Validation_Data"
+OUT_DIR <- "results"
+ORIG <- "data/original/ICD_Codes_Files_and_Validation_Data"
 
 # numeric part of a target code, for measuring adjacency
 codenum <- function(x) suppressWarnings(as.numeric(gsub("[^0-9]", "", x)))
