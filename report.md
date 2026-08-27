@@ -139,7 +139,14 @@ model is reported at its best setting, its median setting and its worst.
 
 ![model comparison](results/plot_f1_accuracy_comparison.png)
 
-**Figure 1. F1 score and accuracy for each embedding model.**
+**Figure 1. F1 and accuracy for each model across all 112 parameter settings.**
+The dot is the best setting, the dash the median, and the line runs down to the
+worst. A model is a range, not a point, and the range is what a single
+best-score bar chart hides.
+
+The ICDA-8 panel makes the case on its own. SapBERT's worst setting, 0.718, is
+above ClinicalBERT's best, 0.716. ClinicalBERT reaches 0.716 once and otherwise
+sits far below it.
 
 SapBERT gains about 0.10 F1 on ICD-10-CA. On ICDA-8 the best-to-best gain is
 0.046, which is inside the measurement noise, so at their best settings the two
