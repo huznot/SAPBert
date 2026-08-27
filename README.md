@@ -59,8 +59,9 @@ Rscript scripts/09_error_analysis.R         # where correct mappings are lost
 Rscript scripts/23_code_prefix_test.R       # code number in the embedded text
 ```
 
-R packages: `dplyr`, `tidyr`, `readxl`, `writexl`, `stringr`, `purrr`,
-`ggplot2`, `xgboost`, `jsonlite`, `reticulate`.
+R packages: `dplyr`, `tidyr`, `readxl`, `stringr`, `purrr`,
+`ggplot2`, `jsonlite`, `xgboost`, `stopwords`. `reticulate` only for
+`01_generate_sapbert_embeddings.R`, which the Python script supersedes.
 
 Python is only needed to regenerate embeddings (`torch`, `transformers`,
 `sentence-transformers`, `pandas`, `openpyxl`):
