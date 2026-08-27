@@ -8,12 +8,13 @@
 #        Rscript 07_full_grid_comparison.R mpnet_base   named ones only
 # each condition writes its own results/full_grid/<tag>.csv so they can run in
 # parallel, then 08_ combines them
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-ORIG_BASE    <- "../data/original"
-SAPBERT_BASE <- "../data/sapbert"
-GEN_BASE     <- "../data/generated"
-OUT_DIR      <- "../results/full_grid"
+ORIG_BASE    <- "data/original"
+SAPBERT_BASE <- "data/sapbert"
+GEN_BASE     <- "data/generated"
+OUT_DIR      <- "results/full_grid"
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 thresholds <- c(0.95, 0.99, 0.995, 0.999)

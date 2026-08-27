@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
-PY="/c/Users/IRFANM/Downloads/pyembed/python.exe"
+# override with PY=/path/to/python if python is not on your PATH
+PY="${PY:-python}"
 cd "$(dirname "$0")"
+mkdir -p ../logs
 for model in clinicalbert sapbert mpnet; do
   for clean in base stripped; do
     echo "=== $model / $clean ==="

@@ -1,5 +1,7 @@
 # breaks performance down by how many correct targets a code has, and checks
 # how much of the icda-8 task is just identity mapping
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 suppressMessages({library(readxl); library(dplyr)})
 V <- "data/original/ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx"
 m10 <- read_excel(V, sheet = "Validation_ICD9_ICD10")

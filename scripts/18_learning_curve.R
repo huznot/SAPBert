@@ -10,11 +10,12 @@
 # repeated over a few random subsamples per size
 #
 # usage: Rscript 18_learning_curve.R [track]
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 suppressMessages(library(xgboost))
 set.seed(20260819)
 
-OUT_DIR <- "../results"
+OUT_DIR <- "results"
 N_OUTER <- 5
 N_REPEAT <- 4
 SIZES <- c(40, 70, 100, 140, 180, 220, 260)

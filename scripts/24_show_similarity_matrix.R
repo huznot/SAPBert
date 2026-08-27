@@ -1,3 +1,5 @@
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 suppressMessages({library(readxl); library(dplyr); library(tidyr); library(ggplot2)})
 
 SIM   <- "data/sapbert/cosine_similarity_matrices_10_9_SapBERT.xlsx"

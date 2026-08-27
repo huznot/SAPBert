@@ -6,8 +6,10 @@
 # running 12_ with no arguments does both tracks and writes these files directly,
 # in which case this isnt needed
 
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 suppressMessages(library(dplyr))
-OUT_DIR <- "../results"
+OUT_DIR <- "results"
 
 parts <- list.files(OUT_DIR, pattern = "^cv_rerank_part_.*\\.rds$", full.names = TRUE)
 if (!length(parts)) stop("no cv_rerank_part_*.rds found in ", OUT_DIR)

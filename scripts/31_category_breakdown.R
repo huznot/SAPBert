@@ -8,13 +8,14 @@
 # the counts are kept in the output so that is visible
 #
 # usage: Rscript 31_category_breakdown.R
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 library(ggplot2)
 
-ORIG_BASE    <- "../data/original"
-SAPBERT_BASE <- "../data/sapbert"
-GEN_BASE     <- "../data/generated"
-OUT_DIR      <- "../results"
+ORIG_BASE    <- "data/original"
+SAPBERT_BASE <- "data/sapbert"
+GEN_BASE     <- "data/generated"
+OUT_DIR      <- "results"
 
 gen <- function(tag) file.path(GEN_BASE, sprintf("cosine_similarity_matrices_%%s_%s.xlsx", tag))
 

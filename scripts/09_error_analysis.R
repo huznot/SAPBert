@@ -6,12 +6,13 @@
 #
 # measures both plus an oracle, the f1 a perfect selector would get on the
 # current pool. thats the hard ceiling for any amount of reranking
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-ORIG_BASE    <- "../data/original"
-SAPBERT_BASE <- "../data/sapbert"
-GEN_BASE     <- "../data/generated"
-OUT_DIR      <- "../results"
+ORIG_BASE    <- "data/original"
+SAPBERT_BASE <- "data/sapbert"
+GEN_BASE     <- "data/generated"
+OUT_DIR      <- "results"
 
 ccs_df <- read_excel(file.path(ORIG_BASE, "ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx"),
                      sheet = "CCS ICD-9-CM-3Level") %>% select(ICD_9_CM, CCS_ID)

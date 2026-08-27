@@ -1,8 +1,9 @@
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-ORIG_BASE    <- "../data/original"
-SAPBERT_BASE <- "../data/sapbert"
-OUT_DIR      <- "../results"
+ORIG_BASE    <- "data/original"
+SAPBERT_BASE <- "data/sapbert"
+OUT_DIR      <- "results"
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 thresholds  <- c(0.95, 0.99, 0.995, 0.999)

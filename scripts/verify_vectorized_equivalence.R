@@ -7,6 +7,8 @@
 # compares chapter lookups, the full merge_and_flag output, and all four metrics
 # under all four flag rules, on real data for both tracks and both directions
 
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 OLD_LIB <- tempfile(fileext = ".R")
 system2("git", c("show", "HEAD:scripts/pipeline_lib.R"), stdout = OLD_LIB)
 
@@ -14,7 +16,7 @@ source("pipeline_lib.R")          # NEW (vectorized) into globalenv
 old <- new.env(parent = globalenv())
 sys.source(OLD_LIB, envir = old)  # OLD (scalar/rowwise)
 
-ORIG_BASE <- "../data/original"
+ORIG_BASE <- "data/original"
 stopifnot(file.exists(file.path(ORIG_BASE, "Co_occurrence/icd_10_9_co_occurrence_3c.xlsx")))
 
 ccs_df <- read_excel(file.path(ORIG_BASE, "ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx"),

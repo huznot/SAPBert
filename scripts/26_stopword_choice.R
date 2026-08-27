@@ -1,3 +1,5 @@
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+
 suppressMessages({library(readxl); library(dplyr); library(stopwords)})
 
 LABELS <- "data/original/ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx"

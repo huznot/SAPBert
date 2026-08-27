@@ -3,12 +3,13 @@
 # narrower settings are just row filters on this so 12_ can sweep them
 # writes results/rerank_features_<track>.rds
 
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 
-ORIG_BASE    <- "../data/original"
-SAPBERT_BASE <- "../data/sapbert"
-GEN_BASE     <- "../data/generated"
-OUT_DIR      <- "../results"
+ORIG_BASE    <- "data/original"
+SAPBERT_BASE <- "data/sapbert"
+GEN_BASE     <- "data/generated"
+OUT_DIR      <- "results"
 
 MAX_SIM_K  <- 50   # top-K similarity candidates per ICD-9 code, per model
 MAX_COOC_N <- 50   # top-N co-occurrence candidates per ICD-9 code

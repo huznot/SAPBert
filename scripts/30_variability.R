@@ -13,13 +13,14 @@
 #   top-1 retrieval, is the highest scoring target a correct one
 #
 # usage: Rscript 30_variability.R
-source("pipeline_lib.R")
+source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
+source("scripts/pipeline_lib.R")
 set.seed(42)
 
-ORIG_BASE    <- "../data/original"
-SAPBERT_BASE <- "../data/sapbert"
-GEN_BASE     <- "../data/generated"
-OUT_DIR      <- "../results"
+ORIG_BASE    <- "data/original"
+SAPBERT_BASE <- "data/sapbert"
+GEN_BASE     <- "data/generated"
+OUT_DIR      <- "results"
 B <- 2000
 
 gen <- function(tag) file.path(GEN_BASE, sprintf("cosine_similarity_matrices_%%s_%s.xlsx", tag))
