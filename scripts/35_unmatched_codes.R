@@ -83,34 +83,28 @@ write.csv(out, file.path(OUT, "unmatched_code_handling.csv"), row.names = FALSE)
 cat("\n=== codes with no correct answer, and the cost of the silence that gets them right ===\n")
 print(as.data.frame(out %>% select(-track_label)), row.names = FALSE)
 
-# the tradeoff, as two bars per model. staying quiet is what gets the unmatched
-# codes right and it is also what loses real mappings, so both are plotted
+# counts, not shares. the two groups have different sizes, 52 codes with no
+# answer against 302 with one, so a percentage axis put every red bar near 100%
+# and every grey bar near zero and compared nothing
 fig <- out %>%
   transmute(track_label, model,
-            `codes with no answer, wrongly mapped` = wrongly_mapped / n_unmatched,
-            `codes with an answer, nothing emitted` = wrongly_silent / n_matched) %>%
-  tidyr::pivot_longer(-c(track_label, model), names_to = "kind", values_to = "share")
+            `mapped a code that has no answer` = wrongly_mapped,
+            `emitted nothing for a code that has one` = wrongly_silent) %>%
+  tidyr::pivot_longer(-c(track_label, model), names_to = "kind", values_to = "n") %>%
+  mutate(kind = factor(kind, levels = c("mapped a code that has no answer",
+                                        "emitted nothing for a code that has one")))
 
-lab <- out %>%
-  transmute(track_label, model,
-            `codes with no answer, wrongly mapped` = sprintf("%d of %d", wrongly_mapped, n_unmatched),
-            `codes with an answer, nothing emitted` = sprintf("%d of %d", wrongly_silent, n_matched)) %>%
-  tidyr::pivot_longer(-c(track_label, model), names_to = "kind", values_to = "txt")
-
-fig <- fig %>% left_join(lab, by = c("track_label", "model", "kind"))
-
-g <- ggplot(fig, aes(model, share, fill = kind)) +
+g <- ggplot(fig, aes(model, n, fill = kind)) +
   geom_col(position = position_dodge(0.75), width = 0.68) +
-  geom_text(aes(label = txt), position = position_dodge(0.75),
-            vjust = -0.4, size = 3, show.legend = FALSE) +
-  facet_wrap(~track_label) +
-  scale_fill_manual(values = c("codes with no answer, wrongly mapped" = "#C44E52",
-                               "codes with an answer, nothing emitted" = "#8C8C8C")) +
-  scale_y_continuous(labels = function(x) sprintf("%.0f%%", 100 * x),
-                     expand = expansion(mult = c(0, 0.18))) +
-  labs(title = "Two ways of being wrong about whether a code has an answer",
-       subtitle = "the same caution avoids the red bar and causes the grey one",
-       x = NULL, y = "Share of codes", fill = NULL) +
+  geom_text(aes(label = n), position = position_dodge(0.75),
+            vjust = -0.4, size = 3.2, show.legend = FALSE) +
+  facet_wrap(~track_label, scales = "free_y") +
+  scale_fill_manual(values = c("mapped a code that has no answer" = "#C44E52",
+                               "emitted nothing for a code that has one" = "#8C8C8C")) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Codes handled wrongly at each model's best setting",
+       subtitle = "9 ICD-10-CA and 52 ICDA-8 codes have no correct answer, 345 and 302 have one",
+       x = NULL, y = "Number of ICD-9-CM codes", fill = NULL) +
   theme_minimal(base_size = 12) +
   theme(legend.position = "top", panel.grid.major.x = element_blank(),
         strip.text = element_text(face = "bold"))

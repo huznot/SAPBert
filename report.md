@@ -121,19 +121,19 @@ and wrong on 39 others.
 
 ![unmatched code handling](results/plot_unmatched_code_handling.png)
 
-**Figure 1. Two ways of being wrong about whether a code has an answer.** Red is
-codes with no correct answer that the pipeline mapped anyway. Grey is codes that
-do have an answer and got nothing.
+**Figure 1. Codes handled wrongly at each model's best setting.** Red counts
+codes with no correct answer that were mapped anyway. Grey counts codes that do
+have an answer and were given nothing. Counts rather than percentages, because
+the two groups are different sizes.
 
-The ICDA-8 panel is the whole argument in one picture. ClinicalBERT and
-all-mpnet-base-v2 have no red bar and a grey bar of 39. SapBERT is the reverse,
-50 red and 5 grey. One rule fires only on co-occurrence evidence and one fires
-on label similarity, and that single choice produces both columns. Neither model
-is deciding which codes deserve an answer.
+On ICDA-8 the two bars trade places. ClinicalBERT and all-mpnet-base-v2 map none
+of the 52 and miss 39 of the 302. SapBERT maps 50 of the 52 and misses 5. The
+mapping rule accounts for both bars in each case: one fires only when the codes
+co-occur in records, the other on label similarity alone.
 
-On ICD-10-CA every model maps all 9. Nine codes cannot separate three models,
-and the grey bars there are 0 or 1 because the similarity signal reaches almost
-every code.
+On ICD-10-CA every model maps all 9 and misses at most 1, so the panel separates
+nothing. It is included because leaving it out would show only the crosswalk
+where the effect appears.
 
 ---
 
