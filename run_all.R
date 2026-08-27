@@ -41,11 +41,15 @@ run("13_precision_coverage.R")       # confidence thresholds and triage
 run("30_variability.R")              # bootstrap sd, section 12
 run("31_category_breakdown.R")       # all 130 ccs categories, section 13
 
+# these name their output after the tracks they were given, and 18_ reads the
+# per track files back, so pass one track at a time
 if (!QUICK) {
-  run("16_ablation.R")
-  run("17_retrieval_sensitivity.R")
-  run("18_learning_curve.R")
-  run("19_category_holdout.R")
+  for (tr in c("10_9", "8_9")) {
+    run("16_ablation.R", tr)
+    run("17_retrieval_sensitivity.R", tr)
+    run("18_learning_curve.R", tr)
+    run("19_category_holdout.R", tr)
+  }
   run("23_code_prefix_test.R")
   run("29_portability.R")
 }
@@ -57,6 +61,7 @@ run("22_target_block_structure.R")
 run("25_frequency_distributions.R")
 run("26_stopword_choice.R")
 run("28_stopwords_and_codes.R")
+run("35_unmatched_codes.R")          # codes with no correct answer, section 2
 run("27_show_results.R")             # every headline number
 
 cat("\nall done. results/ is rebuilt.\n")

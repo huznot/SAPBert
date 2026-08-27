@@ -20,7 +20,11 @@ worth making. It is tested on two migrations:
 `main` follows the existing four-step methodology. The changes on it are a
 newer embedding model, corrections to the parameter search, an analysis of
 where correct mappings are lost, and the text-cleaning work requested in
-review. Best F1 is 0.530 and 0.821, against 0.427 and 0.716 for the original.
+review. Best F1 is 0.524 and 0.761, against 0.423 and 0.716 for the original.
+
+Those figures score all 354 ICD-9-CM codes, including the 9 and 52 that have no
+match in the target system. The original scored only the codes that had one.
+`report.md` Section 2 covers what that changed.
 
 `testing` additionally replaces the selection step with a wide candidate set
 and a trained scoring model, reaching 0.668 and 0.840 on unseen codes. It is
@@ -110,17 +114,17 @@ still runs.
 
 | | |
 |---|---|
-| `16_ablation.R` | which feature groups matter, report Section 7 |
+| `16_ablation.R` | which feature groups matter in the scoring model |
 | `17_retrieval_sensitivity.R` | how much the candidate settings matter |
-| `18_learning_curve.R` | would more training data help, report Figure 3 |
+| `18_learning_curve.R` | would more training data help |
 | `19_category_holdout.R` | does it work on unseen clinical areas |
 | `20_top1_accuracy.R` | is the right answer reachable at all |
 | `21_error_by_code_type.R` | single vs multi target codes |
 | `22_target_block_structure.R` | do multi-target answers sit in blocks |
-| `23_code_prefix_test.R` | code number in the text, report Section 8 |
+| `23_code_prefix_test.R` | code number in the text, report Section 5 |
 | `29_portability.R` | performance without health records or a chapter table |
-| `30_variability.R` | bootstrap standard deviation on every reported score and difference, report Sections 4, 6 and 8 |
-| `31_category_breakdown.R` | performance across all 130 CCS categories, every condition, report Section 9 |
+| `30_variability.R` | bootstrap standard deviation on every reported score and difference, report Section 9 |
+| `31_category_breakdown.R` | performance across all 130 CCS categories, every condition, report Section 10 |
 
 **Show the results, no recomputation, a second or two each**
 
@@ -128,10 +132,11 @@ still runs.
 |---|---|
 | `27_show_results.R` | every headline number |
 | `34_export_rds_as_csv.R` | the held-out predictions as csv, for reading without R |
+| `35_unmatched_codes.R` | codes with no correct answer, report Section 2 |
 | `24_show_similarity_matrix.R` | a worked similarity matrix |
-| `25_frequency_distributions.R` | report Section 11 |
-| `26_stopword_choice.R` | which stop word dictionary, report Section 9 |
-| `28_stopwords_and_codes.R` | report Section 10 |
+| `25_frequency_distributions.R` | report Section 8 |
+| `26_stopword_choice.R` | which stop word dictionary, report Section 6 |
+| `28_stopwords_and_codes.R` | report Section 7 |
 
 `04` and `15` were removed. `15` compared stop word dictionaries using a
 hardcoded approximation of the word lists rather than the real ones and gave

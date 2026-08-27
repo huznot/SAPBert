@@ -241,8 +241,13 @@ calc_recall    <- function(tp, fn) if ((tp + fn) != 0) tp / (tp + fn) else 0
 calc_f1        <- function(p, r) if ((p + r) != 0) 2 * p * r / (p + r) else 0
 calc_accuracy  <- function(tp, fp, fn) if ((tp + fp + fn) != 0) tp / (tp + fp + fn) else 0
 
+# icd-9 codes with no reference match used to be dropped here before tp/fp/fn
+# were counted, so the pipeline was never charged for mapping a code that has no
+# correct answer. they are kept now, which is what the crosswalk is asked to
+# handle in practice. drop_unmatched = TRUE restores the old behaviour
 validate_mapping <- function(manual_df, auto_df, ccs_df, valid_excluding_df,
-                              manual_target_col, target_col_name) {
+                              manual_target_col, target_col_name,
+                              drop_unmatched = FALSE) {
   manual_df <- manual_df %>% mutate(`ICD-9-CM` = as.character(`ICD-9-CM`),
                                      !!manual_target_col := as.character(.data[[manual_target_col]]))
   auto_df <- auto_df %>% mutate(ICD_9_CM = as.character(ICD_9_CM),
@@ -262,8 +267,10 @@ validate_mapping <- function(manual_df, auto_df, ccs_df, valid_excluding_df,
   valid_df <- left_join(valid_df, ccs_df %>% select(ICD_9_CM, CCS_ID),
                          by = c("ICD-9-CM" = "ICD_9_CM"))
 
-  excluded <- as.character(valid_excluding_df$`ICD-9-CM`)
-  valid_df <- valid_df %>% filter(!(`ICD-9-CM` %in% excluded))
+  if (drop_unmatched) {
+    excluded <- as.character(valid_excluding_df$`ICD-9-CM`)
+    valid_df <- valid_df %>% filter(!(`ICD-9-CM` %in% excluded))
+  }
 
   final <- valid_df %>%
     mutate(
@@ -430,7 +437,8 @@ merge_and_flag_reverse <- function(similarity_df, cooccurrence_df, target_col_na
 }
 
 validate_mapping_reverse <- function(manual_df, auto_df, ccs_df, valid_excluding_df,
-                                      manual_target_col, target_col_name) {
+                                      manual_target_col, target_col_name,
+                                      drop_unmatched = FALSE) {
   manual_long <- manual_df %>%
     transmute(TargetCode = as.character(.data[[manual_target_col]]),
               ManualICD9 = as.character(`ICD-9-CM`))
@@ -445,8 +453,10 @@ validate_mapping_reverse <- function(manual_df, auto_df, ccs_df, valid_excluding
   valid_df <- left_join(valid_df, ccs_df %>% select(ICD_9_CM, CCS_ID),
                          by = c("icd9_for_ccs" = "ICD_9_CM"))
 
-  excluded <- as.character(valid_excluding_df$`ICD-9-CM`)
-  valid_df <- valid_df %>% filter(!(icd9_for_ccs %in% excluded))
+  if (drop_unmatched) {
+    excluded <- as.character(valid_excluding_df$`ICD-9-CM`)
+    valid_df <- valid_df %>% filter(!(icd9_for_ccs %in% excluded))
+  }
 
   valid_df %>%
     mutate(
