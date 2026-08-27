@@ -1,7 +1,7 @@
-"track","model","similarity_threshold","top_n","flag_combination","n_unmatched","n_correctly_silent","correct_rejection_rate","n_spurious_pairs","spurious_per_code"
-"10_9","ClinicalBERT",0.995,25,4,9,0,0,13,1.44
-"10_9","SapBERT",0.95,25,4,9,0,0,15,1.67
-"10_9","mpnet",0.95,30,4,9,0,0,19,2.11
-"8_9","ClinicalBERT",0.999,5,3,52,52,1,0,0
-"8_9","SapBERT",0.99,3,2,52,2,0.038,50,1
-"8_9","mpnet",0.95,5,3,52,52,1,0,0
+"track","track_label","model","n_unmatched","correctly_silent","wrongly_mapped","n_matched","wrongly_silent","correct_rejection_rate"
+"10_9","ICD-9-CM to ICD-10-CA","ClinicalBERT",9,0,9,345,1,0
+"10_9","ICD-9-CM to ICD-10-CA","SapBERT",9,0,9,345,0,0
+"10_9","ICD-9-CM to ICD-10-CA","mpnet",9,0,9,345,0,0
+"8_9","ICD-9-CM to ICDA-8","ClinicalBERT",52,52,0,302,39,1
+"8_9","ICD-9-CM to ICDA-8","SapBERT",52,2,50,302,5,0.038
+"8_9","ICD-9-CM to ICDA-8","mpnet",52,52,0,302,39,1

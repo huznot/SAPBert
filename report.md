@@ -92,10 +92,19 @@ have answers. SapBERT is silent on 2 and 5 of those two groups. Caution costs
 ClinicalBERT more in missed mappings than it saves in avoided mistakes, which
 is why SapBERT still scores higher on ICDA-8.
 
-F1 cannot show whether unmatched codes are handled well. It counts hits and
-mistakes, and a code with no correct answer offers no hit to earn. Correct
-silence scores nothing; only errors register. So these codes can lower a score
-and never raise it. Table 2 reports the rate directly instead.
+Scoring these codes catches the mistakes. Mapping one of them is a false
+positive now, which is the whole of SapBERT's 0.060 drop, and that is what the
+change was for.
+
+What F1 cannot do is give credit for getting them right. It counts hits and
+mistakes, and a code with no correct answer offers no hit to earn, so staying
+silent registers as nothing at all. ClinicalBERT is silent on all 52 and scores
+0.716 either way. That is the same figure it would get if the 52 were still
+excluded from the evaluation entirely. Handling them perfectly and never being
+tested on them are indistinguishable in F1.
+
+So F1 shows these codes when the pipeline fails them, not when it handles them.
+Table 2 reports the other half directly.
 
 **Table 2. ICD-9-CM codes the pipeline correctly returns nothing for.**
 
@@ -110,7 +119,21 @@ not judgement about which codes deserve an answer. It is one rule declining to
 fire whenever co-occurrence data is missing, which is correct on these 52 codes
 and wrong on 39 others.
 
-On ICD-10-CA every model maps all 9. Nine codes cannot separate three models.
+![unmatched code handling](results/plot_unmatched_code_handling.png)
+
+**Figure 1. Two ways of being wrong about whether a code has an answer.** Red is
+codes with no correct answer that the pipeline mapped anyway. Grey is codes that
+do have an answer and got nothing.
+
+The ICDA-8 panel is the whole argument in one picture. ClinicalBERT and
+all-mpnet-base-v2 have no red bar and a grey bar of 39. SapBERT is the reverse,
+50 red and 5 grey. One rule fires only on co-occurrence evidence and one fires
+on label similarity, and that single choice produces both columns. Neither model
+is deciding which codes deserve an answer.
+
+On ICD-10-CA every model maps all 9. Nine codes cannot separate three models,
+and the grey bars there are 0 or 1 because the similarity signal reaches almost
+every code.
 
 ---
 
@@ -139,7 +162,7 @@ model is reported at its best setting, its median setting and its worst.
 
 ![model comparison](results/plot_f1_accuracy_comparison.png)
 
-**Figure 1. F1 and accuracy for each model across all 112 parameter settings.**
+**Figure 2. F1 and accuracy for each model across all 112 parameter settings.**
 The dot is the best setting, the dash the median, and the line runs down to the
 worst. A model is a range, not a point, and the range is what a single
 best-score bar chart hides.
@@ -320,7 +343,7 @@ only difference between the four results is the text given to the model.
 
 ![stop words and code numbers](results/plot_stopwords_codes.png)
 
-**Figure 2. Best F1 score for ClinicalBERT under each combination of text
+**Figure 3. Best F1 score for ClinicalBERT under each combination of text
 preparation.**
 
 Each of the four differences was also measured with the paired bootstrap
@@ -390,7 +413,7 @@ ClinicalBERT.**
 
 ![max similarity distribution](results/plot_freq_dist_max_similarity.png)
 
-**Figure 3. How the best available similarity score is spread across the 354
+**Figure 4. How the best available similarity score is spread across the 354
 ICD-9-CM codes.**
 
 Two things follow from this.
@@ -423,7 +446,7 @@ alongside it.**
 
 ![co-occurrence distribution](results/plot_freq_dist_top_cooccurrence.png)
 
-**Figure 4. How the co-occurrence count of each code's most frequent partner is
+**Figure 5. How the co-occurrence count of each code's most frequent partner is
 spread, on a scale where each step is ten times the last.**
 
 The counts differ enormously from one code to another, from single figures up to
@@ -573,7 +596,7 @@ the result. Pooled F1 stays the headline number.
 
 ![f1 spread across categories](results/plot_ccs_f1_distribution.png)
 
-**Figure 5. How F1 is spread across the CCS categories.** One row per model, one
+**Figure 6. How F1 is spread across the CCS categories.** One row per model, one
 column per crosswalk. Each bar counts the categories scoring in that range, and
 the dashed line is that panel's mean over categories. Light shading is
 categories holding a single ICD-9-CM code, dark is those holding two or more.
@@ -625,15 +648,15 @@ codes that category holds.
 
 ![clinicalbert icd-10-ca](results/plot_ccs_f1_all_10_9_clinicalbert.png)
 
-**Figure 6. F1 for every CCS category, ICD-9-CM to ICD-10-CA, ClinicalBERT.**
+**Figure 7. F1 for every CCS category, ICD-9-CM to ICD-10-CA, ClinicalBERT.**
 
 ![sapbert icd-10-ca](results/plot_ccs_f1_all_10_9_sapbert.png)
 
-**Figure 7. F1 for every CCS category, ICD-9-CM to ICD-10-CA, SapBERT.**
+**Figure 8. F1 for every CCS category, ICD-9-CM to ICD-10-CA, SapBERT.**
 
 ![mpnet icd-10-ca](results/plot_ccs_f1_all_10_9_mpnet.png)
 
-**Figure 8. F1 for every CCS category, ICD-9-CM to ICD-10-CA,
+**Figure 9. F1 for every CCS category, ICD-9-CM to ICD-10-CA,
 all-mpnet-base-v2.**
 
 On all three the top is mostly single-code cancers and other conditions with one
@@ -643,15 +666,15 @@ disease. The hard categories are the same categories for every model.
 
 ![clinicalbert icda-8](results/plot_ccs_f1_all_8_9_clinicalbert.png)
 
-**Figure 9. F1 for every CCS category, ICD-9-CM to ICDA-8, ClinicalBERT.**
+**Figure 10. F1 for every CCS category, ICD-9-CM to ICDA-8, ClinicalBERT.**
 
 ![sapbert icda-8](results/plot_ccs_f1_all_8_9_sapbert.png)
 
-**Figure 10. F1 for every CCS category, ICD-9-CM to ICDA-8, SapBERT.**
+**Figure 11. F1 for every CCS category, ICD-9-CM to ICDA-8, SapBERT.**
 
 ![mpnet icda-8](results/plot_ccs_f1_all_8_9_mpnet.png)
 
-**Figure 11. F1 for every CCS category, ICD-9-CM to ICDA-8,
+**Figure 12. F1 for every CCS category, ICD-9-CM to ICDA-8,
 all-mpnet-base-v2.**
 
 The ICDA-8 charts have a long flat top of categories at 1.000, which is the
@@ -662,12 +685,12 @@ means the first named did better in that category.
 
 ![sapbert minus clinicalbert, icd-10-ca](results/plot_ccs_delta_sapbert_vs_clinicalbert_10_9.png)
 
-**Figure 12. Change in F1 by category, SapBERT minus ClinicalBERT, ICD-9-CM to
+**Figure 13. Change in F1 by category, SapBERT minus ClinicalBERT, ICD-9-CM to
 ICD-10-CA.**
 
 ![sapbert minus clinicalbert, icda-8](results/plot_ccs_delta_sapbert_vs_clinicalbert_8_9.png)
 
-**Figure 13. Change in F1 by category, SapBERT minus ClinicalBERT, ICD-9-CM to
+**Figure 14. Change in F1 by category, SapBERT minus ClinicalBERT, ICD-9-CM to
 ICDA-8.**
 
 SapBERT is better in 72 categories, level in 41 and worse in 17 on ICD-10-CA,
@@ -700,12 +723,12 @@ preparation.**
 
 ![text cleaning, icd-10-ca](results/plot_ccs_delta_textclean_vs_base_10_9.png)
 
-**Figure 14. Change in F1 by category from removing both the stop words and the
+**Figure 15. Change in F1 by category from removing both the stop words and the
 code number, ICD-9-CM to ICD-10-CA.**
 
 ![text cleaning, icda-8](results/plot_ccs_delta_textclean_vs_base_8_9.png)
 
-**Figure 15. Change in F1 by category from removing both the stop words and the
+**Figure 16. Change in F1 by category from removing both the stop words and the
 code number, ICD-9-CM to ICDA-8.**
 
 On ICD-10-CA the cleaning helps 59 categories, changes nothing in 51 and hurts
