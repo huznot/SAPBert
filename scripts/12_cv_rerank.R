@@ -20,6 +20,10 @@ OUT_DIR      <- "results"
 N_OUTER <- 5
 N_INNER <- 3
 
+# abstain thresholds the inner cv picks between. 0 emits for every code, which
+# is what the system did before, so it stays in the grid as the null option
+FLOORS <- c(0, 0.15, 0.3, 0.45, 0.6)
+
 VAL_XLSX <- file.path(ORIG_BASE, "ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx")
 
 TRACKS <- list(
@@ -86,10 +90,13 @@ for (tr in SELECTED_TRACKS) {
   # reported. the pool one is the favourable choice and should not stand alone
   manual_full <- read_excel(VAL_XLSX, sheet = tk$manual_sheet)
   excl_full   <- as.character(read_excel(VAL_XLSX, sheet = tk$excl_sheet)$`ICD-9-CM`)
+  # no filter on excl_full here. those codes have no rows in the manual
+  # crosswalk to begin with, so they add nothing to the truth set, but they are
+  # in codes and any pair emitted for them counts against precision
   truth_full <- manual_full %>%
     transmute(ICD_9_CM = as.character(`ICD-9-CM`),
               target = as.character(.data[[tk$manual_target_col]])) %>%
-    filter(!(ICD_9_CM %in% excl_full), ICD_9_CM %in% codes) %>%
+    filter(ICD_9_CM %in% codes) %>%
     distinct()
   cat(sprintf("truth pairs: %d reachable in the pool, %d in the full crosswalk\n",
               nrow(truth), nrow(truth_full)))
@@ -169,11 +176,17 @@ for (tr in SELECTED_TRACKS) {
 
   # emit if confident on its own (tau) or nearly as good as the best one for that
   # code (rho). most codes have several valid targets so one global threshold does
-  # badly. rho = 1 means top 1 only. every code emits at least its best candidate
-  emit_from_scores <- function(df, tau, rho) {
+  # badly. rho = 1 means top 1 only.
+  #
+  # floor lets a code emit nothing. 61 of the 354 codes have no correct answer,
+  # and without this the best candidate is always emitted, so those codes were
+  # guaranteed a false positive. a code is skipped entirely when its best score
+  # is under floor. floor = 0 is the old behaviour and is in the grid, so the
+  # inner cv keeps abstention only if it earns its place
+  emit_from_scores <- function(df, tau, rho, floor = 0) {
     df %>% group_by(ICD_9_CM) %>%
       mutate(.mx = max(.p_score)) %>% ungroup() %>%
-      filter(.p_score >= tau | .p_score >= rho * .mx | .p_score == .mx) %>%
+      filter(.mx >= floor, .p_score >= tau | .p_score >= rho * .mx) %>%
       select(ICD_9_CM, target)
   }
 
@@ -222,14 +235,17 @@ for (tr in SELECTED_TRACKS) {
       if (nrow(isc) == 0) next
       for (tau in seq(0.05, 0.95, by = 0.05)) {
         for (rho in c(0.3, 0.5, 0.7, 0.85, 1.0)) {
-          em <- emit_from_scores(isc, tau, rho)
-          m <- score_pairs(em, truth, train_codes)
-          if (m["f1"] > best$f1) best <- list(f1 = m["f1"], cfg = cfg, tau = tau, rho = rho)
+          for (fl in FLOORS) {
+            em <- emit_from_scores(isc, tau, rho, fl)
+            m <- score_pairs(em, truth, train_codes)
+            if (m["f1"] > best$f1)
+              best <- list(f1 = m["f1"], cfg = cfg, tau = tau, rho = rho, floor = fl)
+          }
         }
       }
     }
-    cat(sprintf("  inner-CV pick: K=%d N=%d chapter=%s tau=%.2f rho=%.2f (inner F1 %.3f)\n",
-                best$cfg$K, best$cfg$N, best$cfg$chapter, best$tau, best$rho, best$f1))
+    cat(sprintf("  inner-CV pick: K=%d N=%d chapter=%s tau=%.2f rho=%.2f floor=%.2f (inner F1 %.3f)\n",
+                best$cfg$K, best$cfg$N, best$cfg$chapter, best$tau, best$rho, best$floor, best$f1))
 
     # fit on the full training set, predict the test fold
     tr_df <- train_full
@@ -241,9 +257,9 @@ for (tr in SELECTED_TRACKS) {
     # retrieval applied at inference as an eligibility filter
     te_df <- apply_retrieval(te_df, best$cfg)
 
-    em <- emit_from_scores(te_df, best$tau, best$rho)
+    em <- emit_from_scores(te_df, best$tau, best$rho, best$floor)
     m_rr <- score_pairs(em, truth, test_codes)
-    oof_pred[[fi]] <- te_df %>% mutate(.tau = best$tau, .rho = best$rho, fold = fi)
+    oof_pred[[fi]] <- te_df %>% mutate(.tau = best$tau, .rho = best$rho, .floor = best$floor, fold = fi)
 
     # baseline, same protocol
     best_key <- NULL; best_bf1 <- -1
@@ -262,7 +278,7 @@ for (tr in SELECTED_TRACKS) {
       baseline_recall = m_bl["recall"], baseline_accuracy = m_bl["accuracy"],
       rerank_f1 = m_rr["f1"], rerank_precision = m_rr["precision"],
       rerank_recall = m_rr["recall"], rerank_accuracy = m_rr["accuracy"],
-      K = best$cfg$K, N = best$cfg$N, chapter = best$cfg$chapter, tau = best$tau, rho = best$rho,
+      K = best$cfg$K, N = best$cfg$N, chapter = best$cfg$chapter, tau = best$tau, rho = best$rho, floor = best$floor,
       baseline_config = best_key)
 
     imp <- xgb.importance(model = bst)
@@ -275,7 +291,7 @@ for (tr in SELECTED_TRACKS) {
           file.path(OUT_DIR, sprintf("cv_rerank_checkpoint_%s.rds", tr)))
 
   # pooled out-of-fold results
-  em_all <- bind_rows(lapply(oof_pred, function(d) emit_from_scores(d, d$.tau[1], d$.rho[1])))
+  em_all <- bind_rows(lapply(oof_pred, function(d) emit_from_scores(d, d$.tau[1], d$.rho[1], d$.floor[1])))
   m_rr_all <- score_pairs(em_all, truth, codes)
 
   # baseline pooled the same way, each folds test codes scored with the config

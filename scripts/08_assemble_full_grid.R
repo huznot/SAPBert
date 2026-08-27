@@ -137,28 +137,42 @@ suppressMessages(library(ggplot2))
 KEEP <- c("ClinicalBERT-original" = "ClinicalBERT",
           "SapBERT-base"          = "SapBERT",
           "mpnet-base"            = "all-mpnet-base-v2")
-fig <- best %>% filter(model %in% names(KEEP)) %>%
+# bars at the best setting alone made every model look like it has one score.
+# each is really a range over 112 settings, so plot the whole range: the dot is
+# the best, the bar is the median, the line runs down to the worst
+fig <- all_grid %>% filter(model %in% names(KEEP)) %>%
   mutate(Model = factor(unname(KEEP[model]), levels = unname(KEEP)),
          track_label = factor(ifelse(track == "10_9",
                                      "ICD-9-CM to ICD-10-CA", "ICD-9-CM to ICDA-8"),
                               levels = c("ICD-9-CM to ICD-10-CA", "ICD-9-CM to ICDA-8"))) %>%
   select(track_label, Model, F1 = f1, Accuracy = accuracy) %>%
   tidyr::pivot_longer(c(F1, Accuracy), names_to = "metric", values_to = "value") %>%
-  mutate(metric = factor(metric, levels = c("F1", "Accuracy")))
+  mutate(metric = factor(metric, levels = c("F1", "Accuracy"))) %>%
+  group_by(track_label, Model, metric) %>%
+  summarise(best = max(value), worst = min(value),
+            middle = median(value), .groups = "drop")
+
 if (nrow(fig)) {
-  g <- ggplot(fig, aes(metric, value, fill = Model)) +
-    geom_col(position = position_dodge(0.8), width = 0.72) +
-    geom_text(aes(label = sprintf("%.3f", value)),
-              position = position_dodge(0.8), vjust = -0.45, size = 3.1) +
-    facet_wrap(~track_label) +
-    scale_fill_manual(values = c("ClinicalBERT" = "#4E79A7", "SapBERT" = "#E1873C",
-                                 "all-mpnet-base-v2" = "#59A14F")) +
-    scale_y_continuous(limits = c(0, 1), expand = expansion(mult = c(0, 0.05))) +
-    labs(x = NULL, y = "Score", fill = NULL) +
+  g <- ggplot(fig, aes(Model, colour = Model)) +
+    geom_linerange(aes(ymin = worst, ymax = best), linewidth = 1.1, alpha = 0.55) +
+    geom_point(aes(y = middle), shape = 95, size = 9) +
+    geom_point(aes(y = best), size = 3.2) +
+    geom_text(aes(y = best, label = sprintf("%.3f", best)),
+              vjust = -1.1, size = 3.1, show.legend = FALSE) +
+    geom_text(aes(y = worst, label = sprintf("%.3f", worst)),
+              vjust = 1.9, size = 3.1, colour = "grey40", show.legend = FALSE) +
+    facet_grid(metric ~ track_label) +
+    scale_colour_manual(values = c("ClinicalBERT" = "#4E79A7", "SapBERT" = "#E1873C",
+                                   "all-mpnet-base-v2" = "#59A14F")) +
+    scale_y_continuous(limits = c(0, 1)) +
+    labs(x = NULL, y = "Score", colour = NULL,
+         title = "Each model over all 112 parameter settings",
+         subtitle = "dot is the best setting, dash the median, line reaches down to the worst") +
     theme_minimal(base_size = 12) +
-    theme(legend.position = "top", panel.grid.major.x = element_blank(),
-          strip.text = element_text(face = "bold"))
+    theme(legend.position = "none", panel.grid.major.x = element_blank(),
+          strip.text = element_text(face = "bold"),
+          axis.text.x = element_text(size = 9))
   ggsave(file.path(OUT_DIR, "plot_f1_accuracy_comparison.png"), g,
-         width = 9, height = 4.6, dpi = 150)
+         width = 9, height = 6.2, dpi = 150)
   cat("\nwrote results/plot_f1_accuracy_comparison.png\n")
 }

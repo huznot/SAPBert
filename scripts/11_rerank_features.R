@@ -314,17 +314,22 @@ for (tr in names(TRACKS)) {
     filter(!(ICD_9_CM %in% excluded)) %>% distinct() %>% mutate(y = 1L)
 
   # keep every code. has_truth marks which ones can be scored, the rest are what
-  # 14_ actually has to map. exclusion list codes are dropped
-  eval_codes <- unique(tp_df$ICD_9_CM)
+  # 14_ actually has to map.
+  #
+  # the exclusion list codes are scored too. their correct answer is nothing at
+  # all, which is a real answer and one the crosswalk has to get right, so they
+  # count as evaluable with no positive rows. anything the model emits for them
+  # is a false positive. they used to be dropped here, which meant a wrong
+  # mapping on them cost nothing
+  eval_codes <- union(unique(tp_df$ICD_9_CM), excluded)
   feat <- feat %>%
-    filter(!(ICD_9_CM %in% excluded)) %>%
     left_join(tp_df, by = c("ICD_9_CM", "target")) %>%
     mutate(y = ifelse(is.na(y), 0L, 1L),
            has_truth = as.integer(ICD_9_CM %in% eval_codes))
 
   n_unl <- n_distinct(feat$ICD_9_CM[feat$has_truth == 0])
-  cat(sprintf("  codes with truth: %d | without truth (to be predicted): %d\n",
-              length(eval_codes), n_unl))
+  cat(sprintf("  codes with truth: %d (%d of them with no correct answer) | without truth: %d\n",
+              length(eval_codes), length(excluded), n_unl))
 
   hit <- feat %>% filter(y == 1) %>% nrow()
   cat(sprintf("  feature table: %d rows, %d positives\n", nrow(feat), hit))
