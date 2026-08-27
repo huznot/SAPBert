@@ -566,8 +566,17 @@ the result. Pooled F1 stays the headline number.
 
 ![f1 spread across categories](results/plot_ccs_f1_distribution.png)
 
-**Figure 5. How F1 is spread across the CCS categories.** Each bar counts the
-categories scoring in that range; the dashed lines are the averages.
+**Figure 5. How F1 is spread across the CCS categories.** One row per model, one
+column per crosswalk. Each bar counts the categories scoring in that range, and
+the dashed line is that panel's mean over categories. Light shading is
+categories holding a single ICD-9-CM code, dark is those holding two or more.
+
+The shading explains the shape. The tall bar at 1.000 on ICDA-8 is mostly
+single-code categories, which are scored on one or two pairs and land on 0 or 1
+rather than anywhere in between. The categories holding several codes sit in the
+middle of the range on both crosswalks. A category mean is therefore pulled
+upward by the smallest categories, which is the same point Table 14 makes with
+the pooled column.
 
 The spread between categories, an SD of about 0.25, is much larger than the
 uncertainty on the overall score in Section 9, about 0.015. The differences

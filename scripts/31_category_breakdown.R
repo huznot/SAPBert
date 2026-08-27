@@ -266,21 +266,32 @@ dist <- breakdown %>%
 means <- dist %>% group_by(track_label, model) %>%
   summarise(mean_f1 = mean(f1), .groups = "drop")
 
-p <- ggplot(dist, aes(x = f1, fill = model)) +
-  geom_histogram(binwidth = 0.05, position = "identity", alpha = 0.6, colour = NA) +
-  geom_vline(data = means, aes(xintercept = mean_f1, colour = model),
-             linetype = "dashed", linewidth = 0.7, show.legend = FALSE) +
-  facet_wrap(~track_label) +
-  scale_fill_manual(values = c("ClinicalBERT-original" = "#4C72B0", "SapBERT-base" = "#DD8452",
-                               "mpnet-base" = "#55A868")) +
-  scale_colour_manual(values = c("ClinicalBERT-original" = "#4C72B0", "SapBERT-base" = "#DD8452",
-                               "mpnet-base" = "#55A868")) +
+# one panel per model instead of three transparent histograms on top of each
+# other, which just went brown where they overlapped. bars are split by how many
+# codes the category holds, because the spikes at 0 and 1 are mostly categories
+# holding a single code, where one pair decides the whole score
+dist <- dist %>%
+  mutate(size_group = ifelse(n_codes == 1, "1 code", "2 or more codes"),
+         model = factor(model, levels = CHARTED))
+means <- means %>% mutate(model = factor(model, levels = CHARTED))
+
+p <- ggplot(dist, aes(x = f1, fill = size_group)) +
+  geom_histogram(binwidth = 0.05, colour = "white", linewidth = 0.2) +
+  geom_vline(data = means, aes(xintercept = mean_f1),
+             linetype = "dashed", linewidth = 0.6, colour = "grey20") +
+  geom_text(data = means, aes(x = mean_f1, y = Inf, label = sprintf("mean %.2f", mean_f1)),
+            hjust = -0.1, vjust = 1.6, size = 3, colour = "grey20", inherit.aes = FALSE) +
+  facet_grid(model ~ track_label) +
+  scale_fill_manual(values = c("1 code" = "#B8CDE4", "2 or more codes" = "#2E5F8A")) +
+  scale_x_continuous(breaks = seq(0, 1, 0.25)) +
   labs(title = "How F1 is spread across the CCS categories",
-       subtitle = "dashed lines are the unweighted mean over categories",
+       subtitle = "each bar counts categories scoring in that range, split by category size",
        x = "F1 within a category", y = "Number of categories", fill = NULL) +
   theme_minimal(base_size = 12) +
-  theme(legend.position = "top", plot.title = element_text(face = "bold"))
-ggsave(file.path(OUT_DIR, "plot_ccs_f1_distribution.png"), p, width = 10, height = 5, dpi = 150)
+  theme(legend.position = "top", plot.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank(),
+        strip.text.y = element_text(angle = 0, face = "bold"))
+ggsave(file.path(OUT_DIR, "plot_ccs_f1_distribution.png"), p, width = 10, height = 7.5, dpi = 150)
 
 cat("\n=== per category f1, spread over categories ===\n")
 print(as.data.frame(category_summary))
