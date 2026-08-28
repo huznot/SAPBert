@@ -748,3 +748,221 @@ for all seven conditions, with the counts each score is built from, are in
 `results/ccs_all_categories_10_9.csv` and `results/ccs_all_categories_8_9.csv`,
 and the category counts behind Figures 12 to 15 are in
 `results/ccs_delta_summary.csv`.
+
+---
+
+## 11. The Codes With No Correct Answer, One At A Time
+
+Section 2 scored these codes and reported one pooled F1 per model. A pooled score
+averages 9 or 52 codes in with the 345 or 302 that do have answers, so it cannot
+show what happens to any individual code. This section lists them one by one.
+
+The pipeline decides from two numbers, the cosine similarity between two code
+labels and how often the two codes appear together in patient records. Every code
+below is described on both. The model is ClinicalBERT, the one the original
+pipeline used.
+
+### ICD-9-CM to ICD-10-CA, the 9 codes with no match
+
+Each ICD-9-CM code is scored against all 2038 ICD-10-CA codes, so each row below
+is a distribution over 2038 numbers.
+
+**Table 17. Cosine similarity of each unmatched ICD-9-CM code against every
+ICD-10-CA code.** Nearest target is the single highest scoring one, the score
+being the maximum column.
+
+| ICD-9-CM | Label | Mean | Min | Q1 | Median | Q3 | Max | Nearest target |
+|---|---|---|---|---|---|---|---|---|
+| 175 | malignant neoplasm of male breast | 0.825 | 0.641 | 0.796 | 0.826 | 0.849 | 0.955 | C30, Malignant neoplasm of nasal cavity and middle ear |
+| 249 | secondary diabetes mellitus | 0.817 | 0.663 | 0.774 | 0.817 | 0.859 | 0.951 | O24, Diabetes mellitus in pregnancy |
+| 239 | neoplasms of unspecified nature | 0.831 | 0.662 | 0.804 | 0.833 | 0.859 | 0.942 | D15, Benign neoplasm of other and unspecified intrathoracic organs |
+| 515 | postinflammatory pulmonary fibrosis | 0.852 | 0.694 | 0.823 | 0.858 | 0.886 | 0.932 | N72, Inflammatory disease of cervix uteri |
+| 209 | neuroendocrine tumors | 0.836 | 0.693 | 0.808 | 0.842 | 0.867 | 0.915 | A74, Other diseases caused by chlamydiae |
+| 327 | organic sleep disorders | 0.770 | 0.541 | 0.725 | 0.773 | 0.823 | 0.915 | P78, Other perinatal digestive system disorders |
+| 339 | other headache syndromes | 0.816 | 0.648 | 0.786 | 0.820 | 0.851 | 0.915 | A69, Other spirochaetal infections |
+| 338 | pain not elsewhere classified | 0.805 | 0.685 | 0.785 | 0.807 | 0.827 | 0.893 | R52, Pain, not elsewhere classified |
+| 445 | atheroembolism | 0.711 | 0.552 | 0.686 | 0.713 | 0.736 | 0.853 | M66, Spontaneous rupture of synovium and tendon |
+
+Every one of these codes reaches a high score. The maxima run from 0.853 to
+0.955, and the 345 codes that do have answers reach between 0.861 and 0.981. Seven
+of the nine sit above the first quartile of that group and four sit above its
+median.
+
+The nearest target is clinically wrong in eight of the nine rows. ICD-9-CM 175,
+malignant neoplasm of male breast, is nearest to C30, malignant neoplasm of nasal
+cavity and middle ear, at 0.955. ICD-9-CM 515, postinflammatory pulmonary
+fibrosis, is nearest to N72, inflammatory disease of cervix uteri. ICD-9-CM 445,
+atheroembolism, is nearest to M66, spontaneous rupture of synovium and tendon.
+The scores are as high as the ones the pipeline is right about, and the answers
+are not close.
+
+The exception is ICD-9-CM 338, pain not elsewhere classified, whose nearest
+target is R52, pain not elsewhere classified, the same phrase. The reference
+crosswalk records no match for it. That is worth checking against the reference
+standard rather than assuming the pipeline is wrong there.
+
+Now the second signal. All 9 codes appear in the co-occurrence file, so all 9
+have empirical data.
+
+**Table 18. Co-occurrence of each unmatched ICD-9-CM code.** Partners is the
+number of ICD-10-CA codes it shares a record with. The quartile and maximum
+describe the counts across those partners.
+
+| ICD-9-CM | Label | Partners | Median | Q3 | Highest | Most frequent partner |
+|---|---|---|---|---|---|---|
+| 338 | pain not elsewhere classified | 827 | 49 | 181.5 | 13431 | E11, Type 2 diabetes mellitus |
+| 515 | postinflammatory pulmonary fibrosis | 306 | 24 | 53.75 | 5194 | J84, Other interstitial pulmonary diseases |
+| 239 | neoplasms of unspecified nature | 585 | 34 | 91 | 4862 | I10, Essential (primary) hypertension |
+| 327 | organic sleep disorders | 349 | 23 | 49 | 3108 | G47, Other sleep disorders |
+| 249 | secondary diabetes mellitus | 161 | 18 | 38 | 1783 | E11, Type 2 diabetes mellitus |
+| 209 | neuroendocrine tumors | 124 | 17 | 31.75 | 506 | C78, Secondary malignant neoplasm of respiratory and digestive organs |
+| 175 | malignant neoplasm of male breast | 24 | 10.5 | 22.5 | 131 | C79, Secondary malignant neoplasm of other and unspecified sites |
+| 339 | other headache syndromes | 58 | 15 | 17.75 | 54 | E11, Type 2 diabetes mellitus |
+| 445 | atheroembolism | 2 | 11.5 | 13.75 | 16 | I74, Arterial embolism and thrombosis |
+
+These counts are not low. ICD-9-CM 338 shares a record with 827 different
+ICD-10-CA codes and appears with E11, type 2 diabetes, 13431 times. 515 reaches
+5194, 239 reaches 4862 and 327 reaches 3108. Only the bottom two rows look the
+way a code with no valid target was expected to look, 445 with 2 partners and a
+highest count of 16, and 339 with 58 partners and a highest count of 54.
+
+Co-occurrence counts how often a code is recorded, not whether it has a target.
+Pain, sleep disorders and unspecified neoplasms are recorded constantly, so they
+co-occur with whatever else the patient has.
+
+### ICD-9-CM to ICDA-8, the 52 codes with no match
+
+Co-occurrence first, because there is nothing to tabulate. None of the 52 codes
+appear in the co-occurrence file at all. A code is listed there only if it shares
+a record with at least one ICDA-8 code, so these 52 have no empirical data
+whatsoever, which is different from having a low count. The same gap covers 32 of
+the 302 codes that do have answers.
+
+That single fact drives the ICDA-8 results in Section 2. ClinicalBERT's best rule
+only fires when two codes co-occur, so it stays silent on all 52. The same rule
+is what leaves 39 of the 302 codes with answers unmapped.
+
+Similarity next. Each code is scored against all 858 ICDA-8 codes.
+
+**Table 19. Cosine similarity of each unmatched ICD-9-CM code against every
+ICDA-8 code.**
+
+| ICD-9-CM | Label | Mean | Min | Q1 | Median | Q3 | Max | Nearest |
+|---|---|---|---|---|---|---|---|---|
+| 164 | malignant neoplasm of thymus heart and mediastinum | 0.813 | 0.584 | 0.776 | 0.810 | 0.846 | 0.985 | 142 |
+| 175 | malignant neoplasm of male breast | 0.816 | 0.578 | 0.782 | 0.816 | 0.848 | 0.984 | 174 |
+| 237 | neoplasm of uncertain behavior of endocrine glands and nervous system | 0.821 | 0.594 | 0.785 | 0.822 | 0.855 | 0.984 | 238 |
+| 179 | malignant neoplasm of uterus part unspecified | 0.812 | 0.633 | 0.780 | 0.810 | 0.842 | 0.980 | 149 |
+| 238 | neoplasm of uncertain behavior of other and unspecified sites and tissues | 0.814 | 0.626 | 0.777 | 0.811 | 0.845 | 0.977 | 237 |
+| 585 | chronic kidney disease | 0.848 | 0.680 | 0.813 | 0.847 | 0.886 | 0.973 | 582 |
+| 165 | malignant neoplasm of other and illdefined sites within the respiratory system and intrathoracic organs | 0.796 | 0.587 | 0.755 | 0.795 | 0.832 | 0.971 | 195 |
+| 615 | inflammatory diseases of uterus except cervix | 0.855 | 0.631 | 0.828 | 0.863 | 0.890 | 0.971 | 621 |
+| 334 | spinocerebellar disease | 0.864 | 0.704 | 0.833 | 0.867 | 0.898 | 0.968 | 348 |
+| 721 | spondylosis and allied disorders | 0.863 | 0.675 | 0.830 | 0.868 | 0.902 | 0.968 | 721 |
+| 234 | carcinoma in situ of other and unspecified sites | 0.828 | 0.632 | 0.794 | 0.828 | 0.857 | 0.966 | 195 |
+| 335 | anterior horn cell disease | 0.851 | 0.674 | 0.816 | 0.856 | 0.889 | 0.965 | 365 |
+| 249 | secondary diabetes mellitus | 0.821 | 0.638 | 0.780 | 0.827 | 0.864 | 0.964 | 250 |
+| 712 | crystal arthropathies | 0.832 | 0.673 | 0.790 | 0.833 | 0.878 | 0.964 | 523 |
+| 230 | carcinoma in situ of digestive organs | 0.839 | 0.616 | 0.808 | 0.840 | 0.873 | 0.963 | 189 |
+| 233 | carcinoma in situ of breast and genitourinary system | 0.820 | 0.583 | 0.785 | 0.822 | 0.859 | 0.962 | 184 |
+| 516 | other alveolar and parietoalveolar pneumonopathy | 0.868 | 0.686 | 0.849 | 0.873 | 0.896 | 0.961 | 517 |
+| 417 | other diseases of pulmonary circulation | 0.826 | 0.697 | 0.796 | 0.825 | 0.858 | 0.960 | 447 |
+| 617 | endometriosis | 0.864 | 0.698 | 0.831 | 0.865 | 0.901 | 0.958 | 582 |
+| 576 | other disorders of biliary tract | 0.854 | 0.680 | 0.823 | 0.858 | 0.888 | 0.956 | 508 |
+| 176 | kaposis sarcoma | 0.855 | 0.668 | 0.826 | 0.862 | 0.888 | 0.955 | 218 |
+| 263 | other and unspecified proteincalorie malnutrition | 0.783 | 0.651 | 0.763 | 0.785 | 0.805 | 0.954 | 267 |
+| 358 | myoneural disorders | 0.849 | 0.691 | 0.810 | 0.851 | 0.889 | 0.954 | 523 |
+| 515 | postinflammatory pulmonary fibrosis | 0.868 | 0.680 | 0.847 | 0.874 | 0.895 | 0.952 | 354 |
+| 231 | carcinoma in situ of respiratory system | 0.836 | 0.603 | 0.805 | 0.839 | 0.874 | 0.951 | 212 |
+| 555 | regional enteritis | 0.851 | 0.655 | 0.823 | 0.854 | 0.879 | 0.950 | 422 |
+| 331 | other cerebral degenerations | 0.832 | 0.679 | 0.803 | 0.835 | 0.862 | 0.949 | 344 |
+| 405 | secondary hypertension | 0.836 | 0.649 | 0.807 | 0.840 | 0.869 | 0.949 | 401 |
+| 333 | other extrapyramidal disease and abnormal movement disorders | 0.835 | 0.651 | 0.805 | 0.844 | 0.871 | 0.945 | 360 |
+| 557 | vascular insufficiency of intestine | 0.867 | 0.711 | 0.842 | 0.870 | 0.898 | 0.945 | 424 |
+| 720 | ankylosing spondylitis and other inflammatory spondylopathies | 0.823 | 0.581 | 0.789 | 0.830 | 0.869 | 0.945 | 321 |
+| 495 | extrinsic allergic alveolitis | 0.863 | 0.649 | 0.844 | 0.866 | 0.891 | 0.944 | 092 |
+| 619 | fistula involving female genital tract | 0.856 | 0.682 | 0.837 | 0.862 | 0.882 | 0.943 | 939 |
+| 359 | muscular dystrophies and other myopathies | 0.842 | 0.663 | 0.805 | 0.847 | 0.885 | 0.942 | 733 |
+| 382 | suppurative and unspecified otitis media | 0.863 | 0.658 | 0.844 | 0.868 | 0.888 | 0.939 | 612 |
+| 316 | psychic factors associated with diseases classified elsewhere | 0.824 | 0.601 | 0.796 | 0.836 | 0.862 | 0.938 | 305 |
+| 496 | chronic airway obstruction not elsewhere classified | 0.862 | 0.703 | 0.841 | 0.868 | 0.884 | 0.937 | 584 |
+| 713 | arthropathy associated with other disorders classified elsewhere | 0.844 | 0.625 | 0.822 | 0.855 | 0.878 | 0.935 | 775 |
+| 508 | respiratory conditions due to other and unspecified external agents | 0.821 | 0.689 | 0.800 | 0.822 | 0.842 | 0.932 | 515 |
+| 586 | renal failure unspecified | 0.847 | 0.697 | 0.824 | 0.850 | 0.871 | 0.929 | 583 |
+| 259 | other endocrine disorders | 0.818 | 0.667 | 0.784 | 0.821 | 0.853 | 0.928 | 117 |
+| 745 | bulbus cordis anomalies and anomalies of cardiac septal closure | 0.845 | 0.724 | 0.825 | 0.846 | 0.870 | 0.928 | 605 |
+| 330 | cerebral degenerations usually manifest in childhood | 0.761 | 0.495 | 0.723 | 0.768 | 0.812 | 0.921 | 095 |
+| 308 | acute reaction to stress | 0.769 | 0.616 | 0.738 | 0.773 | 0.804 | 0.917 | 307 |
+| 327 | organic sleep disorders | 0.804 | 0.617 | 0.765 | 0.803 | 0.849 | 0.917 | 717 |
+| 517 | lung involvement in conditions classified elsewhere | 0.840 | 0.662 | 0.822 | 0.849 | 0.867 | 0.917 | 776 |
+| 305 | nondependent abuse of drugs | 0.800 | 0.566 | 0.773 | 0.811 | 0.837 | 0.913 | 308 |
+| 338 | pain not elsewhere classified | 0.811 | 0.687 | 0.786 | 0.814 | 0.837 | 0.907 | 490 |
+| 588 | disorders resulting from impaired renal function | 0.820 | 0.700 | 0.801 | 0.822 | 0.840 | 0.901 | 515 |
+| 312 | disturbance of conduct not elsewhere classified | 0.775 | 0.678 | 0.751 | 0.775 | 0.797 | 0.895 | 306 |
+| 625 | pain and other symptoms associated with female genital organs | 0.762 | 0.540 | 0.727 | 0.768 | 0.807 | 0.893 | 781 |
+| 315 | specific delays in development | 0.777 | 0.671 | 0.752 | 0.776 | 0.800 | 0.883 | 066 |
+
+The maxima run from 0.883 to 0.985. The 302 codes that do have answers run from
+0.865 to 1.000, so the two ranges sit almost on top of each other. Twenty-six of
+the 52 are above the first quartile of the matched codes and five are above its
+median.
+
+![similarity spread per code](results/plot_unmatched_similarity_spread.png)
+
+**Figure 17. The full distribution behind each row of Tables 17 and 19.** The
+grey line runs from the lowest to the highest score against any target, the red
+bar covers the quartiles and the dark dot is the maximum. Every code's quartiles
+sit in a narrow band, so what differs between codes is only how far the single
+best target stands out from the rest.
+
+### Can a threshold separate these codes
+
+Not on similarity. To clear all 9 ICD-10-CA codes the cutoff on the maximum score
+has to sit above 0.955, and that also removes 286 of the 345 codes that do have
+answers. On ICDA-8 the cutoff is 0.985 and it removes 175 of 302. There is no
+setting that keeps the working mappings and drops these.
+
+![highest similarity by group](results/plot_unmatched_similarity_max.png)
+
+**Figure 18. Highest similarity per code, the codes with no match against the
+codes with one.** One point per ICD-9-CM code. The red points sit inside the grey
+spread on both crosswalks.
+
+![co-occurrence by group](results/plot_unmatched_cooccurrence.png)
+
+**Figure 19. Highest co-occurrence count per code.** Log scale, one point per
+code. Codes missing from the co-occurrence file cannot be drawn, so their count
+is written above each row. On ICDA-8 there are no red points at all because all
+52 are missing. On ICD-10-CA the red points sit inside the grey spread.
+
+One thing worth being exact about, because it explains why the pipeline maps
+these codes at all. The similarity threshold in the pipeline is not an absolute
+cutoff. It keeps every target scoring within a fraction of that code's own
+highest score, between 0.95 and 0.999 depending on the setting, so a code's best
+target always survives it. No score is ever low enough to be rejected. A code
+only goes quiet on the similarity side when the chapter filter removes all of its
+candidates, which happens for 2 of the 52 on ICDA-8, codes 327 and 330. That is
+why every model maps all 9 ICD-10-CA codes.
+
+SapBERT and all-mpnet-base-v2 were run through the same descriptives and give the
+same answer, with the scores sitting lower and spread wider. Their numbers are in
+the summary file below.
+
+### Where this is
+
+`scripts/36_unmatched_descriptives.R` produces all of it and takes about three
+minutes. It reads the committed data and changes nothing in the pipeline.
+
+| File | Contents |
+|---|---|
+| `results/unmatched_similarity_by_code.csv` | Tables 17 and 19 for all three models, with the nearest target and its label |
+| `results/unmatched_cooccurrence_by_code.csv` | Table 18, and the same for every other code |
+| `results/unmatched_top_cooccurrence_pairs.csv` | the three most frequent partners of each code |
+| `results/unmatched_descriptives_summary.csv` | the group level numbers and the cutoff figures |
+| `results/plot_unmatched_similarity_spread.png` | Figure 17 |
+| `results/plot_unmatched_similarity_max.png` | Figure 18 |
+| `results/plot_unmatched_cooccurrence.png` | Figure 19 |
+
+Section 2 and `scripts/35_unmatched_codes.R` cover what the pipeline currently
+does with these codes. This section covers what the two signals look like for
+them.

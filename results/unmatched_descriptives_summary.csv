@@ -1,0 +1,17 @@
+"track","track_label","model","signal","group","codes","mean_similarity","mean_of_max","min_of_max","q1_of_max","median_of_max","q3_of_max","max_of_max","cutoff_clearing_all","cutoff_cost","no_cooccurrence_data","median_partners"
+"10_9","ICD-9-CM to ICD-10-CA","ClinicalBERT","cosine similarity","has a reference match",345,0.82,0.93,0.861,0.914,0.93,0.948,0.981,0.955,286,NA,NA
+"10_9","ICD-9-CM to ICD-10-CA","ClinicalBERT","cosine similarity","no reference match",9,0.807,0.919,0.853,0.915,0.915,0.942,0.955,0.955,286,NA,NA
+"10_9","ICD-9-CM to ICD-10-CA","SapBERT","cosine similarity","has a reference match",345,0.332,0.697,0.546,0.643,0.693,0.745,0.873,0.739,251,NA,NA
+"10_9","ICD-9-CM to ICD-10-CA","SapBERT","cosine similarity","no reference match",9,0.329,0.64,0.553,0.612,0.621,0.678,0.739,0.739,251,NA,NA
+"10_9","ICD-9-CM to ICD-10-CA","mpnet","cosine similarity","has a reference match",345,0.203,0.735,0.34,0.683,0.737,0.793,0.926,0.766,219,NA,NA
+"10_9","ICD-9-CM to ICD-10-CA","mpnet","cosine similarity","no reference match",9,0.201,0.668,0.518,0.619,0.7,0.71,0.766,0.766,219,NA,NA
+"10_9","ICD-9-CM to ICD-10-CA",NA,"co-occurrence frequency","has a reference match",345,NA,NA,7,264,1288.5,5633.5,238548,NA,NA,7,209
+"10_9","ICD-9-CM to ICD-10-CA",NA,"co-occurrence frequency","no reference match",9,NA,NA,16,131,1783,4862,13431,NA,NA,0,161
+"8_9","ICD-9-CM to ICDA-8","ClinicalBERT","cosine similarity","has a reference match",302,0.828,0.97,0.865,0.95,0.975,1,1,0.985,175,NA,NA
+"8_9","ICD-9-CM to ICDA-8","ClinicalBERT","cosine similarity","no reference match",52,0.83,0.946,0.883,0.931,0.949,0.964,0.985,0.985,175,NA,NA
+"8_9","ICD-9-CM to ICDA-8","SapBERT","cosine similarity","has a reference match",302,0.365,0.887,0.518,0.809,0.914,1,1,0.95,174,NA,NA
+"8_9","ICD-9-CM to ICDA-8","SapBERT","cosine similarity","no reference match",52,0.369,0.732,0.518,0.677,0.737,0.781,0.95,0.95,174,NA,NA
+"8_9","ICD-9-CM to ICDA-8","mpnet","cosine similarity","has a reference match",302,0.266,0.883,0.472,0.791,0.92,1,1,0.902,141,NA,NA
+"8_9","ICD-9-CM to ICDA-8","mpnet","cosine similarity","no reference match",52,0.272,0.724,0.491,0.648,0.741,0.792,0.902,0.902,141,NA,NA
+"8_9","ICD-9-CM to ICDA-8",NA,"co-occurrence frequency","has a reference match",302,NA,NA,7,102.75,325.5,827,19099,NA,NA,32,35.5
+"8_9","ICD-9-CM to ICDA-8",NA,"co-occurrence frequency","no reference match",52,NA,NA,NA,NA,NA,NA,NA,NA,NA,52,NA

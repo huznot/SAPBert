@@ -133,6 +133,7 @@ still runs.
 | `27_show_results.R` | every headline number |
 | `34_export_rds_as_csv.R` | the held-out predictions as csv, for reading without R |
 | `35_unmatched_codes.R` | codes with no correct answer, report Section 2 and Figure 1 |
+| `36_unmatched_descriptives.R` | similarity and co-occurrence for those codes on their own, report Section 11 |
 | `24_show_similarity_matrix.R` | a worked similarity matrix |
 | `25_frequency_distributions.R` | report Section 8 |
 | `26_stopword_choice.R` | which stop word dictionary, report Section 6 |
