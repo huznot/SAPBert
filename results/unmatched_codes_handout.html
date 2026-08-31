@@ -142,20 +142,22 @@ the 52 are already being caught by the missing data rather than by any threshold
 
 <h2>Threshold implementation</h2>
 
-<p>A check of the implementation gives a more direct answer to why these cases are not caught.</p>
+<p>A check of the implementation gives a more direct answer to why these cases are not caught.
+Neither of the two thresholds works like a pass mark, where a pair has to score above a set value
+to be accepted. Both are calculated from the code being mapped, so a pair is judged against the
+other candidates for that same code rather than against a fixed standard.</p>
 
-<p>Neither threshold in the pipeline is an absolute one.</p>
+<p>For similarity the cutoff is the threshold multiplied by that code's own highest score, worked
+out separately inside each ICD-9-CM column. The value varied from 0.95 to 0.999 is therefore a
+fraction of the code's own best score and not a score itself, so the top target of every code
+clears it however low that score is. The weakest code on this crosswalk has a best score of 0.853,
+which puts its cutoff at 0.810 under the loosest setting and 0.852 under the tightest, and its best
+target passes either way. There is no value a cosine similarity can fall below and be rejected.</p>
 
-<p>The similarity threshold is applied as the threshold multiplied by that code's own highest
-score, separately inside each ICD-9-CM column. The value varied from 0.95 to 0.999 is a fraction of
-the code's own best score, not a score. So the top target of every code clears it however low
-the score actually is. The weakest code in the ICD-9-CM to ICD-10-CA set has a best score of 0.853 and
-it still produces a candidate. There is no value a cosine similarity can fall below and be
-rejected.</p>
-
-<p>Co-occurrence works the same way. The rule keeps each code's top n partners ranked by frequency,
-with n varied from 3 to 30, and the count itself is never compared against a value. The smallest
-highest count in the file is 7 and it is kept on the same terms as the code with 238,548.</p>
+<p>Co-occurrence is the same idea by a different route. The rule keeps each code's top n partners
+ranked by frequency, with n varied from 3 to 30, and the count itself is never compared against a
+value. The smallest highest count in the file is 7 and it is kept on the same terms as the code
+with 238,548.</p>
 
 <p>So the rule described as a cosine similarity above one value and a co-occurrence above another
 is not the rule the code applies. Both are relative to the code being mapped. The only two

@@ -121,6 +121,7 @@ n_of <- function(track, grp) sum(sim$model == MODEL & sim$track == track & sim$g
 # the weakest best score in the whole crosswalk. it still produces a candidate,
 # which is what shows the similarity rule has no floor
 weakest_best <- function(tk) f3(min(sim$max[sim$model == MODEL & sim$track == tk]))
+floor_at <- function(tk, thr) f3(thr * min(sim$max[sim$model == MODEL & sim$track == tk]))
 
 cooc_mid_raw <- function(tk) {
   median(cooc$max[cooc$track == tk & cooc$group == "has a reference match" & !is.na(cooc$max)])
@@ -327,20 +328,22 @@ the 52 are already being caught by the missing data rather than by any threshold
 mech <- sprintf('
 <h2>Threshold implementation</h2>
 
-<p>A check of the implementation gives a more direct answer to why these cases are not caught.</p>
+<p>A check of the implementation gives a more direct answer to why these cases are not caught.
+Neither of the two thresholds works like a pass mark, where a pair has to score above a set value
+to be accepted. Both are calculated from the code being mapped, so a pair is judged against the
+other candidates for that same code rather than against a fixed standard.</p>
 
-<p>Neither threshold in the pipeline is an absolute one.</p>
+<p>For similarity the cutoff is the threshold multiplied by that code\'s own highest score, worked
+out separately inside each ICD-9-CM column. The value varied from 0.95 to 0.999 is therefore a
+fraction of the code\'s own best score and not a score itself, so the top target of every code
+clears it however low that score is. The weakest code on this crosswalk has a best score of %s,
+which puts its cutoff at %s under the loosest setting and %s under the tightest, and its best
+target passes either way. There is no value a cosine similarity can fall below and be rejected.</p>
 
-<p>The similarity threshold is applied as the threshold multiplied by that code\'s own highest
-score, separately inside each ICD-9-CM column. The value varied from 0.95 to 0.999 is a fraction of
-the code\'s own best score, not a score. So the top target of every code clears it however low
-the score actually is. The weakest code in the ICD-9-CM to ICD-10-CA set has a best score of %s and
-it still produces a candidate. There is no value a cosine similarity can fall below and be
-rejected.</p>
-
-<p>Co-occurrence works the same way. The rule keeps each code\'s top n partners ranked by frequency,
-with n varied from 3 to 30, and the count itself is never compared against a value. The smallest
-highest count in the file is %s and it is kept on the same terms as the code with %s.</p>
+<p>Co-occurrence is the same idea by a different route. The rule keeps each code\'s top n partners
+ranked by frequency, with n varied from 3 to 30, and the count itself is never compared against a
+value. The smallest highest count in the file is %s and it is kept on the same terms as the code
+with %s.</p>
 
 <p>So the rule described as a cosine similarity above one value and a co-occurrence above another
 is not the rule the code applies. Both are relative to the code being mapped. The only two
@@ -355,7 +358,8 @@ floor that is not in the code. Adding an absolute threshold would be a change to
 rather than to a parameter, and on the numbers above it would cost a large share of the correct
 mappings.</p>
 ',
-  weakest_best("10_9"), cooc_span("10_9", "low"), cooc_span("10_9", "high"))
+  weakest_best("10_9"), floor_at("10_9", 0.95), floor_at("10_9", 0.999),
+  cooc_span("10_9", "low"), cooc_span("10_9", "high"))
 
 writeLines(paste0(style, intro, outcome, groups, t10, t8, figs, thresh, mech),
            file.path(OUT, "unmatched_codes_handout.html"))
