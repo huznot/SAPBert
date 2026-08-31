@@ -2,8 +2,11 @@
 # someone who does not have the repo open. reads the csvs that
 # 36_unmatched_descriptives.R writes, so run that first.
 #
-# two pages, plain layout. writes results/unmatched_codes_handout.html.
-# to get the pdf:
+# one page. the 9 icd-10-ca codes are listed in full, the 52 icda-8 codes are
+# summarised with the three highest and three lowest, since a 52 row table is
+# not readable on a handout. the full tables are the csvs.
+#
+# writes results/unmatched_codes_handout.html. to get the pdf:
 #   chrome --headless --disable-gpu --no-pdf-header-footer \
 #     --print-to-pdf=results/unmatched_codes.pdf results/unmatched_codes_handout.html
 #
@@ -37,13 +40,15 @@ tbl <- function(df, headers, align_right) {
          paste(rows, collapse = ""), "</tbody></table>")
 }
 
-sim_tbl <- function(tk) {
+# ends = NULL lists every code, ends = n keeps only the n highest and n lowest
+sim_tbl <- function(tk, ends = NULL) {
   d <- sim %>% filter(model == MODEL, track == tk, group == "no reference match") %>%
-    arrange(desc(max)) %>%
-    transmute(icd9, icd9_label,
-              mean = f3(mean), min = f3(min), q1 = f3(q1), median = f3(median),
-              q3 = f3(q3), max = f3(max),
-              nearest = paste0(nearest_target, ", ", nearest_target_label))
+    arrange(desc(max))
+  if (!is.null(ends)) d <- bind_rows(head(d, ends), tail(d, ends))
+  d <- d %>% transmute(icd9, icd9_label,
+                       mean = f3(mean), min = f3(min), q1 = f3(q1), median = f3(median),
+                       q3 = f3(q3), max = f3(max),
+                       nearest = paste0(nearest_target, ", ", nearest_target_label))
   tbl(d, c("Code", "Label", "Average", "Min", "25th", "Median", "75th", "Max", "Closest target code"),
       c(FALSE, FALSE, rep(TRUE, 6), FALSE))
 }
@@ -78,71 +83,66 @@ html <- sprintf('
 <meta charset="utf-8">
 <title>Codes with no match</title>
 <style>
-  @page { size: letter landscape; margin: 10mm 12mm; }
-  body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #000; line-height: 1.35; }
-  h1 { font-size: 13pt; margin: 0 0 10px 0; }
-  h2 { font-size: 11pt; margin: 14px 0 4px 0; }
-  p { margin: 5px 0; max-width: 250mm; }
-  table { border-collapse: collapse; width: 100%%; font-size: 6.5pt; line-height: 1.05;
-          margin: 4px 0; }
-  th { text-align: left; border-bottom: 1px solid #000; padding: 1.5px 5px 2.5px 5px; }
-  td { border-bottom: 0.5px solid #ccc; padding: 0.5px 5px; vertical-align: top; }
+  @page { size: letter landscape; margin: 9mm 12mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: #000; line-height: 1.28; }
+  h1 { font-size: 12.5pt; margin: 0 0 8px 0; }
+  h2 { font-size: 10pt; margin: 9px 0 3px 0; }
+  p { margin: 3px 0; max-width: 250mm; }
+  table { border-collapse: collapse; width: 100%%; font-size: 7.2pt; line-height: 1.1; margin: 4px 0; }
+  th { text-align: left; border-bottom: 1px solid #000; padding: 1px 5px 2px 5px; }
+  td { border-bottom: 0.5px solid #ccc; padding: 1px 5px; vertical-align: top; }
   td.num { text-align: right; white-space: nowrap; }
-  .break { page-break-before: always; }
-  .break + h2 { margin-top: 0; }
 </style>
 
 <h1>ICD-9-CM codes with no match in the target system &mdash; 27 August 2026</h1>
 
 <p>There are 9 ICD-9-CM codes with no ICD-10-CA match and 52 with no ICDA-8 match. The algorithm
 uses two numbers to decide: how often a pair of codes appears together in patient records, and the
-cosine similarity between the two code labels. Both are described below for each code separately.
-Similarity is from ClinicalBERT.</p>
+cosine similarity between the two code labels. Similarity here is from ClinicalBERT.</p>
 
 <h2>ICD-9-CM to ICD-10-CA, the 9 codes</h2>
 
-<p>Co-occurrence. Partners is the number of different ICD-10-CA codes the code shares a record
-with, and the columns after it describe the counts across those partners. The source data does not
-report a count below 7.</p>
+<p>Co-occurrence, all 9. Partners is the number of different ICD-10-CA codes the code shares a
+record with, and the columns after it describe the counts across those partners. The source data
+does not report a count below 7.</p>
 
 %s
 
-<p>These counts are not low. Code 338 shares a record with 827 different ICD-10-CA codes and its
-highest count is 13,431. Codes 515, 239 and 327 also reach the thousands. Across the %d codes that
-do have a match, the middle value of the highest count is %s, so this group sits above it rather
-than below. Only 445 and 339 are low. The counts look like they reflect how often a code is
-recorded, not whether it has a valid target.</p>
+<p>These counts are not low. Code 338 shares a record with 827 different ICD-10-CA codes, up to
+13,431 times. Across the %d codes that do have a match the middle value of the highest count is
+%s, so this group sits above it rather than below. Only 445 and 339 are low.</p>
 
 <p>Cosine similarity, each code scored against all 2038 ICD-10-CA codes.</p>
 
 %s
 
-<p>The highest score for these 9 runs from %s. Across the %d codes that do have a match it runs
-from %s, so the two groups overlap. The closest ICD-10-CA code is clinically unrelated in 8 of the
-9: code 175, malignant neoplasm of male breast, is closest to C30, malignant neoplasm of nasal
-cavity and middle ear, at 0.955. The exception is code 338, whose closest target R52 carries the
-same label, pain not elsewhere classified, yet the reference crosswalk records no match for it.</p>
+<p>The highest score for these 9 runs from %s, against %s for the %d codes that do have a match.
+The closest ICD-10-CA code is clinically unrelated in 8 of the 9: code 175, malignant neoplasm of
+male breast, is closest to C30, malignant neoplasm of nasal cavity and middle ear. The exception is
+code 338, whose closest target R52 carries the same label, yet the crosswalk records no match.</p>
 
-<div class="break"></div>
 <h2>ICD-9-CM to ICDA-8, the 52 codes</h2>
 
-<p>None of the 52 appear in the co-occurrence data at all, so there is nothing to tabulate for
-that signal. That is why the algorithm returns no match for them, and also why it returns no match
-for 39 codes that do have one, since 32 of the %d matched codes are missing from the same data.</p>
+<p>None of the 52 appear in the co-occurrence data at all, so there is nothing to describe for that
+signal. That is why the algorithm returns no match for them, and also why it returns no match for
+39 codes that do have one, since 32 of the %d matched codes are missing from the same data.</p>
 
-<p>Cosine similarity, each code scored against all 858 ICDA-8 codes. The highest score for these
-52 runs from %s, against %s for the %d codes that do have a match. On both crosswalks the codes
-with no match sit inside the range of the codes that do, so no cut-off on either signal separates
-them without also losing a large share of the correct mappings.</p>
+<p>Cosine similarity against all 858 ICDA-8 codes. The highest score for these 52 runs from %s,
+against %s for the %d codes that do have a match. The three highest and the three lowest are below
+as examples, and I have the other 46 if they are useful.</p>
 
 %s
+
+<p>On both crosswalks the codes with no match sit inside the range of the codes that do, so no
+cut-off on either signal separates them without also losing a large share of the correct
+mappings.</p>
 ',
   cooc_tbl("10_9"), n_of("10_9", "has a reference match"), cooc_mid("10_9"),
   sim_tbl("10_9"), rng("10_9", "no reference match"),
-  n_of("10_9", "has a reference match"), rng("10_9", "has a reference match"),
+  rng("10_9", "has a reference match"), n_of("10_9", "has a reference match"),
   n_of("8_9", "has a reference match"),
   rng("8_9", "no reference match"), rng("8_9", "has a reference match"),
-  n_of("8_9", "has a reference match"), sim_tbl("8_9"))
+  n_of("8_9", "has a reference match"), sim_tbl("8_9", ends = 3))
 
 writeLines(html, file.path(OUT, "unmatched_codes_handout.html"))
 cat("wrote results/unmatched_codes_handout.html\n")
