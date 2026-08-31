@@ -83,14 +83,43 @@ highest and the four lowest below, and I have the rest if you want them.</p>
 
 <table><thead><tr><th>Code</th><th>Label</th><th>Average</th><th>Min</th><th>25th</th><th>Median</th><th>75th</th><th>Max</th><th>Closest target code</th></tr></thead><tbody><tr><td class="txt">164</td><td class="txt">malignant neoplasm of thymus heart and mediastinum</td><td class="num">0.813</td><td class="num">0.584</td><td class="num">0.776</td><td class="num">0.810</td><td class="num">0.846</td><td class="num">0.985</td><td class="txt">142, malignant neoplasm of salivary gland</td></tr><tr><td class="txt">175</td><td class="txt">malignant neoplasm of male breast</td><td class="num">0.816</td><td class="num">0.578</td><td class="num">0.782</td><td class="num">0.816</td><td class="num">0.848</td><td class="num">0.984</td><td class="txt">174, malignant neoplasm of breast</td></tr><tr><td class="txt">237</td><td class="txt">neoplasm of uncertain behavior of endocrine glands and nervous system</td><td class="num">0.821</td><td class="num">0.594</td><td class="num">0.785</td><td class="num">0.822</td><td class="num">0.855</td><td class="num">0.984</td><td class="txt">238, neoplasm of unspecified nature of eye brain and other parts of nervous system</td></tr><tr><td class="txt">179</td><td class="txt">malignant neoplasm of uterus part unspecified</td><td class="num">0.812</td><td class="num">0.633</td><td class="num">0.780</td><td class="num">0.810</td><td class="num">0.842</td><td class="num">0.980</td><td class="txt">149, malignant neoplasm of pharynx unspecified</td></tr><tr><td class="txt">588</td><td class="txt">disorders resulting from impaired renal function</td><td class="num">0.820</td><td class="num">0.700</td><td class="num">0.801</td><td class="num">0.822</td><td class="num">0.840</td><td class="num">0.901</td><td class="txt">515, pneumoconiosis due to silica and silicates</td></tr><tr><td class="txt">312</td><td class="txt">disturbance of conduct not elsewhere classified</td><td class="num">0.775</td><td class="num">0.678</td><td class="num">0.751</td><td class="num">0.775</td><td class="num">0.797</td><td class="num">0.895</td><td class="txt">306, special symptoms not elsewhere classified</td></tr><tr><td class="txt">625</td><td class="txt">pain and other symptoms associated with female genital organs</td><td class="num">0.762</td><td class="num">0.540</td><td class="num">0.727</td><td class="num">0.768</td><td class="num">0.807</td><td class="num">0.893</td><td class="txt">781, other symptoms referable to nervous system and special senses</td></tr><tr><td class="txt">315</td><td class="txt">specific delays in development</td><td class="num">0.777</td><td class="num">0.671</td><td class="num">0.752</td><td class="num">0.776</td><td class="num">0.800</td><td class="num">0.883</td><td class="txt">066, late effects of viral encephalitis</td></tr></tbody></table>
 
-<h2>Where this leaves the two signals</h2>
+<div class="break"></div>
+<h2>Whether a threshold on either number would catch these</h2>
 
-<p>Neither one separates these codes from the ones that do have a match. On ICD-10-CA, a similarity
-cut-off high enough to clear all 9 would have to sit above 0.955, and that also removes 286 of the 345
-codes that are correct. On ICDA-8 the cut-off would be 0.985 and it removes 175 of 302. Co-occurrence
-does not rescue it either, since the 9 sit on the high side of it and the 52 are not in the data at
-all.</p>
+<p>Not on its own. On ICD-10-CA a similarity cut-off high enough to clear all 9 would have to sit
+above 0.955, and that also removes 286 of the 345 codes that are correct. On ICDA-8 the cut-off would be
+0.985 and it removes 175 of 302. Co-occurrence is no better. A count cut-off high enough to clear the 9
+would have to sit above 13,431, which removes 293 of the 338 matched codes that are in the file. Both
+together do not help either, because on ICD-10-CA the 9 pass both tests comfortably, and on ICDA-8
+the 52 are already being caught by the missing data rather than by any threshold.</p>
 
-<p>So I do not think a threshold on these two numbers is the way to handle these codes, which is
-why I have not built one yet.</p>
+<h2>What the algorithm is actually doing with these two numbers</h2>
+
+<p>While I was checking the above I found something I was not expecting, and I think it is a more
+useful answer to why the special cases are not being caught.</p>
+
+<p>Neither threshold in the pipeline is an absolute one.</p>
+
+<p>The similarity threshold is applied as the threshold multiplied by that code's own highest
+score, separately inside each ICD-9-CM column. The value we vary from 0.95 to 0.999 is a fraction
+of the code's own best score, not a score. So the top target of every code clears it however low
+the score actually is. The weakest code in the ICD-9-CM to ICD-10-CA set has a best score of 0.853 and
+it still produces a candidate. There is no value a cosine similarity can fall below and be
+rejected.</p>
+
+<p>Co-occurrence works the same way. The rule keeps each code's top n partners ranked by
+frequency, with n varied from 3 to 30, and the count itself is never compared against anything. The
+smallest highest count in the file is 7 and it is kept on the same terms as the code with 238,548.</p>
+
+<p>So the rule we describe as a cosine similarity above one value and a co-occurrence above another
+is not the rule the code is applying. Both are relative to the code being mapped. The only two
+things that make the algorithm stay quiet are the chapter filter removing every candidate, or,
+under the flag settings that require co-occurrence, the code being absent from the co-occurrence
+file. That second one is what is happening to all 52 on the ICDA-8 side, and it is why the right
+answer there is coming out for the wrong reason.</p>
+
+<p>I think that is worth settling before we test the abstain scenarios, because those scenarios
+assume a floor that is not in the code yet. Putting a real absolute threshold in would be a change
+to the pipeline rather than a change to a parameter, and going by the numbers above it would cost a
+lot of correct mappings, so I have not made it.</p>
 

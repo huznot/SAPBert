@@ -2,10 +2,17 @@
 # someone who does not have the repo open. reads the csvs that
 # 36_unmatched_descriptives.R writes, so run that first.
 #
-# two or three pages. the 9 icd-10-ca codes are listed in full, the 52 icda-8
-# codes are shown as the four highest and four lowest, since a 52 row table is
-# not readable on a handout. the full tables are the csvs. no em dashes and no
-# date in the heading, both asked for.
+# three pages, tables only. the figures 36_ writes are 4:3 and too tall to sit
+# on a landscape page next to the tables, so they are left out.
+# the 9 icd-10-ca codes are listed in full, the 52 icda-8 codes
+# are shown as the four highest and four lowest, since a 52 row table is not
+# readable on a handout. the full tables are the csvs. no em dashes and no date
+# in the heading, both asked for.
+#
+# the last section is the answer to "what is not working in our algorithm".
+# the thresholds named in the meeting are not absolute in the implementation,
+# see pipeline_lib.R lines 153 to 190. the grid values quoted there, 0.95 to
+# 0.999 and 3 to 30, are the ones set in 07_full_grid_comparison.R line 20.
 #
 # writes results/unmatched_codes_handout.html. to get the pdf:
 #   chrome --headless --disable-gpu --no-pdf-header-footer \
@@ -75,6 +82,10 @@ rng <- function(tk, grp) {
 }
 n_of <- function(track, grp) sum(sim$model == MODEL & sim$track == track & sim$group == grp)
 
+# the weakest best score in the whole crosswalk. it still produces a candidate,
+# which is what shows the similarity rule has no floor
+weakest_best <- function(tk) f3(min(sim$max[sim$model == MODEL & sim$track == tk]))
+
 # middle value of the highest co-occurrence count, for the codes that do match,
 # and how many of the unmatched codes beat it
 cooc_mid_raw <- function(tk) {
@@ -85,12 +96,24 @@ n_above_mid <- function(tk) {
   sum(cooc$track == tk & cooc$group == "no reference match" &
         !is.na(cooc$max) & cooc$max > cooc_mid_raw(tk))
 }
+# matched codes that are actually in the co-occurrence file, the denominator the
+# co-occurrence cutoff cost is counted against
+n_cooc_present <- function(tk) {
+  sum(cooc$track == tk & cooc$group == "has a reference match" & !is.na(cooc$max))
+}
+cooc_span <- function(tk, which) {
+  v <- cooc$max[cooc$track == tk & !is.na(cooc$max)]
+  fn(if (which == "low") min(v) else max(v))
+}
 
-# the cutoff that would clear every unmatched code, and what it costs
-cut_of <- function(tk, field) {
-  d <- summ %>% filter(model == MODEL, track == tk, signal == "cosine similarity",
-                       group == "no reference match")
-  if (field == "cut") f3(d$cutoff_clearing_all[1]) else d$cutoff_cost[1]
+# the cutoff that would clear every unmatched code, and what it costs, for
+# either signal. written by 36_ into the summary
+cut_of <- function(tk, sig, field) {
+  d <- summ %>% filter(track == tk, signal == sig, group == "no reference match",
+                       is.na(model) | model == MODEL)
+  if (field == "cut") {
+    if (sig == "cosine similarity") f3(d$cutoff_clearing_all[1]) else fn(d$cutoff_clearing_all[1])
+  } else d$cutoff_cost[1]
 }
 
 html <- sprintf('
@@ -178,16 +201,45 @@ highest and the four lowest below, and I have the rest if you want them.</p>
 
 %s
 
-<h2>Where this leaves the two signals</h2>
+<div class="break"></div>
+<h2>Whether a threshold on either number would catch these</h2>
 
-<p>Neither one separates these codes from the ones that do have a match. On ICD-10-CA, a similarity
-cut-off high enough to clear all 9 would have to sit above %s, and that also removes %d of the %d
-codes that are correct. On ICDA-8 the cut-off would be %s and it removes %d of %d. Co-occurrence
-does not rescue it either, since the 9 sit on the high side of it and the 52 are not in the data at
-all.</p>
+<p>Not on its own. On ICD-10-CA a similarity cut-off high enough to clear all 9 would have to sit
+above %s, and that also removes %d of the %d codes that are correct. On ICDA-8 the cut-off would be
+%s and it removes %d of %d. Co-occurrence is no better. A count cut-off high enough to clear the 9
+would have to sit above %s, which removes %d of the %d matched codes that are in the file. Both
+together do not help either, because on ICD-10-CA the 9 pass both tests comfortably, and on ICDA-8
+the 52 are already being caught by the missing data rather than by any threshold.</p>
 
-<p>So I do not think a threshold on these two numbers is the way to handle these codes, which is
-why I have not built one yet.</p>
+<h2>What the algorithm is actually doing with these two numbers</h2>
+
+<p>While I was checking the above I found something I was not expecting, and I think it is a more
+useful answer to why the special cases are not being caught.</p>
+
+<p>Neither threshold in the pipeline is an absolute one.</p>
+
+<p>The similarity threshold is applied as the threshold multiplied by that code\'s own highest
+score, separately inside each ICD-9-CM column. The value we vary from 0.95 to 0.999 is a fraction
+of the code\'s own best score, not a score. So the top target of every code clears it however low
+the score actually is. The weakest code in the ICD-9-CM to ICD-10-CA set has a best score of %s and
+it still produces a candidate. There is no value a cosine similarity can fall below and be
+rejected.</p>
+
+<p>Co-occurrence works the same way. The rule keeps each code\'s top n partners ranked by
+frequency, with n varied from 3 to 30, and the count itself is never compared against anything. The
+smallest highest count in the file is %s and it is kept on the same terms as the code with %s.</p>
+
+<p>So the rule we describe as a cosine similarity above one value and a co-occurrence above another
+is not the rule the code is applying. Both are relative to the code being mapped. The only two
+things that make the algorithm stay quiet are the chapter filter removing every candidate, or,
+under the flag settings that require co-occurrence, the code being absent from the co-occurrence
+file. That second one is what is happening to all 52 on the ICDA-8 side, and it is why the right
+answer there is coming out for the wrong reason.</p>
+
+<p>I think that is worth settling before we test the abstain scenarios, because those scenarios
+assume a floor that is not in the code yet. Putting a real absolute threshold in would be a change
+to the pipeline rather than a change to a parameter, and going by the numbers above it would cost a
+lot of correct mappings, so I have not made it.</p>
 ',
   cooc_tbl("10_9"), n_of("10_9", "has a reference match"), cooc_mid("10_9"),
   n_above_mid("10_9"),
@@ -196,8 +248,13 @@ why I have not built one yet.</p>
   n_of("8_9", "has a reference match"),
   rng("8_9", "no reference match"), rng("8_9", "has a reference match"),
   n_of("8_9", "has a reference match"), sim_tbl("8_9", ends = 4),
-  cut_of("10_9", "cut"), cut_of("10_9", "cost"), n_of("10_9", "has a reference match"),
-  cut_of("8_9", "cut"), cut_of("8_9", "cost"), n_of("8_9", "has a reference match"))
+  cut_of("10_9", "cosine similarity", "cut"), cut_of("10_9", "cosine similarity", "cost"),
+  n_of("10_9", "has a reference match"),
+  cut_of("8_9", "cosine similarity", "cut"), cut_of("8_9", "cosine similarity", "cost"),
+  n_of("8_9", "has a reference match"),
+  cut_of("10_9", "co-occurrence frequency", "cut"),
+  cut_of("10_9", "co-occurrence frequency", "cost"), n_cooc_present("10_9"),
+  weakest_best("10_9"), cooc_span("10_9", "low"), cooc_span("10_9", "high"))
 
 writeLines(html, file.path(OUT, "unmatched_codes_handout.html"))
 cat("wrote results/unmatched_codes_handout.html\n")

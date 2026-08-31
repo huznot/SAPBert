@@ -142,6 +142,15 @@ for (tr in names(TRACKS)) {
                   max(no_m$max), nrow(no_m)))
       cat(sprintf("no match, and it also removes %d of the %d codes that have one\n",
                   sum(has_m$max <= max(no_m$max)), nrow(has_m)))
+
+      # that cutoff does not exist in the pipeline. pipeline_lib.R line 163 sets
+      # cutoff <- threshold * max_score inside each icd-9 column, so the rule is
+      # relative to the code's own best score and its top target always clears
+      # it. the weakest best score in the crosswalk is the proof
+      cat(sprintf("\nthe lowest maximum over all %d codes is %.3f, and that code still produces a\n",
+                  nrow(per_code), min(per_code$max)))
+      cat("candidate, because the implemented rule is threshold * that code's own maximum,\n")
+      cat("not an absolute score. no similarity is ever low enough on its own to abstain\n")
     }
   }
 
@@ -169,7 +178,31 @@ for (tr in names(TRACKS)) {
               min_of_max = q(max, 0), q1_of_max = q(max, .25),
               median_of_max = q(max, .5), q3_of_max = q(max, .75),
               max_of_max = q(max, 1), .groups = "drop")
+
+  # the separation question again, on the other signal. a code absent from the
+  # file has no count rather than a low one, so it cannot be cleared by a
+  # threshold and is left out of the ceiling
+  no_c  <- per_cooc %>% filter(group == "no reference match", !is.na(max))
+  has_c <- per_cooc %>% filter(group == "has a reference match", !is.na(max))
+  if (nrow(no_c)) {
+    cooc_grp <- cooc_grp %>%
+      mutate(cutoff_clearing_all = max(no_c$max),
+             cutoff_cost = sum(has_c$max <= max(no_c$max)))
+  }
   print(as.data.frame(cooc_grp), row.names = FALSE)
+
+  if (nrow(no_c)) {
+    cat(sprintf("\na cutoff on the highest count above %d is the lowest that clears all %d codes\n",
+                max(no_c$max), nrow(no_c)))
+    cat(sprintf("with no match that are in the file, and it removes %d of the %d that have one\n",
+                sum(has_c$max <= max(no_c$max)), nrow(has_c)))
+  }
+  # and that cutoff does not exist either. get_cooccurrence_codes_from_df keeps
+  # each code's top_n partners by rank, so the count itself is never compared
+  # against a value
+  cat(sprintf("\nthe smallest highest count among the codes that are in the file is %d, and it is\n",
+              min(c(no_c$max, has_c$max))))
+  cat("kept, because the implemented rule takes each code's top n partners by rank\n")
   group_rows[[paste(tr, "cooc")]] <- cooc_grp %>%
     mutate(track = tr, track_label = tk$label, model = NA_character_,
            signal = "co-occurrence frequency", .before = 1)

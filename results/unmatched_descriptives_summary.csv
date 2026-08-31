@@ -5,8 +5,8 @@
 "10_9","ICD-9-CM to ICD-10-CA","SapBERT","cosine similarity","no reference match",9,0.329,0.64,0.553,0.612,0.621,0.678,0.739,0.739,251,NA,NA
 "10_9","ICD-9-CM to ICD-10-CA","mpnet","cosine similarity","has a reference match",345,0.203,0.735,0.34,0.683,0.737,0.793,0.926,0.766,219,NA,NA
 "10_9","ICD-9-CM to ICD-10-CA","mpnet","cosine similarity","no reference match",9,0.201,0.668,0.518,0.619,0.7,0.71,0.766,0.766,219,NA,NA
-"10_9","ICD-9-CM to ICD-10-CA",NA,"co-occurrence frequency","has a reference match",345,NA,NA,7,264,1288.5,5633.5,238548,NA,NA,7,209
-"10_9","ICD-9-CM to ICD-10-CA",NA,"co-occurrence frequency","no reference match",9,NA,NA,16,131,1783,4862,13431,NA,NA,0,161
+"10_9","ICD-9-CM to ICD-10-CA",NA,"co-occurrence frequency","has a reference match",345,NA,NA,7,264,1288.5,5633.5,238548,13431,293,7,209
+"10_9","ICD-9-CM to ICD-10-CA",NA,"co-occurrence frequency","no reference match",9,NA,NA,16,131,1783,4862,13431,13431,293,0,161
 "8_9","ICD-9-CM to ICDA-8","ClinicalBERT","cosine similarity","has a reference match",302,0.828,0.97,0.865,0.95,0.975,1,1,0.985,175,NA,NA
 "8_9","ICD-9-CM to ICDA-8","ClinicalBERT","cosine similarity","no reference match",52,0.83,0.946,0.883,0.931,0.949,0.964,0.985,0.985,175,NA,NA
 "8_9","ICD-9-CM to ICDA-8","SapBERT","cosine similarity","has a reference match",302,0.365,0.887,0.518,0.809,0.914,1,1,0.95,174,NA,NA
