@@ -45,7 +45,8 @@ for it on the ordinary ones.</p>
 co-occurrence file if it shares a record with at least one target code, so a code that is not in
 the file has no data rather than a low count. Partners is how many different target codes a code
 turned up with, and the last five columns describe each group by the highest count any one of its
-codes reached. Nothing below 7 is reported in the source data.</p>
+codes reached. Pairs below a frequency of 6 were removed when the
+co-occurrence data was built, and the lowest count present is 7.</p>
 
 <table class="grp"><thead><tr><th>Target system</th><th>Group</th><th>Codes</th><th>Not in the file</th><th>Median partners</th><th>Highest count, lowest</th><th>25th</th><th>Median</th><th>75th</th><th>Highest count, highest</th></tr></thead><tbody><tr><td class="txt">ICD-10-CA</td><td class="txt">no match</td><td class="num">9</td><td class="num">0</td><td class="num">161</td><td class="num">16</td><td class="num">131</td><td class="num">1,783</td><td class="num">4,862</td><td class="num">13,431</td></tr><tr><td class="txt">ICD-10-CA</td><td class="txt">has a match</td><td class="num">345</td><td class="num">7</td><td class="num">209</td><td class="num">7</td><td class="num">264</td><td class="num">1,288.5</td><td class="num">5,633.5</td><td class="num">238,548</td></tr><tr><td class="txt">ICDA-8</td><td class="txt">no match</td><td class="num">52</td><td class="num">52</td><td class="num">no data</td><td class="num">no data</td><td class="num">no data</td><td class="num">no data</td><td class="num">no data</td><td class="num">no data</td></tr><tr><td class="txt">ICDA-8</td><td class="txt">has a match</td><td class="num">302</td><td class="num">32</td><td class="num">35.5</td><td class="num">7</td><td class="num">102.8</td><td class="num">325.5</td><td class="num">827</td><td class="num">19,099</td></tr></tbody></table>
 
@@ -142,33 +143,32 @@ the 52 are already being caught by the missing data rather than by any threshold
 
 <h2>Threshold implementation</h2>
 
-<p>A check of the implementation gives a more direct answer to why these cases are not caught.
-Neither of the two thresholds works like a pass mark, where a pair has to score above a set value
-to be accepted. Both are calculated from the code being mapped, so a pair is judged against the
-other candidates for that same code rather than against a fixed standard.</p>
+<p>Step 1 of the Methods defines the similarity cutoff as the maximum similarity score for a code
+multiplied by the threshold value, which makes it relative to the code being mapped rather than a
+fixed standard. Table 2 of the same document then describes the thresholds as the minimum cosine
+similarity required for a match. Only the first of those is what the code does, and the difference
+matters for these cases.</p>
 
-<p>For similarity the cutoff is the threshold multiplied by that code's own highest score, worked
-out separately inside each ICD-9-CM column. The value varied from 0.95 to 0.999 is therefore a
-fraction of the code's own best score and not a score itself, so the top target of every code
+<p>Because the cutoff is a fraction of each code's own best score, the top target of every code
 clears it however low that score is. The weakest code on this crosswalk has a best score of 0.853,
-which puts its cutoff at 0.810 under the loosest setting and 0.852 under the tightest, and its best
-target passes either way. There is no value a cosine similarity can fall below and be rejected.</p>
+which puts its cutoff at 0.844 at a threshold of 0.990 and 0.853 at 1.0, so its best target passes at
+either end of the range in Table 2. There is no value a cosine similarity can fall below and be
+rejected.</p>
 
-<p>Co-occurrence is the same idea by a different route. The rule keeps each code's top n partners
-ranked by frequency, with n varied from 3 to 30, and the count itself is never compared against a
-value. The smallest highest count in the file is 7 and it is kept on the same terms as the code
-with 238,548.</p>
+<p>Step 2 behaves the same way. It keeps each code's top N partners ranked by co-occurrence
+frequency, so the count is never compared against a value. The smallest highest count in the file
+is 7 and it is kept on the same terms as the code with 238,548. Pairs below a frequency of 6 were
+removed when the co-occurrence data was built, but that is a property of the data rather than a
+decision the algorithm makes.</p>
 
-<p>So the rule described as a cosine similarity above one value and a co-occurrence above another
-is not the rule the code applies. Both are relative to the code being mapped. The only two
-things that make the algorithm stay quiet are the chapter filter removing every candidate, or,
-under the flag settings that require co-occurrence, the code being absent from the co-occurrence
-file. That second one is what is happening to all 52 on the ICDA-8 side, and it is why all 9 on the
-ICD-10-CA side come out as false positives. Nothing in the pipeline was ever going to reject
-them.</p>
+<p>So neither step rejects a pair for scoring too low. The only two things that make the algorithm
+stay quiet are the Step 3 chapter distance filter removing every candidate, or mapping algorithm 3,
+the one selected in the Methods, finding no co-occurrence data for the code. The second is what
+happens to all 52 on the ICDA-8 side, and between them they are why all 9 on the ICD-10-CA side
+come out as false positives.</p>
 
-<p>This is worth settling before the abstain scenarios are tested, since those scenarios assume a
-floor that is not in the code. Adding an absolute threshold would be a change to the pipeline
-rather than to a parameter, and on the numbers above it would cost a large share of the correct
-mappings.</p>
+<p>This is worth settling before the abstain scenarios are tested. A scenario that rejects a pair
+for a low cosine similarity or a low co-occurrence count would be a change to Step 1 or Step 2
+rather than a change to a parameter, and on the numbers above it would cost a large share of the
+correct mappings.</p>
 

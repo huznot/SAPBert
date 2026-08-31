@@ -208,7 +208,8 @@ groups <- sprintf('
 co-occurrence file if it shares a record with at least one target code, so a code that is not in
 the file has no data rather than a low count. Partners is how many different target codes a code
 turned up with, and the last five columns describe each group by the highest count any one of its
-codes reached. Nothing below 7 is reported in the source data.</p>
+codes reached. Pairs below a frequency of 6 were removed when the
+co-occurrence data was built, and the lowest count present is 7.</p>
 
 %s
 
@@ -328,37 +329,36 @@ the 52 are already being caught by the missing data rather than by any threshold
 mech <- sprintf('
 <h2>Threshold implementation</h2>
 
-<p>A check of the implementation gives a more direct answer to why these cases are not caught.
-Neither of the two thresholds works like a pass mark, where a pair has to score above a set value
-to be accepted. Both are calculated from the code being mapped, so a pair is judged against the
-other candidates for that same code rather than against a fixed standard.</p>
+<p>Step 1 of the Methods defines the similarity cutoff as the maximum similarity score for a code
+multiplied by the threshold value, which makes it relative to the code being mapped rather than a
+fixed standard. Table 2 of the same document then describes the thresholds as the minimum cosine
+similarity required for a match. Only the first of those is what the code does, and the difference
+matters for these cases.</p>
 
-<p>For similarity the cutoff is the threshold multiplied by that code\'s own highest score, worked
-out separately inside each ICD-9-CM column. The value varied from 0.95 to 0.999 is therefore a
-fraction of the code\'s own best score and not a score itself, so the top target of every code
+<p>Because the cutoff is a fraction of each code\'s own best score, the top target of every code
 clears it however low that score is. The weakest code on this crosswalk has a best score of %s,
-which puts its cutoff at %s under the loosest setting and %s under the tightest, and its best
-target passes either way. There is no value a cosine similarity can fall below and be rejected.</p>
+which puts its cutoff at %s at a threshold of 0.990 and %s at 1.0, so its best target passes at
+either end of the range in Table 2. There is no value a cosine similarity can fall below and be
+rejected.</p>
 
-<p>Co-occurrence is the same idea by a different route. The rule keeps each code\'s top n partners
-ranked by frequency, with n varied from 3 to 30, and the count itself is never compared against a
-value. The smallest highest count in the file is %s and it is kept on the same terms as the code
-with %s.</p>
+<p>Step 2 behaves the same way. It keeps each code\'s top N partners ranked by co-occurrence
+frequency, so the count is never compared against a value. The smallest highest count in the file
+is %s and it is kept on the same terms as the code with %s. Pairs below a frequency of 6 were
+removed when the co-occurrence data was built, but that is a property of the data rather than a
+decision the algorithm makes.</p>
 
-<p>So the rule described as a cosine similarity above one value and a co-occurrence above another
-is not the rule the code applies. Both are relative to the code being mapped. The only two
-things that make the algorithm stay quiet are the chapter filter removing every candidate, or,
-under the flag settings that require co-occurrence, the code being absent from the co-occurrence
-file. That second one is what is happening to all 52 on the ICDA-8 side, and it is why all 9 on the
-ICD-10-CA side come out as false positives. Nothing in the pipeline was ever going to reject
-them.</p>
+<p>So neither step rejects a pair for scoring too low. The only two things that make the algorithm
+stay quiet are the Step 3 chapter distance filter removing every candidate, or mapping algorithm 3,
+the one selected in the Methods, finding no co-occurrence data for the code. The second is what
+happens to all 52 on the ICDA-8 side, and between them they are why all 9 on the ICD-10-CA side
+come out as false positives.</p>
 
-<p>This is worth settling before the abstain scenarios are tested, since those scenarios assume a
-floor that is not in the code. Adding an absolute threshold would be a change to the pipeline
-rather than to a parameter, and on the numbers above it would cost a large share of the correct
-mappings.</p>
+<p>This is worth settling before the abstain scenarios are tested. A scenario that rejects a pair
+for a low cosine similarity or a low co-occurrence count would be a change to Step 1 or Step 2
+rather than a change to a parameter, and on the numbers above it would cost a large share of the
+correct mappings.</p>
 ',
-  weakest_best("10_9"), floor_at("10_9", 0.95), floor_at("10_9", 0.999),
+  weakest_best("10_9"), floor_at("10_9", 0.990), floor_at("10_9", 1.0),
   cooc_span("10_9", "low"), cooc_span("10_9", "high"))
 
 writeLines(paste0(style, intro, outcome, groups, t10, t8, figs, thresh, mech),

@@ -941,10 +941,15 @@ is written above each row. On ICDA-8 there are no red points at all because all
 52 are missing. On ICD-10-CA the red points sit inside the grey spread.
 
 One thing worth being exact about, because it explains why the pipeline maps
-these codes at all. The similarity threshold in the pipeline is not an absolute
-cutoff. It keeps every target scoring within a fraction of that code's own
-highest score, between 0.95 and 0.999 depending on the setting, so a code's best
-target always survives it. No score is ever low enough to be rejected. A code
+these codes at all. The similarity threshold is not an absolute cutoff, and the
+Methods says so: Step 1 applies it "by taking the maximum similarity score and
+multiplying it by a series of threshold values", explicitly "instead of a single
+fixed cutoff". Table 2 of the same document then calls the thresholds "the
+minimum cosine similarity required for a match", which is the opposite reading
+and the one that gets used in discussion. Step 1 is what the code implements, so
+every target scoring within a fraction of that code's own highest score is kept,
+a code's best target always survives, and no score is ever low enough to be
+rejected. A code
 only goes quiet on the similarity side when the chapter filter removes all of its
 candidates, which happens for 2 of the 52 on ICDA-8, codes 327 and 330. That is
 why every model maps all 9 ICD-10-CA codes.
