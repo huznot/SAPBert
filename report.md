@@ -922,6 +922,11 @@ has to sit above 0.955, and that also removes 286 of the 345 codes that do have
 answers. On ICDA-8 the cutoff is 0.985 and it removes 175 of 302. There is no
 setting that keeps the working mappings and drops these.
 
+Not on co-occurrence either. To clear the 9 ICD-10-CA codes a cutoff on the
+highest count has to sit above 13,431, which removes 293 of the 338 codes with
+answers that are in the file. The ICDA-8 group cannot be cleared by a cutoff at
+all, since none of the 52 are in the file to be thresholded.
+
 ![highest similarity by group](results/plot_unmatched_similarity_max.png)
 
 **Figure 18. Highest similarity per code, the codes with no match against the
@@ -943,6 +948,15 @@ target always survives it. No score is ever low enough to be rejected. A code
 only goes quiet on the similarity side when the chapter filter removes all of its
 candidates, which happens for 2 of the 52 on ICDA-8, codes 327 and 330. That is
 why every model maps all 9 ICD-10-CA codes.
+
+The co-occurrence side is relative in the same way. `get_cooccurrence_codes_
+from_df` keeps each code's top `top_n` partners ranked by frequency, with
+`top_n` from 3 to 30, so the count is never compared against a value. The
+smallest highest count in the ICD-10-CA file is 7 and it is kept on the same
+terms as the pair at 238,548. So neither of the two thresholds the methodology
+describes is an absolute one, and the only two things that silence a code are
+the chapter filter emptying its candidate list, or flag combination 3 with no
+co-occurrence data.
 
 SapBERT and all-mpnet-base-v2 were run through the same descriptives and give the
 same answer, with the scores sitting lower and spread wider. Their numbers are in
