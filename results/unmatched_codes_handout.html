@@ -5,37 +5,72 @@
   @page { size: letter landscape; margin: 10mm 14mm; }
   body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #000; line-height: 1.28; }
   h1 { font-size: 13pt; margin: 0 0 8px 0; }
-  h2 { font-size: 11pt; margin: 10px 0 4px 0; }
+  h2 { font-size: 11pt; margin: 12px 0 4px 0; }
   .break + h2 { margin-top: 0; }
   p { margin: 4px 0; max-width: 250mm; }
   table { border-collapse: collapse; width: 100%; font-size: 7.3pt; line-height: 1.12; margin: 5px 0; }
   th { text-align: left; border-bottom: 1px solid #000; padding: 2px 5px 3px 5px; }
   td { border-bottom: 0.5px solid #ccc; padding: 1px 5px; vertical-align: top; }
   td.num { text-align: right; white-space: nowrap; }
+  img { max-width: 232mm; max-height: 82mm; width: auto; height: auto; margin: 4px 0; }
   .break { page-break-before: always; }
 </style>
 
 <h1>ICD-9-CM codes with no match in the target system</h1>
 
 <p>There are 9 ICD-9-CM codes with no ICD-10-CA match and 52 with no ICDA-8 match. The reference
-crosswalk lists them with no partner, so for these codes the correct output is no mapping at all.</p>
+crosswalk lists them with no partner, so for these codes the correct output is no mapping at all,
+and any mapping the algorithm produces for them is a false positive.</p>
 
 <p>The algorithm decides using two numbers. One is how often a pair of codes shows up on the same
 patient record. The other is the cosine similarity between the two code labels, which here comes
-from ClinicalBERT. Both are below, for each code on its own.</p>
+from ClinicalBERT. Below are both numbers, first for the two groups together and then for each of
+these codes on its own, with the codes that do have a match alongside for comparison.</p>
 
-<h2>ICD-9-CM to ICD-10-CA, the 9 codes</h2>
+<h2>What the algorithm does with these codes at the moment</h2>
 
-<p>Co-occurrence first, since that is the one we expected to be low. Partners is how many different
-ICD-10-CA codes each one turned up with, and the five columns after it describe the counts across
-those partners. Nothing below 7 is reported in the source data, which is why every minimum is 7.</p>
+<p>Taking the outcome first, since it is what the rest of this is explaining. On ICD-9-CM to
+ICD-10-CA the algorithm produces a mapping for all 9 of the codes that should get none. Every one
+of them is a false positive and not one is correctly rejected. On ICD-9-CM to ICDA-8 it is the
+other way round. It stays silent on all 52, which is the right answer, but it also stays silent on
+39 of the 302 codes that do have a valid match, so it is getting the special cases right and paying
+for it on the ordinary ones.</p>
+
+<h2>The two groups side by side</h2>
+
+<p>Co-occurrence first, since that is the one we expected to be low. A code is only listed in the
+co-occurrence file if it shares a record with at least one target code, so a code that is not in
+the file has no data rather than a low count. Partners is how many different target codes a code
+turned up with, and the last five columns describe each group by the highest count any one of its
+codes reached. Nothing below 7 is reported in the source data.</p>
+
+<table><thead><tr><th>Crosswalk</th><th>Group</th><th>Codes</th><th>Not in the file</th><th>Median partners</th><th>Highest count, lowest</th><th>25th</th><th>Median</th><th>75th</th><th>Highest count, highest</th></tr></thead><tbody><tr><td class="txt">ICD-9-CM to ICD-10-CA</td><td class="txt">no match</td><td class="num">9</td><td class="num">0</td><td class="num">161</td><td class="num">16</td><td class="num">131</td><td class="num">1,783</td><td class="num">4,862</td><td class="num">13,431</td></tr><tr><td class="txt">ICD-9-CM to ICD-10-CA</td><td class="txt">has a match</td><td class="num">345</td><td class="num">7</td><td class="num">209</td><td class="num">7</td><td class="num">264</td><td class="num">1,288.5</td><td class="num">5,633.5</td><td class="num">238,548</td></tr><tr><td class="txt">ICD-9-CM to ICDA-8</td><td class="txt">no match</td><td class="num">52</td><td class="num">52</td><td class="num">no data</td><td class="num">no data</td><td class="num">no data</td><td class="num">no data</td><td class="num">no data</td><td class="num">no data</td></tr><tr><td class="txt">ICD-9-CM to ICDA-8</td><td class="txt">has a match</td><td class="num">302</td><td class="num">32</td><td class="num">35.5</td><td class="num">7</td><td class="num">102.8</td><td class="num">325.5</td><td class="num">827</td><td class="num">19,099</td></tr></tbody></table>
+
+<p>The ICD-10-CA group with no match is not low. Its middle code reaches a higher top count than
+the middle code of the group that does have a match. The ICDA-8 group with no match is not low
+either, it is simply not there at all.</p>
+
+<p>Then cosine similarity. Each ICD-9-CM code is scored against every target code, 2038 of them for
+ICD-10-CA and 858 for ICDA-8, so the average column below is over all of those scores and all of
+the codes in the group. The last five columns describe the group by each code's single best score,
+which is the one that decides whether a mapping gets made.</p>
+
+<table><thead><tr><th>Crosswalk</th><th>Group</th><th>Codes</th><th>Average of every score</th><th>Best score, lowest</th><th>25th</th><th>Median</th><th>75th</th><th>Best score, highest</th></tr></thead><tbody><tr><td class="txt">ICD-9-CM to ICD-10-CA</td><td class="txt">no match</td><td class="num">9</td><td class="num">0.807</td><td class="num">0.853</td><td class="num">0.915</td><td class="num">0.915</td><td class="num">0.942</td><td class="num">0.955</td></tr><tr><td class="txt">ICD-9-CM to ICD-10-CA</td><td class="txt">has a match</td><td class="num">345</td><td class="num">0.820</td><td class="num">0.861</td><td class="num">0.914</td><td class="num">0.930</td><td class="num">0.948</td><td class="num">0.981</td></tr><tr><td class="txt">ICD-9-CM to ICDA-8</td><td class="txt">no match</td><td class="num">52</td><td class="num">0.830</td><td class="num">0.883</td><td class="num">0.931</td><td class="num">0.949</td><td class="num">0.964</td><td class="num">0.985</td></tr><tr><td class="txt">ICD-9-CM to ICDA-8</td><td class="txt">has a match</td><td class="num">302</td><td class="num">0.828</td><td class="num">0.865</td><td class="num">0.950</td><td class="num">0.975</td><td class="num">1.000</td><td class="num">1.000</td></tr></tbody></table>
+
+<p>On both crosswalks the group with no match sits inside the range of the group that has one. That
+is the finding in one line, and the per code tables below are where it comes from.</p>
+
+<div class="break"></div>
+<h2>ICD-9-CM to ICD-10-CA, the 9 codes one at a time</h2>
+
+<p>Co-occurrence.</p>
 
 <table><thead><tr><th>Code</th><th>Label</th><th>Partners</th><th>Min</th><th>25th</th><th>Median</th><th>75th</th><th>Max</th><th>Most frequent partner</th></tr></thead><tbody><tr><td class="txt">338</td><td class="txt">pain not elsewhere classified</td><td class="num">827</td><td class="num">7</td><td class="num">18</td><td class="num">49</td><td class="num">181.5</td><td class="num">13,431</td><td class="txt">E11, Type 2 diabetes mellitus</td></tr><tr><td class="txt">515</td><td class="txt">postinflammatory pulmonary fibrosis</td><td class="num">306</td><td class="num">7</td><td class="num">13</td><td class="num">24</td><td class="num">53.8</td><td class="num">5,194</td><td class="txt">J84, Other interstitial pulmonary diseases</td></tr><tr><td class="txt">239</td><td class="txt">neoplasms of unspecified nature</td><td class="num">585</td><td class="num">7</td><td class="num">14</td><td class="num">34</td><td class="num">91</td><td class="num">4,862</td><td class="txt">I10, Essential (primary) hypertension</td></tr><tr><td class="txt">327</td><td class="txt">organic sleep disorders</td><td class="num">349</td><td class="num">7</td><td class="num">12</td><td class="num">23</td><td class="num">49</td><td class="num">3,108</td><td class="txt">G47, Other sleep disorders</td></tr><tr><td class="txt">249</td><td class="txt">secondary diabetes mellitus</td><td class="num">161</td><td class="num">7</td><td class="num">12</td><td class="num">18</td><td class="num">38</td><td class="num">1,783</td><td class="txt">E11, Type 2 diabetes mellitus</td></tr><tr><td class="txt">209</td><td class="txt">neuroendocrine tumors</td><td class="num">124</td><td class="num">7</td><td class="num">11.8</td><td class="num">17</td><td class="num">31.8</td><td class="num">506</td><td class="txt">C78, Secondary malignant neoplasm of respiratory and digestive organs</td></tr><tr><td class="txt">175</td><td class="txt">malignant neoplasm of male breast</td><td class="num">24</td><td class="num">7</td><td class="num">8</td><td class="num">10.5</td><td class="num">22.5</td><td class="num">131</td><td class="txt">C79, Secondary malignant neoplasm of other and unspecified sites</td></tr><tr><td class="txt">339</td><td class="txt">other headache syndromes</td><td class="num">58</td><td class="num">7</td><td class="num">9.2</td><td class="num">15</td><td class="num">17.8</td><td class="num">54</td><td class="txt">E11, Type 2 diabetes mellitus</td></tr><tr><td class="txt">445</td><td class="txt">atheroembolism</td><td class="num">2</td><td class="num">7</td><td class="num">9.2</td><td class="num">11.5</td><td class="num">13.8</td><td class="num">16</td><td class="txt">I74, Arterial embolism and thrombosis</td></tr></tbody></table>
 
 <p>They are not low. Code 338, pain not elsewhere classified, turned up with 827 different
 ICD-10-CA codes, and with E11, type 2 diabetes mellitus, 13,431 times. Code 515 reaches 5,194 and
-code 239 reaches 4,862. For comparison I took the 345 ICD-9-CM codes that do have a match and found
-the middle value of their highest count, which is 1,288.5. 5 of these 9 are above it.</p>
+code 239 reaches 4,862. Across the 345 ICD-9-CM codes that do have a match the middle value of the
+highest count is 1,288.5, and 5 of these 9 are above it.</p>
 
 <p>Two do behave the way we expected. Code 445, atheroembolism, has 2 partners and never gets past
 16, and code 339, other headache syndromes, has 58 partners and a top count of 54.</p>
@@ -44,8 +79,7 @@ the middle value of their highest count, which is 1,288.5. 5 of these 9 are abov
 Pain, sleep disorders and unspecified neoplasms get recorded on all sorts of patients, so they sit
 next to whatever else the patient has.</p>
 
-<p>Cosine similarity next. Each of the 9 is scored against all 2038 ICD-10-CA codes, so each row
-below is a summary of 2038 numbers.</p>
+<p>Cosine similarity. Each row below is a summary of that code's 2038 scores.</p>
 
 <table><thead><tr><th>Code</th><th>Label</th><th>Average</th><th>Min</th><th>25th</th><th>Median</th><th>75th</th><th>Max</th><th>Closest target code</th></tr></thead><tbody><tr><td class="txt">175</td><td class="txt">malignant neoplasm of male breast</td><td class="num">0.825</td><td class="num">0.641</td><td class="num">0.796</td><td class="num">0.826</td><td class="num">0.849</td><td class="num">0.955</td><td class="txt">C30, Malignant neoplasm of nasal cavity and middle ear</td></tr><tr><td class="txt">249</td><td class="txt">secondary diabetes mellitus</td><td class="num">0.817</td><td class="num">0.663</td><td class="num">0.774</td><td class="num">0.817</td><td class="num">0.859</td><td class="num">0.951</td><td class="txt">O24, Diabetes mellitus in pregnancy</td></tr><tr><td class="txt">239</td><td class="txt">neoplasms of unspecified nature</td><td class="num">0.831</td><td class="num">0.662</td><td class="num">0.804</td><td class="num">0.833</td><td class="num">0.859</td><td class="num">0.942</td><td class="txt">D15, Benign neoplasm of other and unspecified intrathoracic organs</td></tr><tr><td class="txt">515</td><td class="txt">postinflammatory pulmonary fibrosis</td><td class="num">0.852</td><td class="num">0.694</td><td class="num">0.823</td><td class="num">0.858</td><td class="num">0.886</td><td class="num">0.932</td><td class="txt">N72, Inflammatory disease of cervix uteri</td></tr><tr><td class="txt">209</td><td class="txt">neuroendocrine tumors</td><td class="num">0.836</td><td class="num">0.693</td><td class="num">0.808</td><td class="num">0.842</td><td class="num">0.867</td><td class="num">0.915</td><td class="txt">A74, Other diseases caused by chlamydiae</td></tr><tr><td class="txt">327</td><td class="txt">organic sleep disorders</td><td class="num">0.770</td><td class="num">0.541</td><td class="num">0.725</td><td class="num">0.773</td><td class="num">0.823</td><td class="num">0.915</td><td class="txt">P78, Other perinatal digestive system disorders</td></tr><tr><td class="txt">339</td><td class="txt">other headache syndromes</td><td class="num">0.816</td><td class="num">0.648</td><td class="num">0.786</td><td class="num">0.820</td><td class="num">0.851</td><td class="num">0.915</td><td class="txt">A69, Other spirochaetal infections</td></tr><tr><td class="txt">338</td><td class="txt">pain not elsewhere classified</td><td class="num">0.805</td><td class="num">0.685</td><td class="num">0.785</td><td class="num">0.807</td><td class="num">0.827</td><td class="num">0.893</td><td class="txt">R52, Pain, not elsewhere classified</td></tr><tr><td class="txt">445</td><td class="txt">atheroembolism</td><td class="num">0.711</td><td class="num">0.552</td><td class="num">0.686</td><td class="num">0.713</td><td class="num">0.736</td><td class="num">0.853</td><td class="txt">M66, Spontaneous rupture of synovium and tendon</td></tr></tbody></table>
 
@@ -57,31 +91,45 @@ a code has a real match.</p>
 neoplasm of male breast and its closest ICD-10-CA code is C30, malignant neoplasm of nasal cavity
 and middle ear, at 0.955. Code 515 is postinflammatory pulmonary fibrosis and its closest is N72,
 inflammatory disease of cervix uteri. The model is picking up shared words rather than shared
-meaning.</p>
+meaning, and since both signals point the wrong way at once, all 9 come out as mappings.</p>
 
 <p>The one worth a second look is code 338. Its closest target is R52, and both are labelled pain
 not elsewhere classified, but the crosswalk still records no match for it. I wanted to flag it in
 case that one is an error in the reference rather than in the algorithm.</p>
 
 <div class="break"></div>
-<h2>ICD-9-CM to ICDA-8, the 52 codes</h2>
+<h2>ICD-9-CM to ICDA-8, the 52 codes one at a time</h2>
 
 <p>These behave completely differently. None of the 52 appear in the co-occurrence data at all. Not
-a low count, no row. A code is only listed there if it shares a record with at least one ICDA-8
-code, and none of these ever did, so there is nothing to describe for that signal.</p>
+a low count, no row, so there is nothing to tabulate for that signal.</p>
 
-<p>That works out in our favour, because it means the algorithm returns no match for all 52, which
-is the right answer. But it gets there for a reason that costs us elsewhere. It will not accept a
-pair without co-occurrence data, and 32 of the 302 ICD-9-CM codes that do have a valid ICDA-8 match
-are missing from that file too. It stays silent on those as well, and loses 39 mappings that are
-correct.</p>
+<p>That works out in our favour, because it means the algorithm returns no match for all 52. But it
+gets there for a reason that costs us elsewhere. It will not accept a pair without co-occurrence
+data, and 32 of the 302 ICD-9-CM codes that do have a valid ICDA-8 match are missing from that file
+too, which is where the 39 lost mappings come from. The 52 are being got right by an accident of
+missing data rather than by either threshold doing its job.</p>
 
-<p>Similarity looks much the same as it did on the other crosswalk. Each code is scored against all
-858 ICDA-8 codes. The best score for the 52 runs from 0.883 to 0.985, against 0.865 to 1.000 for the 302 that do have a
-match, so again there is no gap between the two groups. Rather than list all 52 I have put the four
-highest and the four lowest below, and I have the rest if you want them.</p>
+<p>Similarity looks much the same as it did on the other crosswalk. The best score for the 52 runs
+from 0.883 to 0.985, against 0.865 to 1.000 for the 302 that do have a match, so again there is no gap between the two
+groups. Rather than list all 52 I have put the four highest and the four lowest below, and I have
+the rest if you want them.</p>
 
 <table><thead><tr><th>Code</th><th>Label</th><th>Average</th><th>Min</th><th>25th</th><th>Median</th><th>75th</th><th>Max</th><th>Closest target code</th></tr></thead><tbody><tr><td class="txt">164</td><td class="txt">malignant neoplasm of thymus heart and mediastinum</td><td class="num">0.813</td><td class="num">0.584</td><td class="num">0.776</td><td class="num">0.810</td><td class="num">0.846</td><td class="num">0.985</td><td class="txt">142, malignant neoplasm of salivary gland</td></tr><tr><td class="txt">175</td><td class="txt">malignant neoplasm of male breast</td><td class="num">0.816</td><td class="num">0.578</td><td class="num">0.782</td><td class="num">0.816</td><td class="num">0.848</td><td class="num">0.984</td><td class="txt">174, malignant neoplasm of breast</td></tr><tr><td class="txt">237</td><td class="txt">neoplasm of uncertain behavior of endocrine glands and nervous system</td><td class="num">0.821</td><td class="num">0.594</td><td class="num">0.785</td><td class="num">0.822</td><td class="num">0.855</td><td class="num">0.984</td><td class="txt">238, neoplasm of unspecified nature of eye brain and other parts of nervous system</td></tr><tr><td class="txt">179</td><td class="txt">malignant neoplasm of uterus part unspecified</td><td class="num">0.812</td><td class="num">0.633</td><td class="num">0.780</td><td class="num">0.810</td><td class="num">0.842</td><td class="num">0.980</td><td class="txt">149, malignant neoplasm of pharynx unspecified</td></tr><tr><td class="txt">588</td><td class="txt">disorders resulting from impaired renal function</td><td class="num">0.820</td><td class="num">0.700</td><td class="num">0.801</td><td class="num">0.822</td><td class="num">0.840</td><td class="num">0.901</td><td class="txt">515, pneumoconiosis due to silica and silicates</td></tr><tr><td class="txt">312</td><td class="txt">disturbance of conduct not elsewhere classified</td><td class="num">0.775</td><td class="num">0.678</td><td class="num">0.751</td><td class="num">0.775</td><td class="num">0.797</td><td class="num">0.895</td><td class="txt">306, special symptoms not elsewhere classified</td></tr><tr><td class="txt">625</td><td class="txt">pain and other symptoms associated with female genital organs</td><td class="num">0.762</td><td class="num">0.540</td><td class="num">0.727</td><td class="num">0.768</td><td class="num">0.807</td><td class="num">0.893</td><td class="txt">781, other symptoms referable to nervous system and special senses</td></tr><tr><td class="txt">315</td><td class="txt">specific delays in development</td><td class="num">0.777</td><td class="num">0.671</td><td class="num">0.752</td><td class="num">0.776</td><td class="num">0.800</td><td class="num">0.883</td><td class="txt">066, late effects of viral encephalitis</td></tr></tbody></table>
+
+<div class="break"></div>
+<h2>The same thing as a picture</h2>
+
+<p>Each point is one ICD-9-CM code, placed at its highest cosine similarity against any target
+code. In both panels the upper row is the codes that do have a match and the lower row is the codes
+that do not, and the box covers the middle half of each group.</p>
+
+<img src="plot_unmatched_similarity_max.png">
+
+<p>The same layout for co-occurrence, each code placed at its highest count against any target
+code, on a log scale. The lower row of the ICDA-8 panel is empty because none of those 52 codes are
+in the file.</p>
+
+<img src="plot_unmatched_cooccurrence.png">
 
 <div class="break"></div>
 <h2>Whether a threshold on either number would catch these</h2>
@@ -89,7 +137,7 @@ highest and the four lowest below, and I have the rest if you want them.</p>
 <p>Not on its own. On ICD-10-CA a similarity cut-off high enough to clear all 9 would have to sit
 above 0.955, and that also removes 286 of the 345 codes that are correct. On ICDA-8 the cut-off would be
 0.985 and it removes 175 of 302. Co-occurrence is no better. A count cut-off high enough to clear the 9
-would have to sit above 13,431, which removes 293 of the 338 matched codes that are in the file. Both
+would have to sit above 13,431, which removes 293 of the 338 matched codes that are in the file. The two
 together do not help either, because on ICD-10-CA the 9 pass both tests comfortably, and on ICDA-8
 the 52 are already being caught by the missing data rather than by any threshold.</p>
 
@@ -107,19 +155,32 @@ the score actually is. The weakest code in the ICD-9-CM to ICD-10-CA set has a b
 it still produces a candidate. There is no value a cosine similarity can fall below and be
 rejected.</p>
 
-<p>Co-occurrence works the same way. The rule keeps each code's top n partners ranked by
-frequency, with n varied from 3 to 30, and the count itself is never compared against anything. The
-smallest highest count in the file is 7 and it is kept on the same terms as the code with 238,548.</p>
+<p>Co-occurrence works the same way. The rule keeps each code's top n partners ranked by frequency,
+with n varied from 3 to 30, and the count itself is never compared against anything. The smallest
+highest count in the file is 7 and it is kept on the same terms as the code with 238,548.</p>
 
 <p>So the rule we describe as a cosine similarity above one value and a co-occurrence above another
 is not the rule the code is applying. Both are relative to the code being mapped. The only two
 things that make the algorithm stay quiet are the chapter filter removing every candidate, or,
 under the flag settings that require co-occurrence, the code being absent from the co-occurrence
-file. That second one is what is happening to all 52 on the ICDA-8 side, and it is why the right
-answer there is coming out for the wrong reason.</p>
+file. That second one is what is happening to all 52 on the ICDA-8 side, and it is why all 9 on the
+ICD-10-CA side come out as false positives. Nothing in the pipeline was ever going to reject
+them.</p>
 
 <p>I think that is worth settling before we test the abstain scenarios, because those scenarios
 assume a floor that is not in the code yet. Putting a real absolute threshold in would be a change
 to the pipeline rather than a change to a parameter, and going by the numbers above it would cost a
 lot of correct mappings, so I have not made it.</p>
+
+<h2>Two notes</h2>
+
+<p>The ICDA-8 count. In the meeting the figure was 54 codes with no match. The exclusion sheet in
+the validation workbook lists 52, and 52 is the number used throughout here, so it is worth
+checking which is right before any of this gets written up.</p>
+
+<p>Where it is in the repository. The analysis is scripts/36_unmatched_descriptives.R on the main
+branch, which reads only committed data and writes the four csv files in results/ that everything
+above comes from. The outcome counts are scripts/35_unmatched_codes.R. It is written up in
+report.md Section 11, and this handout is scripts/37_unmatched_handout.R. This covers the one to no
+match case only, so the one to one and one to many cases are still to do.</p>
 
