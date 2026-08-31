@@ -1,0 +1,938 @@
+"icd9","icd9_label","icd9_chapter","ccs_id","ccs_category","target","target_label","target_chapter","aligned_target_chapters","chapter_distance","survives_chapter_filter"
+"140","malignant neoplasm of lip",2,"1","cancer of head and neck","C00","Malignant neoplasm of lip",2,"2",0,TRUE
+"141","malignant neoplasm of tongue",2,"1","cancer of head and neck","C01","Malignant neoplasm of base of tongue",2,"2",0,TRUE
+"141","malignant neoplasm of tongue",2,"1","cancer of head and neck","C02","Malignant neoplasm of other and unspecified parts of tongue",2,"2",0,TRUE
+"142","malignant neoplasm of major salivary glands",2,"1","cancer of head and neck","C07","Malignant neoplasm of parotid gland",2,"2",0,TRUE
+"142","malignant neoplasm of major salivary glands",2,"1","cancer of head and neck","C08","Malignant neoplasm of other and unspecified major salivary glands",2,"2",0,TRUE
+"143","malignant neoplasm of gum",2,"1","cancer of head and neck","C03","Malignant neoplasm of gum",2,"2",0,TRUE
+"144","malignant neoplasm of floor of mouth",2,"1","cancer of head and neck","C04","Malignant neoplasm of floor of mouth",2,"2",0,TRUE
+"145","malignant neoplasm of other and unspecified parts of mouth",2,"1","cancer of head and neck","C05","Malignant neoplasm of palate",2,"2",0,TRUE
+"145","malignant neoplasm of other and unspecified parts of mouth",2,"1","cancer of head and neck","C06","Malignant neoplasm of other and unspecified parts of mouth",2,"2",0,TRUE
+"146","malignant neoplasm of oropharynx",2,"1","cancer of head and neck","C09","Malignant neoplasm of tonsil",2,"2",0,TRUE
+"146","malignant neoplasm of oropharynx",2,"1","cancer of head and neck","C10","Malignant neoplasm of oropharynx",2,"2",0,TRUE
+"147","malignant neoplasm of nasopharynx",2,"1","cancer of head and neck","C11","Malignant neoplasm of nasopharynx",2,"2",0,TRUE
+"148","malignant neoplasm of hypopharynx",2,"1","cancer of head and neck","C12","Malignant neoplasm of pyriform sinus",2,"2",0,TRUE
+"148","malignant neoplasm of hypopharynx",2,"1","cancer of head and neck","C13","Malignant neoplasm of hypopharynx",2,"2",0,TRUE
+"149","malignant neoplasm of other and illdefined sites within the lip oral cavity and pharynx",2,"1","cancer of head and neck","C14","Malignant neoplasm of other and ill-defined sites in the lip, oral cavity and pharynx",2,"2",0,TRUE
+"150","malignant neoplasm of esophagus",2,"2","cancer of esophagus","C15","Malignant neoplasm of oesophagus",2,"2",0,TRUE
+"151","malignant neoplasm of stomach",2,"3","cancer of stomach","C16","Malignant neoplasm of stomach",2,"2",0,TRUE
+"152","malignant neoplasm of small intestine including duodenum",2,"4","cancer of other gi organs peritoneum","C17","Malignant neoplasm of small intestine",2,"2",0,TRUE
+"153","malignant neoplasm of colon",2,"5","colon cancer","C18","Malignant neoplasm of colon",2,"2",0,TRUE
+"154","malignant neoplasm of rectum rectosigmoid junction and anus",2,"6","cancer of rectum and anus","C19","Malignant neoplasm of rectosigmoid junction",2,"2",0,TRUE
+"154","malignant neoplasm of rectum rectosigmoid junction and anus",2,"6","cancer of rectum and anus","C20","Malignant neoplasm of rectum",2,"2",0,TRUE
+"154","malignant neoplasm of rectum rectosigmoid junction and anus",2,"6","cancer of rectum and anus","C21","Malignant neoplasm of anus and anal canal",2,"2",0,TRUE
+"155","malignant neoplasm of liver and intrahepatic bile ducts",2,"7","cancer of liver and intrahepatic bile duct","C22","Malignant neoplasm of liver and intrahepatic bile ducts",2,"2",0,TRUE
+"156","malignant neoplasm of gallbladder and extrahepatic bile ducts",2,"4","cancer of other gi organs peritoneum","C23","Malignant neoplasm of gallbladder",2,"2",0,TRUE
+"156","malignant neoplasm of gallbladder and extrahepatic bile ducts",2,"4","cancer of other gi organs peritoneum","C24","Malignant neoplasm of other and unspecified parts of biliary tract",2,"2",0,TRUE
+"157","malignant neoplasm of pancreas",2,"8","pancreas cancer","C25","Malignant neoplasm of pancreas",2,"2",0,TRUE
+"158","malignant neoplasm of retroperitoneum and peritoneum",2,"4","cancer of other gi organs peritoneum","C45","Mesothelioma",2,"2",0,TRUE
+"158","malignant neoplasm of retroperitoneum and peritoneum",2,"4","cancer of other gi organs peritoneum","C48","Malignant neoplasm of retroperitoneum and peritoneum",2,"2",0,TRUE
+"159","malignant neoplasm of other and illdefined sites within the digestive organs and peritoneum",2,"4","cancer of other gi organs peritoneum","C26","Malignant neoplasm of other and ill-defined digestive organs",2,"2",0,TRUE
+"159","malignant neoplasm of other and illdefined sites within the digestive organs and peritoneum",2,"4","cancer of other gi organs peritoneum","C46","Kaposi's sarcoma",2,"2",0,TRUE
+"160","malignant neoplasm of nasal cavities middle ear and accessory sinuses",2,"1","cancer of head and neck","C30","Malignant neoplasm of nasal cavity and middle ear",2,"2",0,TRUE
+"160","malignant neoplasm of nasal cavities middle ear and accessory sinuses",2,"1","cancer of head and neck","C31","Malignant neoplasm of accessory sinuses",2,"2",0,TRUE
+"161","malignant neoplasm of larynx",2,"1","cancer of head and neck","C32","Malignant neoplasm of larynx",2,"2",0,TRUE
+"162","malignant neoplasm of trachea bronchus and lung",2,"9","lung and other respiratory cancer","C33","Malignant neoplasm of trachea",2,"2",0,TRUE
+"162","malignant neoplasm of trachea bronchus and lung",2,"9","lung and other respiratory cancer","C34","Malignant neoplasm of bronchus and lung",2,"2",0,TRUE
+"162","malignant neoplasm of trachea bronchus and lung",2,"9","lung and other respiratory cancer","C46","Kaposi's sarcoma",2,"2",0,TRUE
+"163","malignant neoplasm of pleura",2,"9","lung and other respiratory cancer","C38","Malignant neoplasm of heart, mediastinum and pleura",2,"2",0,TRUE
+"163","malignant neoplasm of pleura",2,"9","lung and other respiratory cancer","C45","Mesothelioma",2,"2",0,TRUE
+"164","malignant neoplasm of thymus heart and mediastinum",2,"10","other cancers","C37","Malignant neoplasm of thymus",2,"2",0,TRUE
+"164","malignant neoplasm of thymus heart and mediastinum",2,"10","other cancers","C38","Malignant neoplasm of heart, mediastinum and pleura",2,"2",0,TRUE
+"164","malignant neoplasm of thymus heart and mediastinum",2,"10","other cancers","C45","Mesothelioma",2,"2",0,TRUE
+"165","malignant neoplasm of other and illdefined sites within the respiratory system and intrathoracic organs",2,"9","lung and other respiratory cancer","C39","Malignant neoplasm of other and ill-defined sites in the respiratory system and intrathoracic organs",2,"2",0,TRUE
+"170","malignant neoplasm of bone and articular cartilage",2,"11","cancer of bone and connective tissue","C40","Malignant neoplasm of bone and articular cartilage of limbs",2,"2",0,TRUE
+"170","malignant neoplasm of bone and articular cartilage",2,"11","cancer of bone and connective tissue","C41","Malignant neoplasm of bone and articular cartilage of other and unspecified sites",2,"2",0,TRUE
+"171","malignant neoplasm of connective and other soft tissue",2,"11","cancer of bone and connective tissue","C47","Malignant neoplasm of peripheral nerves and autonomic nervous system",2,"2",0,TRUE
+"171","malignant neoplasm of connective and other soft tissue",2,"11","cancer of bone and connective tissue","C49","Malignant neoplasm of other connective and soft tissue",2,"2",0,TRUE
+"172","malignant melanoma of skin",2,"12","skin melanoma","C43","Malignant melanoma of skin",2,"2",0,TRUE
+"174","malignant neoplasm of female breast",2,"13","breast cancer","C50","Malignant neoplasm of breast",2,"2",0,TRUE
+"176","kaposis sarcoma",2,"10","other cancers","C05","Malignant neoplasm of palate",2,"2",0,TRUE
+"176","kaposis sarcoma",2,"10","other cancers","C46","Kaposi's sarcoma",2,"2",0,TRUE
+"176","kaposis sarcoma",2,"10","other cancers","C76","Malignant neoplasm of other and ill-defined sites",2,"2",0,TRUE
+"179","malignant neoplasm of uterus part unspecified",2,"14","uterus cancer","C55","Malignant neoplasm of uterus, part unspecified",2,"2",0,TRUE
+"180","malignant neoplasm of cervix uteri",2,"15","cervix cancer","C53","Malignant neoplasm of cervix uteri",2,"2",0,TRUE
+"181","malignant neoplasm of placenta",2,"16","cancer of other female genital organs","C58","Malignant neoplasm of placenta",2,"2",0,TRUE
+"182","malignant neoplasm of body of uterus",2,"14","uterus cancer","C54","Malignant neoplasm of corpus uteri",2,"2",0,TRUE
+"183","malignant neoplasm of ovary and other uterine adnexa",2,"16","cancer of other female genital organs","C56","Malignant neoplasm of ovary",2,"2",0,TRUE
+"183","malignant neoplasm of ovary and other uterine adnexa",2,"16","cancer of other female genital organs","C57","Malignant neoplasm of other and unspecified female genital organs",2,"2",0,TRUE
+"184","malignant neoplasm of other and unspecified female genital organs",2,"16","cancer of other female genital organs","C51","Malignant neoplasm of vulva",2,"2",0,TRUE
+"184","malignant neoplasm of other and unspecified female genital organs",2,"16","cancer of other female genital organs","C52","Malignant neoplasm of vagina",2,"2",0,TRUE
+"184","malignant neoplasm of other and unspecified female genital organs",2,"16","cancer of other female genital organs","C57","Malignant neoplasm of other and unspecified female genital organs",2,"2",0,TRUE
+"185","malignant neoplasm of prostate",2,"17","prostate cancer","C61","Malignant neoplasm of prostate",2,"2",0,TRUE
+"186","malignant neoplasm of testis",2,"18","testis cancer","C62","Malignant neoplasm of testis",2,"2",0,TRUE
+"187","malignant neoplasm of penis and other male genital organs",2,"19","cancer of other male genital organs","C60","Malignant neoplasm of penis",2,"2",0,TRUE
+"187","malignant neoplasm of penis and other male genital organs",2,"19","cancer of other male genital organs","C63","Malignant neoplasm of other and unspecified male genital organs",2,"2",0,TRUE
+"188","malignant neoplasm of bladder",2,"20","bladder cancer","C67","Malignant neoplasm of bladder",2,"2",0,TRUE
+"189","malignant neoplasm of kidney and other and unspecified urinary organs",2,"21","cancer of kidney and other urinary organs","C64","Malignant neoplasm of kidney, except renal pelvis",2,"2",0,TRUE
+"189","malignant neoplasm of kidney and other and unspecified urinary organs",2,"21","cancer of kidney and other urinary organs","C65","Malignant neoplasm of renal pelvis",2,"2",0,TRUE
+"189","malignant neoplasm of kidney and other and unspecified urinary organs",2,"21","cancer of kidney and other urinary organs","C66","Malignant neoplasm of ureter",2,"2",0,TRUE
+"189","malignant neoplasm of kidney and other and unspecified urinary organs",2,"21","cancer of kidney and other urinary organs","C68","Malignant neoplasm of other and unspecified urinary organs",2,"2",0,TRUE
+"190","malignant neoplasm of eye",2,"10","other cancers","C69","Malignant neoplasm of eye and adnexa",2,"2",0,TRUE
+"191","malignant neoplasm of brain",2,"22","cancer of brain and nervous system","C71","Malignant neoplasm of brain",2,"2",0,TRUE
+"192","malignant neoplasm of other and unspecified parts of nervous system",2,"22","cancer of brain and nervous system","C70","Malignant neoplasm of meninges",2,"2",0,TRUE
+"192","malignant neoplasm of other and unspecified parts of nervous system",2,"22","cancer of brain and nervous system","C72","Malignant neoplasm of spinal cord, cranial nerves and other parts of central nervous system",2,"2",0,TRUE
+"193","malignant neoplasm of thyroid gland",2,"23","thyroid cancer","C73","Malignant neoplasm of thyroid gland",2,"2",0,TRUE
+"194","malignant neoplasm of other endocrine glands and related structures",2,"10","other cancers","C74","Malignant neoplasm of adrenal gland",2,"2",0,TRUE
+"194","malignant neoplasm of other endocrine glands and related structures",2,"10","other cancers","C75","Malignant neoplasm of other endocrine glands and related structures",2,"2",0,TRUE
+"195","malignant neoplasm of other and illdefined sites",2,"10","other cancers","C45","Mesothelioma",2,"2",0,TRUE
+"195","malignant neoplasm of other and illdefined sites",2,"10","other cancers","C76","Malignant neoplasm of other and ill-defined sites",2,"2",0,TRUE
+"196","secondary and unspecified malignant neoplasm of lymph nodes",2,"24","secondary malignancy","C77","Secondary and unspecified malignant neoplasm of lymph nodes",2,"2",0,TRUE
+"197","secondary malignant neoplasm of respiratory and digestive systems",2,"24","secondary malignancy","C78","Secondary malignant neoplasm of respiratory and digestive organs",2,"2",0,TRUE
+"198","secondary malignant neoplasm of other specified sites",2,"24","secondary malignancy","C79","Secondary malignant neoplasm of other and unspecified sites",2,"2",0,TRUE
+"199","malignant neoplasm without specification of site",2,"25","malignant neoplasm without specification of site","C45","Mesothelioma",2,"2",0,TRUE
+"199","malignant neoplasm without specification of site",2,"25","malignant neoplasm without specification of site","C46","Kaposi's sarcoma",2,"2",0,TRUE
+"199","malignant neoplasm without specification of site",2,"25","malignant neoplasm without specification of site","C80","Malignant neoplasm without specification of site",2,"2",0,TRUE
+"199","malignant neoplasm without specification of site",2,"25","malignant neoplasm without specification of site","C97","Malignant neoplasms of independent (primary) multiple sites",2,"2",0,TRUE
+"200","lymphosarcoma and reticulosarcoma and other specified malignant tumors of lymphatic tissue",2,"26","nonhodgkins lymphoma","C83","Non-follicular lymphoma",2,"2",0,TRUE
+"200","lymphosarcoma and reticulosarcoma and other specified malignant tumors of lymphatic tissue",2,"26","nonhodgkins lymphoma","C88","Malignant immunoproliferative diseases",2,"2",0,TRUE
+"200","lymphosarcoma and reticulosarcoma and other specified malignant tumors of lymphatic tissue",2,"26","nonhodgkins lymphoma","C96","Other and unspecified malignant neoplasms of lymphoid, haematopoietic and related tissue",2,"2",0,TRUE
+"201","hodgkins disease",2,"27","hodgkins disease","C81","Hodgkin lymphoma",2,"2",0,TRUE
+"202","other malignant neoplasms of lymphoid and histiocytic tissue",2,"26","nonhodgkins lymphoma","C82","Follicular lymphoma",2,"2",0,TRUE
+"202","other malignant neoplasms of lymphoid and histiocytic tissue",2,"26","nonhodgkins lymphoma","C83","Non-follicular lymphoma",2,"2",0,TRUE
+"202","other malignant neoplasms of lymphoid and histiocytic tissue",2,"26","nonhodgkins lymphoma","C84","Mature T/NK-cell lymphomas",2,"2",0,TRUE
+"202","other malignant neoplasms of lymphoid and histiocytic tissue",2,"26","nonhodgkins lymphoma","C85","Other and unspecified types of non-Hodgkin lymphoma",2,"2",0,TRUE
+"202","other malignant neoplasms of lymphoid and histiocytic tissue",2,"26","nonhodgkins lymphoma","C91","Lymphoid leukaemia",2,"2",0,TRUE
+"202","other malignant neoplasms of lymphoid and histiocytic tissue",2,"26","nonhodgkins lymphoma","C96","Other and unspecified malignant neoplasms of lymphoid, haematopoietic and related tissue",2,"2",0,TRUE
+"203","multiple myeloma and immunoproliferative neoplasms",2,"28","multiple myeloma and leukemias","C88","Malignant immunoproliferative diseases",2,"2",0,TRUE
+"203","multiple myeloma and immunoproliferative neoplasms",2,"28","multiple myeloma and leukemias","C90","Multiple myeloma and malignant plasma cell neoplasms",2,"2",0,TRUE
+"204","lymphoid leukemia",2,"28","multiple myeloma and leukemias","C91","Lymphoid leukaemia",2,"2",0,TRUE
+"205","myeloid leukemia",2,"28","multiple myeloma and leukemias","C92","Myeloid leukaemia",2,"2",0,TRUE
+"206","monocytic leukemia",2,"28","multiple myeloma and leukemias","C93","Monocytic leukaemia",2,"2",0,TRUE
+"207","other specified leukemia",2,"28","multiple myeloma and leukemias","C94","Other leukaemias of specified cell type",2,"2",0,TRUE
+"208","leukemia of unspecified cell type",2,"28","multiple myeloma and leukemias","C95","Leukaemia of unspecified cell type",2,"2",0,TRUE
+"225","benign neoplasm of brain and other parts of nervous system",2,"29","other and unspecified benign neoplasm","D32","Benign neoplasm of meninges",2,"2",0,TRUE
+"225","benign neoplasm of brain and other parts of nervous system",2,"29","other and unspecified benign neoplasm","D33","Benign neoplasm of brain and other parts of central nervous system",2,"2",0,TRUE
+"230","carcinoma in situ of digestive organs",2,"4","cancer of other gi organs peritoneum","D00","Carcinoma in situ of oral cavity, oesophagus and stomach",2,"2",0,TRUE
+"230","carcinoma in situ of digestive organs",2,"4","cancer of other gi organs peritoneum","D01","Carcinoma in situ of other and unspecified digestive organs",2,"2",0,TRUE
+"231","carcinoma in situ of respiratory system",2,"9","lung and other respiratory cancer","D02","Carcinoma in situ of middle ear and respiratory system",2,"2",0,TRUE
+"233","carcinoma in situ of breast and genitourinary system",2,"10","other cancers","D05","Carcinoma in situ of breast",2,"2",0,TRUE
+"233","carcinoma in situ of breast and genitourinary system",2,"10","other cancers","D06","Carcinoma in situ of cervix uteri",2,"2",0,TRUE
+"233","carcinoma in situ of breast and genitourinary system",2,"10","other cancers","D07","Carcinoma in situ of other and unspecified genital organs",2,"2",0,TRUE
+"233","carcinoma in situ of breast and genitourinary system",2,"10","other cancers","D09","Carcinoma in situ of other and unspecified sites",2,"2",0,TRUE
+"234","carcinoma in situ of other and unspecified sites",2,"10","other cancers","D09","Carcinoma in situ of other and unspecified sites",2,"2",0,TRUE
+"237","neoplasm of uncertain behavior of endocrine glands and nervous system",2,"30","neoplasms of unspecified nature","D42","Neoplasm of uncertain or unknown behaviour of meninges",2,"2",0,TRUE
+"237","neoplasm of uncertain behavior of endocrine glands and nervous system",2,"30","neoplasms of unspecified nature","D43","Neoplasm of uncertain or unknown behaviour of brain and central nervous system",2,"2",0,TRUE
+"237","neoplasm of uncertain behavior of endocrine glands and nervous system",2,"30","neoplasms of unspecified nature","D44","Neoplasm of uncertain or unknown behaviour of endocrine glands",2,"2",0,TRUE
+"237","neoplasm of uncertain behavior of endocrine glands and nervous system",2,"30","neoplasms of unspecified nature","Q85","Phakomatoses, not elsewhere classified",17,"2",2,FALSE
+"238","neoplasm of uncertain behavior of other and unspecified sites and tissues",2,"30","neoplasms of unspecified nature","D45","Polycythaemia vera",2,"2",0,TRUE
+"238","neoplasm of uncertain behavior of other and unspecified sites and tissues",2,"30","neoplasms of unspecified nature","D46","Myelodysplastic syndromes",2,"2",0,TRUE
+"238","neoplasm of uncertain behavior of other and unspecified sites and tissues",2,"30","neoplasms of unspecified nature","D47","Other neoplasms of uncertain or unknown behaviour of lymphoid, haematopoietic and related tissue",2,"2",0,TRUE
+"238","neoplasm of uncertain behavior of other and unspecified sites and tissues",2,"30","neoplasms of unspecified nature","D48","Neoplasm of uncertain or unknown behaviour of other and unspecified sites",2,"2",0,TRUE
+"240","simple and unspecified goiter",3,"31","thyroid disorders","E01","Iodine-deficiency-related thyroid disorders and allied conditions",4,"4",0,TRUE
+"240","simple and unspecified goiter",3,"31","thyroid disorders","E04","Other nontoxic goitre",4,"4",0,TRUE
+"241","nontoxic nodular goiter",3,"31","thyroid disorders","E01","Iodine-deficiency-related thyroid disorders and allied conditions",4,"4",0,TRUE
+"241","nontoxic nodular goiter",3,"31","thyroid disorders","E04","Other nontoxic goitre",4,"4",0,TRUE
+"242","thyrotoxicosis with or without goiter",3,"31","thyroid disorders","E05","Thyrotoxicosis [hyperthyroidism]",4,"4",0,TRUE
+"243","congenital hypothyroidism",3,"31","thyroid disorders","E00","Congenital iodine-deficiency syndrome",4,"4",0,TRUE
+"243","congenital hypothyroidism",3,"31","thyroid disorders","E03","Other hypothyroidism",4,"4",0,TRUE
+"244","acquired hypothyroidism",3,"31","thyroid disorders","E01","Iodine-deficiency-related thyroid disorders and allied conditions",4,"4",0,TRUE
+"244","acquired hypothyroidism",3,"31","thyroid disorders","E02","Subclinical iodine-deficiency hypothyroidism",4,"4",0,TRUE
+"244","acquired hypothyroidism",3,"31","thyroid disorders","E03","Other hypothyroidism",4,"4",0,TRUE
+"244","acquired hypothyroidism",3,"31","thyroid disorders","E89","Postprocedural endocrine and metabolic disorders, not elsewhere classified",4,"4",0,TRUE
+"245","thyroiditis",3,"31","thyroid disorders","E06","Thyroiditis",4,"4",0,TRUE
+"246","other disorders of thyroid",3,"31","thyroid disorders","E03","Other hypothyroidism",4,"4",0,TRUE
+"246","other disorders of thyroid",3,"31","thyroid disorders","E07","Other disorders of thyroid",4,"4",0,TRUE
+"246","other disorders of thyroid",3,"31","thyroid disorders","E35","Disorders of endocrine glands in diseases classified elsewhere",4,"4",0,TRUE
+"250","diabetes mellitus",3,"32","diabetes mellitus","E10","Type 1 diabetes mellitus",4,"4",0,TRUE
+"250","diabetes mellitus",3,"32","diabetes mellitus","E11","Type 2 diabetes mellitus",4,"4",0,TRUE
+"250","diabetes mellitus",3,"32","diabetes mellitus","E13","Other specified diabetes mellitus",4,"4",0,TRUE
+"250","diabetes mellitus",3,"32","diabetes mellitus","E14","Unspecified diabetes mellitus",4,"4",0,TRUE
+"251","other disorders of pancreatic internal secretiondisorders of parathyroid gland",3,"33","other endocrine disorders","E15","Nondiabetic hypoglycaemic coma",4,"4",0,TRUE
+"251","other disorders of pancreatic internal secretiondisorders of parathyroid gland",3,"33","other endocrine disorders","E16","Other disorders of pancreatic internal secretion",4,"4",0,TRUE
+"251","other disorders of pancreatic internal secretiondisorders of parathyroid gland",3,"33","other endocrine disorders","E89","Postprocedural endocrine and metabolic disorders, not elsewhere classified",4,"4",0,TRUE
+"252","disorders of parathyroid gland",3,"33","other endocrine disorders","E20","Hypoparathyroidism",4,"4",0,TRUE
+"252","disorders of parathyroid gland",3,"33","other endocrine disorders","E21","Hyperparathyroidism and other disorders of parathyroid gland",4,"4",0,TRUE
+"252","disorders of parathyroid gland",3,"33","other endocrine disorders","E89","Postprocedural endocrine and metabolic disorders, not elsewhere classified",4,"4",0,TRUE
+"253","disorders of the pituitary gland and its hypothalamic control",3,"33","other endocrine disorders","E22","Hyperfunction of pituitary gland",4,"4",0,TRUE
+"253","disorders of the pituitary gland and its hypothalamic control",3,"33","other endocrine disorders","E23","Hypofunction and other disorders of pituitary gland",4,"4",0,TRUE
+"253","disorders of the pituitary gland and its hypothalamic control",3,"33","other endocrine disorders","E34","Other endocrine disorders",4,"4",0,TRUE
+"253","disorders of the pituitary gland and its hypothalamic control",3,"33","other endocrine disorders","E89","Postprocedural endocrine and metabolic disorders, not elsewhere classified",4,"4",0,TRUE
+"254","diseases of thymus gland",3,"33","other endocrine disorders","E32","Diseases of thymus",4,"4",0,TRUE
+"255","disorders of adrenal glands",3,"33","other endocrine disorders","E24","Cushing's syndrome",4,"4",0,TRUE
+"255","disorders of adrenal glands",3,"33","other endocrine disorders","E25","Adrenogenital disorders",4,"4",0,TRUE
+"255","disorders of adrenal glands",3,"33","other endocrine disorders","E26","Hyperaldosteronism",4,"4",0,TRUE
+"255","disorders of adrenal glands",3,"33","other endocrine disorders","E27","Other disorders of adrenal gland",4,"4",0,TRUE
+"255","disorders of adrenal glands",3,"33","other endocrine disorders","E35","Disorders of endocrine glands in diseases classified elsewhere",4,"4",0,TRUE
+"255","disorders of adrenal glands",3,"33","other endocrine disorders","E89","Postprocedural endocrine and metabolic disorders, not elsewhere classified",4,"4",0,TRUE
+"256","ovarian dysfunction",3,"33","other endocrine disorders","E28","Ovarian dysfunction",4,"4",0,TRUE
+"256","ovarian dysfunction",3,"33","other endocrine disorders","E89","Postprocedural endocrine and metabolic disorders, not elsewhere classified",4,"4",0,TRUE
+"257","testicular dysfunction",3,"33","other endocrine disorders","E29","Testicular dysfunction",4,"4",0,TRUE
+"257","testicular dysfunction",3,"33","other endocrine disorders","E34","Other endocrine disorders",4,"4",0,TRUE
+"257","testicular dysfunction",3,"33","other endocrine disorders","E89","Postprocedural endocrine and metabolic disorders, not elsewhere classified",4,"4",0,TRUE
+"258","polyglandular dysfunction and related disorders",3,"33","other endocrine disorders","E31","Polyglandular dysfunction",4,"4",0,TRUE
+"259","other endocrine disorders",3,"33","other endocrine disorders","E30","Disorders of puberty, not elsewhere classified",4,"4",0,TRUE
+"259","other endocrine disorders",3,"33","other endocrine disorders","E34","Other endocrine disorders",4,"4",0,TRUE
+"259","other endocrine disorders",3,"33","other endocrine disorders","E35","Disorders of endocrine glands in diseases classified elsewhere",4,"4",0,TRUE
+"260","kwashiorkor",3,"34","nutritional deficiencies","E40","Kwashiorkor",4,"4",0,TRUE
+"260","kwashiorkor",3,"34","nutritional deficiencies","E42","Marasmic kwashiorkor",4,"4",0,TRUE
+"261","nutritional marasmus",3,"34","nutritional deficiencies","E41","Nutritional marasmus",4,"4",0,TRUE
+"262","other severe proteincalorie malnutrition",3,"34","nutritional deficiencies","E43","Unspecified severe protein-energy malnutrition",4,"4",0,TRUE
+"263","other and unspecified proteincalorie malnutrition",3,"34","nutritional deficiencies","E44","Protein-energy malnutrition of moderate and mild degree",4,"4",0,TRUE
+"263","other and unspecified proteincalorie malnutrition",3,"34","nutritional deficiencies","E45","Retarded development following protein-energy malnutrition",4,"4",0,TRUE
+"263","other and unspecified proteincalorie malnutrition",3,"34","nutritional deficiencies","E46","Unspecified protein-energy malnutrition",4,"4",0,TRUE
+"263","other and unspecified proteincalorie malnutrition",3,"34","nutritional deficiencies","E64","Sequelae of malnutrition and other nutritional deficiencies",4,"4",0,TRUE
+"268","vitamin d deficiency",3,"34","nutritional deficiencies","E55","Vitamin D deficiency",4,"4",0,TRUE
+"268","vitamin d deficiency",3,"34","nutritional deficiencies","E64","Sequelae of malnutrition and other nutritional deficiencies",4,"4",0,TRUE
+"268","vitamin d deficiency",3,"34","nutritional deficiencies","M83","Adult osteomalacia",13,"4",2,FALSE
+"270","disorders of aminoacid transport and metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E70","Disorders of aromatic amino-acid metabolism",4,"4",0,TRUE
+"270","disorders of aminoacid transport and metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E71","Disorders of branched-chain amino-acid metabolism and fatty-acid metabolism",4,"4",0,TRUE
+"270","disorders of aminoacid transport and metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E72","Other disorders of amino-acid metabolism",4,"4",0,TRUE
+"271","disorders of carbohydrate transport and metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E73","Lactose intolerance",4,"4",0,TRUE
+"271","disorders of carbohydrate transport and metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E74","Other disorders of carbohydrate metabolism",4,"4",0,TRUE
+"271","disorders of carbohydrate transport and metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E77","Disorders of glycoprotein metabolism",4,"4",0,TRUE
+"271","disorders of carbohydrate transport and metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","R73","Elevated blood glucose level",18,"4",2,FALSE
+"272","disorders of lipoid metabolism",3,"36","disorders of lipid metabolism","E75","Disorders of sphingolipid metabolism and other lipid storage disorders",4,"4",0,TRUE
+"272","disorders of lipoid metabolism",3,"36","disorders of lipid metabolism","E77","Disorders of glycoprotein metabolism",4,"4",0,TRUE
+"272","disorders of lipoid metabolism",3,"36","disorders of lipid metabolism","E78","Disorders of lipoprotein metabolism and other lipidaemias",4,"4",0,TRUE
+"272","disorders of lipoid metabolism",3,"36","disorders of lipid metabolism","E88","Other metabolic disorders",4,"4",0,TRUE
+"272","disorders of lipoid metabolism",3,"36","disorders of lipid metabolism","H02","Other disorders of eyelid",7,"4",2,FALSE
+"273","disorders of plasma protein metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","C88","Malignant immunoproliferative diseases",2,"4",1,FALSE
+"273","disorders of plasma protein metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","D47","Other neoplasms of uncertain or unknown behaviour of lymphoid, haematopoietic and related tissue",2,"4",1,FALSE
+"273","disorders of plasma protein metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","D89","Other disorders involving the immune mechanism, not elsewhere classified",3,"4",2,FALSE
+"273","disorders of plasma protein metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E88","Other metabolic disorders",4,"4",0,TRUE
+"273","disorders of plasma protein metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","R77","Other abnormalities of plasma proteins",18,"4",2,FALSE
+"274","gout",3,"37","gout and other crystal arthropathies","M10","Gout",13,"4",2,FALSE
+"275","disorders of mineral metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E20","Hypoparathyroidism",4,"4",0,TRUE
+"275","disorders of mineral metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E83","Disorders of mineral metabolism",4,"4",0,TRUE
+"275","disorders of mineral metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","M11","Other crystal arthropathies",13,"4",2,FALSE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","D76","Other specified diseases with participation of lymphoreticular and reticulohistiocytic tissue",3,"4",2,FALSE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E71","Disorders of branched-chain amino-acid metabolism and fatty-acid metabolism",4,"4",0,TRUE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E76","Disorders of glycosaminoglycan metabolism",4,"4",0,TRUE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E79","Disorders of purine and pyrimidine metabolism",4,"4",0,TRUE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E80","Disorders of porphyrin and bilirubin metabolism",4,"4",0,TRUE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E84","Cystic fibrosis",4,"4",0,TRUE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E85","Amyloidosis",4,"4",0,TRUE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E88","Other metabolic disorders",4,"4",0,TRUE
+"277","other and unspecified disorders of metabolism",3,"35","other nutritional endocrine immunity and metabolic disorders","E89","Postprocedural endocrine and metabolic disorders, not elsewhere classified",4,"4",0,TRUE
+"278","overweight obesity and other hyperalimentation",3,"35","other nutritional endocrine immunity and metabolic disorders","E65","Localized adiposity",4,"4",0,TRUE
+"278","overweight obesity and other hyperalimentation",3,"35","other nutritional endocrine immunity and metabolic disorders","E66","Obesity",4,"4",0,TRUE
+"278","overweight obesity and other hyperalimentation",3,"35","other nutritional endocrine immunity and metabolic disorders","E67","Other hyperalimentation",4,"4",0,TRUE
+"278","overweight obesity and other hyperalimentation",3,"35","other nutritional endocrine immunity and metabolic disorders","E68","Sequelae of hyperalimentation",4,"4",0,TRUE
+"279","disorders involving the immune mechanism",3,"35","other nutritional endocrine immunity and metabolic disorders","D80","Immunodeficiency with predominantly antibody defects",3,"4",2,FALSE
+"279","disorders involving the immune mechanism",3,"35","other nutritional endocrine immunity and metabolic disorders","D81","Combined immunodeficiencies",3,"4",2,FALSE
+"279","disorders involving the immune mechanism",3,"35","other nutritional endocrine immunity and metabolic disorders","D82","Immunodeficiency associated with other major defects",3,"4",2,FALSE
+"279","disorders involving the immune mechanism",3,"35","other nutritional endocrine immunity and metabolic disorders","D83","Common variable immunodeficiency",3,"4",2,FALSE
+"279","disorders involving the immune mechanism",3,"35","other nutritional endocrine immunity and metabolic disorders","D84","Other immunodeficiencies",3,"4",2,FALSE
+"279","disorders involving the immune mechanism",3,"35","other nutritional endocrine immunity and metabolic disorders","D89","Other disorders involving the immune mechanism, not elsewhere classified",3,"4",2,FALSE
+"280","iron deficiency anemias",4,"38","anemia","D50","Iron deficiency anaemia",3,"3",0,TRUE
+"282","hereditary hemolytic anemias",4,"38","anemia","D55","Anaemia due to enzyme disorders",3,"3",0,TRUE
+"282","hereditary hemolytic anemias",4,"38","anemia","D56","Thalassaemia",3,"3",0,TRUE
+"282","hereditary hemolytic anemias",4,"38","anemia","D57","Sickle-cell disorders",3,"3",0,TRUE
+"282","hereditary hemolytic anemias",4,"38","anemia","D58","Other hereditary haemolytic anaemias",3,"3",0,TRUE
+"283","acquired hemolytic anemias",4,"38","anemia","D59","Acquired haemolytic anaemia",3,"3",0,TRUE
+"284","aplastic anemia and other bone marrow failure syndromes",4,"38","anemia","D46","Myelodysplastic syndromes",2,"3",2,FALSE
+"284","aplastic anemia and other bone marrow failure syndromes",4,"38","anemia","D60","Acquired pure red cell aplasia [erythroblastopenia]",3,"3",0,TRUE
+"284","aplastic anemia and other bone marrow failure syndromes",4,"38","anemia","D61","Other aplastic anaemias",3,"3",0,TRUE
+"285","other and unspecified anemias",4,"38","anemia","D46","Myelodysplastic syndromes",2,"3",2,FALSE
+"285","other and unspecified anemias",4,"38","anemia","D62","Acute posthaemorrhagic anaemia",3,"3",0,TRUE
+"285","other and unspecified anemias",4,"38","anemia","D63","Anaemia in chronic diseases classified elsewhere",3,"3",0,TRUE
+"285","other and unspecified anemias",4,"38","anemia","D64","Other anaemias",3,"3",0,TRUE
+"286","coagulation defects",4,"39","other hematologic conditions","D65","Disseminated intravascular coagulation [defibrination syndrome]",3,"3",0,TRUE
+"286","coagulation defects",4,"39","other hematologic conditions","D66","Hereditary factor VIII deficiency",3,"3",0,TRUE
+"286","coagulation defects",4,"39","other hematologic conditions","D67","Hereditary factor IX deficiency",3,"3",0,TRUE
+"286","coagulation defects",4,"39","other hematologic conditions","D68","Other coagulation defects",3,"3",0,TRUE
+"287","purpura and other hemorrhagic conditions",4,"39","other hematologic conditions","D69","Purpura and other haemorrhagic conditions",3,"3",0,TRUE
+"288","diseases of white blood cells",4,"39","other hematologic conditions","D70","Agranulocytosis",3,"3",0,TRUE
+"288","diseases of white blood cells",4,"39","other hematologic conditions","D71","Functional disorders of polymorphonuclear neutrophils",3,"3",0,TRUE
+"288","diseases of white blood cells",4,"39","other hematologic conditions","D72","Other disorders of white blood cells",3,"3",0,TRUE
+"288","diseases of white blood cells",4,"39","other hematologic conditions","R72","Abnormality of white blood cells, not elsewhere classified",18,"3",2,FALSE
+"289","other diseases of blood and bloodforming organs",4,"39","other hematologic conditions","C94","Other leukaemias of specified cell type",2,"3",2,FALSE
+"289","other diseases of blood and bloodforming organs",4,"39","other hematologic conditions","D73","Diseases of spleen",3,"3",0,TRUE
+"289","other diseases of blood and bloodforming organs",4,"39","other hematologic conditions","D74","Methaemoglobinaemia",3,"3",0,TRUE
+"289","other diseases of blood and bloodforming organs",4,"39","other hematologic conditions","D75","Other diseases of blood and blood-forming organs",3,"3",0,TRUE
+"289","other diseases of blood and bloodforming organs",4,"39","other hematologic conditions","D77","Other disorders of blood and blood-forming organs in diseases classified elsewhere",3,"3",0,TRUE
+"289","other diseases of blood and bloodforming organs",4,"39","other hematologic conditions","D89","Other disorders involving the immune mechanism, not elsewhere classified",3,"3",0,TRUE
+"289","other diseases of blood and bloodforming organs",4,"39","other hematologic conditions","I88","Nonspecific lymphadenitis",9,"3",2,FALSE
+"290","dementias",5,"40","delirium dementia and other cognitive disorders","F01","Vascular dementia",5,"5",0,TRUE
+"290","dementias",5,"40","delirium dementia and other cognitive disorders","F03","Unspecified dementia",5,"5",0,TRUE
+"290","dementias",5,"40","delirium dementia and other cognitive disorders","F05","Delirium, not induced by alcohol and other psychoactive substances",5,"5",0,TRUE
+"291","alcoholinduced mental disorders",5,"41","alcohol and substancerelated disorders","F10","Mental and behavioural disorders due to use of alcohol",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F11","Mental and behavioural disorders due to use of opioids",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F12","Mental and behavioural disorders due to use of cannabinoids",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F13","Mental and behavioural disorders due to use of sedatives or hypnotics",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F14","Mental and behavioural disorders due to use of cocaine",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F15","Mental and behavioural disorders due to use of other stimulants, including caffeine",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F16","Mental and behavioural disorders due to use of hallucinogens",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F17","Mental and behavioural disorders due to use of tobacco",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F18","Mental and behavioural disorders due to use of volatile solvents",5,"5",0,TRUE
+"292","druginduced mental disorders",5,"41","alcohol and substancerelated disorders","F19","Mental and behavioural disorders due to multiple drug use and use of other psychoactive substances",5,"5",0,TRUE
+"294","persistent mental disorders due to conditions classified elsewhere",5,"40","delirium dementia and other cognitive disorders","F00","Dementia in Alzheimer's disease (G30.-)",5,"5",0,TRUE
+"294","persistent mental disorders due to conditions classified elsewhere",5,"40","delirium dementia and other cognitive disorders","F02","Dementia in other diseases classified elsewhere",5,"5",0,TRUE
+"294","persistent mental disorders due to conditions classified elsewhere",5,"40","delirium dementia and other cognitive disorders","F04","Organic amnesic syndrome, not induced by alcohol and other psychoactive substances",5,"5",0,TRUE
+"294","persistent mental disorders due to conditions classified elsewhere",5,"40","delirium dementia and other cognitive disorders","F06","Other mental disorders due to brain damage and dysfunction and to physical disease",5,"5",0,TRUE
+"294","persistent mental disorders due to conditions classified elsewhere",5,"40","delirium dementia and other cognitive disorders","F09","Unspecified organic or symptomatic mental disorder",5,"5",0,TRUE
+"295","schizophrenic disorders",5,"42","schizophrenia and other psychotic disorders","F20","Schizophrenia",5,"5",0,TRUE
+"295","schizophrenic disorders",5,"42","schizophrenia and other psychotic disorders","F21","Schizotypal disorder",5,"5",0,TRUE
+"295","schizophrenic disorders",5,"42","schizophrenia and other psychotic disorders","F23","Acute and transient psychotic disorders",5,"5",0,TRUE
+"295","schizophrenic disorders",5,"42","schizophrenia and other psychotic disorders","F25","Schizoaffective disorders",5,"5",0,TRUE
+"296","episodic mood disorders",5,"43","mood and anxiety disorders","F30","Manic episode",5,"5",0,TRUE
+"296","episodic mood disorders",5,"43","mood and anxiety disorders","F31","Bipolar affective disorder",5,"5",0,TRUE
+"296","episodic mood disorders",5,"43","mood and anxiety disorders","F32","Depressive episode",5,"5",0,TRUE
+"296","episodic mood disorders",5,"43","mood and anxiety disorders","F33","Recurrent depressive disorder",5,"5",0,TRUE
+"296","episodic mood disorders",5,"43","mood and anxiety disorders","F34","Persistent mood [affective] disorders",5,"5",0,TRUE
+"296","episodic mood disorders",5,"43","mood and anxiety disorders","F38","Other mood [affective] disorders",5,"5",0,TRUE
+"296","episodic mood disorders",5,"43","mood and anxiety disorders","F39","Unspecified mood [affective] disorder",5,"5",0,TRUE
+"297","delusional disorders",5,"42","schizophrenia and other psychotic disorders","F22","Persistent delusional disorders",5,"5",0,TRUE
+"297","delusional disorders",5,"42","schizophrenia and other psychotic disorders","F24","Induced delusional disorder",5,"5",0,TRUE
+"298","other nonorganic psychoses",5,"42","schizophrenia and other psychotic disorders","F23","Acute and transient psychotic disorders",5,"5",0,TRUE
+"298","other nonorganic psychoses",5,"42","schizophrenia and other psychotic disorders","F28","Other nonorganic psychotic disorders",5,"5",0,TRUE
+"298","other nonorganic psychoses",5,"42","schizophrenia and other psychotic disorders","F29","Unspecified nonorganic psychosis",5,"5",0,TRUE
+"298","other nonorganic psychoses",5,"42","schizophrenia and other psychotic disorders","F32","Depressive episode",5,"5",0,TRUE
+"298","other nonorganic psychoses",5,"42","schizophrenia and other psychotic disorders","R41","Other symptoms and signs involving cognitive functions and awareness",18,"5",2,FALSE
+"299","pervasive developmental disorders",5,"44","disorders usually diagnosed in infancy childhood or adolescence","F84","Pervasive developmental disorders",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F32","Depressive episode",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F34","Persistent mood [affective] disorders",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F40","Phobic anxiety disorders",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F41","Other anxiety disorders",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F42","Obsessive-compulsive disorder",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F44","Dissociative [conversion] disorders",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F45","Somatoform disorders",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F48","Other neurotic disorders",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F68","Other disorders of adult personality and behaviour",5,"5",0,TRUE
+"300","anxiety dissociative and somatoform disorders",5,"43","mood and anxiety disorders","F99","Mental disorder, not otherwise specified",5,"5",0,TRUE
+"301","personality disorders",5,"45","personality disorders","F34","Persistent mood [affective] disorders",5,"5",0,TRUE
+"301","personality disorders",5,"45","personality disorders","F60","Specific personality disorders",5,"5",0,TRUE
+"301","personality disorders",5,"45","personality disorders","F61","Mixed and other personality disorders",5,"5",0,TRUE
+"301","personality disorders",5,"45","personality disorders","F62","Enduring personality changes, not attributable to brain damage and disease",5,"5",0,TRUE
+"301","personality disorders",5,"45","personality disorders","F68","Other disorders of adult personality and behaviour",5,"5",0,TRUE
+"301","personality disorders",5,"45","personality disorders","F69","Unspecified disorder of adult personality and behaviour",5,"5",0,TRUE
+"303","alcohol dependence syndrome",5,"41","alcohol and substancerelated disorders","F10","Mental and behavioural disorders due to use of alcohol",5,"5",0,TRUE
+"303","alcohol dependence syndrome",5,"41","alcohol and substancerelated disorders","G31","Other degenerative diseases of nervous system, not elsewhere classified",6,"5",1,FALSE
+"304","drug dependence",5,"41","alcohol and substancerelated disorders","F11","Mental and behavioural disorders due to use of opioids",5,"5",0,TRUE
+"304","drug dependence",5,"41","alcohol and substancerelated disorders","F12","Mental and behavioural disorders due to use of cannabinoids",5,"5",0,TRUE
+"304","drug dependence",5,"41","alcohol and substancerelated disorders","F13","Mental and behavioural disorders due to use of sedatives or hypnotics",5,"5",0,TRUE
+"304","drug dependence",5,"41","alcohol and substancerelated disorders","F14","Mental and behavioural disorders due to use of cocaine",5,"5",0,TRUE
+"304","drug dependence",5,"41","alcohol and substancerelated disorders","F15","Mental and behavioural disorders due to use of other stimulants, including caffeine",5,"5",0,TRUE
+"304","drug dependence",5,"41","alcohol and substancerelated disorders","F16","Mental and behavioural disorders due to use of hallucinogens",5,"5",0,TRUE
+"304","drug dependence",5,"41","alcohol and substancerelated disorders","F18","Mental and behavioural disorders due to use of volatile solvents",5,"5",0,TRUE
+"304","drug dependence",5,"41","alcohol and substancerelated disorders","F19","Mental and behavioural disorders due to multiple drug use and use of other psychoactive substances",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F10","Mental and behavioural disorders due to use of alcohol",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F11","Mental and behavioural disorders due to use of opioids",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F12","Mental and behavioural disorders due to use of cannabinoids",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F13","Mental and behavioural disorders due to use of sedatives or hypnotics",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F14","Mental and behavioural disorders due to use of cocaine",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F15","Mental and behavioural disorders due to use of other stimulants, including caffeine",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F16","Mental and behavioural disorders due to use of hallucinogens",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F17","Mental and behavioural disorders due to use of tobacco",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F18","Mental and behavioural disorders due to use of volatile solvents",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F19","Mental and behavioural disorders due to multiple drug use and use of other psychoactive substances",5,"5",0,TRUE
+"305","nondependent abuse of drugs",5,"41","alcohol and substancerelated disorders","F55","Abuse of non-dependence-producing substances",5,"5",0,TRUE
+"306","physiological malfunction arising from mental factors",5,"46","miscellaneous mental health disorders","F45","Somatoform disorders",5,"5",0,TRUE
+"306","physiological malfunction arising from mental factors",5,"46","miscellaneous mental health disorders","F52","Sexual dysfunction, not caused by organic disorder or disease",5,"5",0,TRUE
+"306","physiological malfunction arising from mental factors",5,"46","miscellaneous mental health disorders","F59","Unspecified behavioural syndromes associated with physiological disturbances and physical factors",5,"5",0,TRUE
+"307","special symptoms or syndromes not elsewhere classified",5,"46","miscellaneous mental health disorders","F45","Somatoform disorders",5,"5",0,TRUE
+"307","special symptoms or syndromes not elsewhere classified",5,"46","miscellaneous mental health disorders","F50","Eating disorders",5,"5",0,TRUE
+"307","special symptoms or syndromes not elsewhere classified",5,"46","miscellaneous mental health disorders","F51","Nonorganic sleep disorders",5,"5",0,TRUE
+"307","special symptoms or syndromes not elsewhere classified",5,"46","miscellaneous mental health disorders","F95","Tic disorders",5,"5",0,TRUE
+"307","special symptoms or syndromes not elsewhere classified",5,"46","miscellaneous mental health disorders","F98","Other behavioural and emotional disorders with onset usually occurring in childhood and adolescence",5,"5",0,TRUE
+"307","special symptoms or syndromes not elsewhere classified",5,"46","miscellaneous mental health disorders","G44","Other headache syndromes",6,"5",1,FALSE
+"308","acute reaction to stress",5,"43","mood and anxiety disorders","F43","Reaction to severe stress, and adjustment disorders",5,"5",0,TRUE
+"309","adjustment reaction",5,"47","adjustment disorders","F43","Reaction to severe stress, and adjustment disorders",5,"5",0,TRUE
+"309","adjustment reaction",5,"47","adjustment disorders","F93","Emotional disorders with onset specific to childhood",5,"5",0,TRUE
+"310","specific nonpsychotic mental disorders due to brain damage",5,"46","miscellaneous mental health disorders","F06","Other mental disorders due to brain damage and dysfunction and to physical disease",5,"5",0,TRUE
+"310","specific nonpsychotic mental disorders due to brain damage",5,"46","miscellaneous mental health disorders","F07","Personality and behavioural disorders due to brain disease, damage and dysfunction",5,"5",0,TRUE
+"311","depressive disorder not elsewhere classified",5,"43","mood and anxiety disorders","F32","Depressive episode",5,"5",0,TRUE
+"311","depressive disorder not elsewhere classified",5,"43","mood and anxiety disorders","F53","Mental and behavioural disorders associated with the puerperium, not elsewhere classified",5,"5",0,TRUE
+"312","disturbance of conduct not elsewhere classified",5,"48","attentiondeficit conduct and disruptive behavior disorders","F63","Habit and impulse disorders",5,"5",0,TRUE
+"312","disturbance of conduct not elsewhere classified",5,"48","attentiondeficit conduct and disruptive behavior disorders","F91","Conduct disorders",5,"5",0,TRUE
+"312","disturbance of conduct not elsewhere classified",5,"48","attentiondeficit conduct and disruptive behavior disorders","F92","Mixed disorders of conduct and emotions",5,"5",0,TRUE
+"314","hyperkinetic syndrome of childhood",5,"48","attentiondeficit conduct and disruptive behavior disorders","F90","Hyperkinetic disorders",5,"5",0,TRUE
+"315","specific delays in development",5,"49","developmental disorders","F80","Specific developmental disorders of speech and language",5,"5",0,TRUE
+"315","specific delays in development",5,"49","developmental disorders","F81","Specific developmental disorders of scholastic skills",5,"5",0,TRUE
+"315","specific delays in development",5,"49","developmental disorders","F82","Specific developmental disorder of motor function",5,"5",0,TRUE
+"315","specific delays in development",5,"49","developmental disorders","F83","Mixed specific developmental disorders",5,"5",0,TRUE
+"315","specific delays in development",5,"49","developmental disorders","F88","Other disorders of psychological development",5,"5",0,TRUE
+"315","specific delays in development",5,"49","developmental disorders","F89","Unspecified disorder of psychological development",5,"5",0,TRUE
+"316","psychic factors associated with diseases classified elsewhere",5,"46","miscellaneous mental health disorders","F54","Psychological and behavioural factors associated with disorders or diseases classified elsewhere",5,"5",0,TRUE
+"317","mild intellectual disabilities",5,"49","developmental disorders","F70","Mild mental retardation",5,"5",0,TRUE
+"318","other specified intellectual disabilities",5,"49","developmental disorders","F71","Moderate mental retardation",5,"5",0,TRUE
+"318","other specified intellectual disabilities",5,"49","developmental disorders","F72","Severe mental retardation",5,"5",0,TRUE
+"318","other specified intellectual disabilities",5,"49","developmental disorders","F73","Profound mental retardation",5,"5",0,TRUE
+"319","unspecified intellectual disabilities",5,"49","developmental disorders","F78","Other mental retardation",5,"5",0,TRUE
+"319","unspecified intellectual disabilities",5,"49","developmental disorders","F79","Unspecified mental retardation",5,"5",0,TRUE
+"330","cerebral degenerations usually manifest in childhood",6,"50","other nervous system conditions","E75","Disorders of sphingolipid metabolism and other lipid storage disorders",4,"6/7/8",2,FALSE
+"330","cerebral degenerations usually manifest in childhood",6,"50","other nervous system conditions","F84","Pervasive developmental disorders",5,"6/7/8",1,FALSE
+"330","cerebral degenerations usually manifest in childhood",6,"50","other nervous system conditions","G31","Other degenerative diseases of nervous system, not elsewhere classified",6,"6/7/8",0,TRUE
+"331","other cerebral degenerations",6,"40","delirium dementia and other cognitive disorders","G30","Alzheimer's disease",6,"6/7/8",0,TRUE
+"331","other cerebral degenerations",6,"40","delirium dementia and other cognitive disorders","G31","Other degenerative diseases of nervous system, not elsewhere classified",6,"6/7/8",0,TRUE
+"331","other cerebral degenerations",6,"40","delirium dementia and other cognitive disorders","G32","Other degenerative disorders of nervous system in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"331","other cerebral degenerations",6,"40","delirium dementia and other cognitive disorders","G91","Hydrocephalus",6,"6/7/8",0,TRUE
+"331","other cerebral degenerations",6,"40","delirium dementia and other cognitive disorders","G93","Other disorders of brain",6,"6/7/8",0,TRUE
+"331","other cerebral degenerations",6,"40","delirium dementia and other cognitive disorders","G94","Other disorders of brain in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"332","parkinsons disease",6,"51","parkinsons disease","G20","Parkinson's disease",6,"6/7/8",0,TRUE
+"332","parkinsons disease",6,"51","parkinsons disease","G21","Secondary parkinsonism",6,"6/7/8",0,TRUE
+"332","parkinsons disease",6,"51","parkinsons disease","G22","Parkinsonism in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"333","other extrapyramidal disease and abnormal movement disorders",6,"50","other nervous system conditions","G10","Huntington's disease",6,"6/7/8",0,TRUE
+"333","other extrapyramidal disease and abnormal movement disorders",6,"50","other nervous system conditions","G21","Secondary parkinsonism",6,"6/7/8",0,TRUE
+"333","other extrapyramidal disease and abnormal movement disorders",6,"50","other nervous system conditions","G23","Other degenerative diseases of basal ganglia",6,"6/7/8",0,TRUE
+"333","other extrapyramidal disease and abnormal movement disorders",6,"50","other nervous system conditions","G24","Dystonia",6,"6/7/8",0,TRUE
+"333","other extrapyramidal disease and abnormal movement disorders",6,"50","other nervous system conditions","G25","Other extrapyramidal and movement disorders",6,"6/7/8",0,TRUE
+"333","other extrapyramidal disease and abnormal movement disorders",6,"50","other nervous system conditions","G26","Extrapyramidal and movement disorders in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"333","other extrapyramidal disease and abnormal movement disorders",6,"50","other nervous system conditions","G80","Cerebral palsy",6,"6/7/8",0,TRUE
+"333","other extrapyramidal disease and abnormal movement disorders",6,"50","other nervous system conditions","G90","Disorders of autonomic nervous system",6,"6/7/8",0,TRUE
+"334","spinocerebellar disease",6,"50","other nervous system conditions","G11","Hereditary ataxia",6,"6/7/8",0,TRUE
+"334","spinocerebellar disease",6,"50","other nervous system conditions","G13","Systemic atrophies primarily affecting central nervous system in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"335","anterior horn cell disease",6,"50","other nervous system conditions","G12","Spinal muscular atrophy and related syndromes",6,"6/7/8",0,TRUE
+"335","anterior horn cell disease",6,"50","other nervous system conditions","G14","Postpolio syndrome",6,"6/7/8",0,TRUE
+"336","other diseases of spinal cord",6,"50","other nervous system conditions","G32","Other degenerative disorders of nervous system in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"336","other diseases of spinal cord",6,"50","other nervous system conditions","G55","Nerve root and plexus compressions in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"336","other diseases of spinal cord",6,"50","other nervous system conditions","G95","Other diseases of spinal cord",6,"6/7/8",0,TRUE
+"336","other diseases of spinal cord",6,"50","other nervous system conditions","G99","Other disorders of nervous system in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"337","disorders of the autonomic nervous system",6,"50","other nervous system conditions","G90","Disorders of autonomic nervous system",6,"6/7/8",0,TRUE
+"337","disorders of the autonomic nervous system",6,"50","other nervous system conditions","G99","Other disorders of nervous system in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"340","multiple sclerosis",6,"53","multiple sclerosis","G35","Multiple sclerosis",6,"6/7/8",0,TRUE
+"341","other demyelinating diseases of central nervous system",6,"50","other nervous system conditions","G36","Other acute disseminated demyelination",6,"6/7/8",0,TRUE
+"341","other demyelinating diseases of central nervous system",6,"50","other nervous system conditions","G37","Other demyelinating diseases of central nervous system",6,"6/7/8",0,TRUE
+"342","hemiplegia and hemiparesis",6,"54","paralysis","G81","Hemiplegia",6,"6/7/8",0,TRUE
+"343","infantile cerebral palsy",6,"54","paralysis","G80","Cerebral palsy",6,"6/7/8",0,TRUE
+"344","other paralytic syndromes",6,"54","paralysis","G04","Encephalitis, myelitis and encephalomyelitis",6,"6/7/8",0,TRUE
+"344","other paralytic syndromes",6,"54","paralysis","G46","Vascular syndromes of brain in cerebrovascular diseases (I60-I67)",6,"6/7/8",0,TRUE
+"344","other paralytic syndromes",6,"54","paralysis","G82","Paraplegia and tetraplegia",6,"6/7/8",0,TRUE
+"344","other paralytic syndromes",6,"54","paralysis","G83","Other paralytic syndromes",6,"6/7/8",0,TRUE
+"345","epilepsy and recurrent seizures",6,"55","epilepsyconvulsions","G40","Epilepsy",6,"6/7/8",0,TRUE
+"345","epilepsy and recurrent seizures",6,"55","epilepsyconvulsions","G41","Status epilepticus",6,"6/7/8",0,TRUE
+"346","migraine",6,"52","headache including migraine","G43","Migraine",6,"6/7/8",0,TRUE
+"346","migraine",6,"52","headache including migraine","G44","Other headache syndromes",6,"6/7/8",0,TRUE
+"347","cataplexy and narcolepsy",6,"50","other nervous system conditions","G47","Other sleep disorders",6,"6/7/8",0,TRUE
+"348","other conditions of brain",6,"50","other nervous system conditions","G93","Other disorders of brain",6,"6/7/8",0,TRUE
+"353","nerve root and plexus disorders",6,"50","other nervous system conditions","G54","Nerve root and plexus disorders",6,"6/7/8",0,TRUE
+"353","nerve root and plexus disorders",6,"50","other nervous system conditions","G55","Nerve root and plexus compressions in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"354","mononeuritis of upper limb and mononeuritis multiplex",6,"50","other nervous system conditions","G56","Mononeuropathies of upper limb",6,"6/7/8",0,TRUE
+"354","mononeuritis of upper limb and mononeuritis multiplex",6,"50","other nervous system conditions","G58","Other mononeuropathies",6,"6/7/8",0,TRUE
+"355","mononeuritis of lower limb and unspecified site",6,"50","other nervous system conditions","G57","Mononeuropathies of lower limb",6,"6/7/8",0,TRUE
+"355","mononeuritis of lower limb and unspecified site",6,"50","other nervous system conditions","G58","Other mononeuropathies",6,"6/7/8",0,TRUE
+"355","mononeuritis of lower limb and unspecified site",6,"50","other nervous system conditions","G59","Mononeuropathy in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"356","hereditary and idiopathic peripheral neuropathy",6,"50","other nervous system conditions","G60","Hereditary and idiopathic neuropathy",6,"6/7/8",0,TRUE
+"356","hereditary and idiopathic peripheral neuropathy",6,"50","other nervous system conditions","G62","Other polyneuropathies",6,"6/7/8",0,TRUE
+"357","inflammatory and toxic neuropathy",6,"50","other nervous system conditions","G61","Inflammatory polyneuropathy",6,"6/7/8",0,TRUE
+"357","inflammatory and toxic neuropathy",6,"50","other nervous system conditions","G62","Other polyneuropathies",6,"6/7/8",0,TRUE
+"357","inflammatory and toxic neuropathy",6,"50","other nervous system conditions","G63","Polyneuropathy in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"358","myoneural disorders",6,"50","other nervous system conditions","G70","Myasthenia gravis and other myoneural disorders",6,"6/7/8",0,TRUE
+"358","myoneural disorders",6,"50","other nervous system conditions","G73","Disorders of myoneural junction and muscle in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"359","muscular dystrophies and other myopathies",6,"50","other nervous system conditions","G71","Primary disorders of muscles",6,"6/7/8",0,TRUE
+"359","muscular dystrophies and other myopathies",6,"50","other nervous system conditions","G72","Other myopathies",6,"6/7/8",0,TRUE
+"359","muscular dystrophies and other myopathies",6,"50","other nervous system conditions","G73","Disorders of myoneural junction and muscle in diseases classified elsewhere",6,"6/7/8",0,TRUE
+"360","disorders of the globe",6,"56","other eye disorders","H44","Disorders of globe",7,"6/7/8",0,TRUE
+"360","disorders of the globe",6,"56","other eye disorders","H45","Disorders of vitreous body and globe in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"361","retinal detachments and defects",6,"57","retinal detachments defects vascular occlusion and retinopathy","H33","Retinal detachments and breaks",7,"6/7/8",0,TRUE
+"362","other retinal disorders",6,"57","retinal detachments defects vascular occlusion and retinopathy","G45","Transient cerebral ischaemic attacks and related syndromes",6,"6/7/8",0,TRUE
+"362","other retinal disorders",6,"57","retinal detachments defects vascular occlusion and retinopathy","H34","Retinal vascular occlusions",7,"6/7/8",0,TRUE
+"362","other retinal disorders",6,"57","retinal detachments defects vascular occlusion and retinopathy","H35","Other retinal disorders",7,"6/7/8",0,TRUE
+"362","other retinal disorders",6,"57","retinal detachments defects vascular occlusion and retinopathy","H36","Retinal disorders in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"362","other retinal disorders",6,"57","retinal detachments defects vascular occlusion and retinopathy","H59","Postprocedural disorders of eye and adnexa, not elsewhere classified",7,"6/7/8",0,TRUE
+"363","chorioretinal inflammations scars and other disorders of choroid",6,"56","other eye disorders","H30","Chorioretinal inflammation",7,"6/7/8",0,TRUE
+"363","chorioretinal inflammations scars and other disorders of choroid",6,"56","other eye disorders","H31","Other disorders of choroid",7,"6/7/8",0,TRUE
+"363","chorioretinal inflammations scars and other disorders of choroid",6,"56","other eye disorders","H32","Chorioretinal disorders in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"364","disorders of iris and ciliary body",6,"56","other eye disorders","H20","Iridocyclitis",7,"6/7/8",0,TRUE
+"364","disorders of iris and ciliary body",6,"56","other eye disorders","H21","Other disorders of iris and ciliary body",7,"6/7/8",0,TRUE
+"364","disorders of iris and ciliary body",6,"56","other eye disorders","H22","Disorders of iris and ciliary body in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"365","glaucoma",6,"58","glaucoma","H40","Glaucoma",7,"6/7/8",0,TRUE
+"365","glaucoma",6,"58","glaucoma","H42","Glaucoma in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"365","glaucoma",6,"58","glaucoma","Q15","Other congenital malformations of eye",17,"6/7/8",2,FALSE
+"366","cataract",6,"59","cataract","H25","Senile cataract",7,"6/7/8",0,TRUE
+"366","cataract",6,"59","cataract","H26","Other cataract",7,"6/7/8",0,TRUE
+"366","cataract",6,"59","cataract","H28","Cataract and other disorders of lens in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"369","blindness and low vision",6,"60","blindness and vision defects","H54","Visual impairment including blindness (binocular or monocular)",7,"6/7/8",0,TRUE
+"370","keratitis",6,"56","other eye disorders","H16","Keratitis",7,"6/7/8",0,TRUE
+"370","keratitis",6,"56","other eye disorders","H19","Disorders of sclera and cornea in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"371","corneal opacity and other disorders of cornea",6,"56","other eye disorders","H17","Corneal scars and opacities",7,"6/7/8",0,TRUE
+"371","corneal opacity and other disorders of cornea",6,"56","other eye disorders","H18","Other disorders of cornea",7,"6/7/8",0,TRUE
+"371","corneal opacity and other disorders of cornea",6,"56","other eye disorders","H19","Disorders of sclera and cornea in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"372","disorders of conjunctiva",6,"56","other eye disorders","H10","Conjunctivitis",7,"6/7/8",0,TRUE
+"372","disorders of conjunctiva",6,"56","other eye disorders","H11","Other disorders of conjunctiva",7,"6/7/8",0,TRUE
+"372","disorders of conjunctiva",6,"56","other eye disorders","H13","Disorders of conjunctiva in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"376","disorders of the orbit",6,"56","other eye disorders","H05","Disorders of orbit",7,"6/7/8",0,TRUE
+"376","disorders of the orbit",6,"56","other eye disorders","H06","Disorders of lacrimal system and orbit in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"377","disorders of optic nerve and visual pathways",6,"56","other eye disorders","H46","Optic neuritis",7,"6/7/8",0,TRUE
+"377","disorders of optic nerve and visual pathways",6,"56","other eye disorders","H47","Other disorders of optic [2nd] nerve and visual pathways",7,"6/7/8",0,TRUE
+"377","disorders of optic nerve and visual pathways",6,"56","other eye disorders","H48","Disorders of optic [2nd] nerve and visual pathways in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H15","Disorders of sclera",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H19","Disorders of sclera and cornea in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H27","Other disorders of lens",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H28","Cataract and other disorders of lens in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H43","Disorders of vitreous body",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H45","Disorders of vitreous body and globe in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H55","Nystagmus and other irregular eye movements",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H57","Other disorders of eye and adnexa",7,"6/7/8",0,TRUE
+"379","other disorders of eye",6,"56","other eye disorders","H58","Other disorders of eye and adnexa in diseases classified elsewhere",7,"6/7/8",0,TRUE
+"380","disorders of external ear",6,"61","other ear and sense organ disorders","H60","Otitis externa",8,"6/7/8",0,TRUE
+"380","disorders of external ear",6,"61","other ear and sense organ disorders","H61","Other disorders of external ear",8,"6/7/8",0,TRUE
+"380","disorders of external ear",6,"61","other ear and sense organ disorders","H62","Disorders of external ear in diseases classified elsewhere",8,"6/7/8",0,TRUE
+"381","nonsuppurative otitis media and eustachian tube disorders",6,"62","otitis media and related conditions","H65","Nonsuppurative otitis media",8,"6/7/8",0,TRUE
+"381","nonsuppurative otitis media and eustachian tube disorders",6,"62","otitis media and related conditions","H68","Eustachian salpingitis and obstruction",8,"6/7/8",0,TRUE
+"381","nonsuppurative otitis media and eustachian tube disorders",6,"62","otitis media and related conditions","H69","Other disorders of Eustachian tube",8,"6/7/8",0,TRUE
+"382","suppurative and unspecified otitis media",6,"62","otitis media and related conditions","H66","Suppurative and unspecified otitis media",8,"6/7/8",0,TRUE
+"382","suppurative and unspecified otitis media",6,"62","otitis media and related conditions","H67","Otitis media in diseases classified elsewhere",8,"6/7/8",0,TRUE
+"383","mastoiditis and related conditions",6,"62","otitis media and related conditions","H70","Mastoiditis and related conditions",8,"6/7/8",0,TRUE
+"383","mastoiditis and related conditions",6,"62","otitis media and related conditions","H75","Other disorders of middle ear and mastoid in diseases classified elsewhere",8,"6/7/8",0,TRUE
+"383","mastoiditis and related conditions",6,"62","otitis media and related conditions","H95","Postprocedural disorders of ear and mastoid process, not elsewhere classified",8,"6/7/8",0,TRUE
+"384","other disorders of tympanic membrane",6,"61","other ear and sense organ disorders","H72","Perforation of tympanic membrane",8,"6/7/8",0,TRUE
+"384","other disorders of tympanic membrane",6,"61","other ear and sense organ disorders","H73","Other disorders of tympanic membrane",8,"6/7/8",0,TRUE
+"386","vertiginous syndromes and other disorders of vestibular system",6,"63","conditions associated with dizziness or vertigo","H81","Disorders of vestibular function",8,"6/7/8",0,TRUE
+"386","vertiginous syndromes and other disorders of vestibular system",6,"63","conditions associated with dizziness or vertigo","H82","Vertiginous syndromes in diseases classified elsewhere",8,"6/7/8",0,TRUE
+"386","vertiginous syndromes and other disorders of vestibular system",6,"63","conditions associated with dizziness or vertigo","H83","Other diseases of inner ear",8,"6/7/8",0,TRUE
+"389","hearing loss",6,"61","other ear and sense organ disorders","H90","Conductive and sensorineural hearing loss",8,"6/7/8",0,TRUE
+"389","hearing loss",6,"61","other ear and sense organ disorders","H91","Other hearing loss",8,"6/7/8",0,TRUE
+"393","chronic rheumatic pericarditis",7,"64","peri endo and myocarditis cardiomyopathy","I09","Other rheumatic heart diseases",9,"9",0,TRUE
+"394","diseases of mitral valve",7,"65","heart valve disorders","I05","Rheumatic mitral valve diseases",9,"9",0,TRUE
+"394","diseases of mitral valve",7,"65","heart valve disorders","I08","Multiple valve diseases",9,"9",0,TRUE
+"395","diseases of aortic valve",7,"65","heart valve disorders","I06","Rheumatic aortic valve diseases",9,"9",0,TRUE
+"395","diseases of aortic valve",7,"65","heart valve disorders","I08","Multiple valve diseases",9,"9",0,TRUE
+"396","diseases of mitral and aortic valves",7,"65","heart valve disorders","I08","Multiple valve diseases",9,"9",0,TRUE
+"397","diseases of other endocardial structures",7,"65","heart valve disorders","I07","Rheumatic tricuspid valve diseases",9,"9",0,TRUE
+"397","diseases of other endocardial structures",7,"65","heart valve disorders","I08","Multiple valve diseases",9,"9",0,TRUE
+"397","diseases of other endocardial structures",7,"65","heart valve disorders","I09","Other rheumatic heart diseases",9,"9",0,TRUE
+"398","other rheumatic heart disease",7,"64","peri endo and myocarditis cardiomyopathy","I08","Multiple valve diseases",9,"9",0,TRUE
+"398","other rheumatic heart disease",7,"64","peri endo and myocarditis cardiomyopathy","I09","Other rheumatic heart diseases",9,"9",0,TRUE
+"401","essential hypertension",7,"66","hypertension","I10","Essential (primary) hypertension",9,"9",0,TRUE
+"402","hypertensive heart disease",7,"67","hypertension complications","I11","Hypertensive heart disease",9,"9",0,TRUE
+"403","hypertensive chronic kidney disease",7,"67","hypertension complications","I12","Hypertensive renal disease",9,"9",0,TRUE
+"404","hypertensive heart and chronic kidney disease",7,"67","hypertension complications","I13","Hypertensive heart and renal disease",9,"9",0,TRUE
+"405","secondary hypertension",7,"67","hypertension complications","I15","Secondary hypertension",9,"9",0,TRUE
+"410","acute myocardial infarction",7,"68","acute myocardial infarction","I21","Acute myocardial infarction",9,"9",0,TRUE
+"410","acute myocardial infarction",7,"68","acute myocardial infarction","I22","Subsequent myocardial infarction",9,"9",0,TRUE
+"410","acute myocardial infarction",7,"68","acute myocardial infarction","I51","Complications and ill-defined descriptions of heart disease",9,"9",0,TRUE
+"411","other acute and subacute forms of ischemic heart disease",7,"69","coronary atherosclerosis and other heart disease","I20","Angina pectoris",9,"9",0,TRUE
+"411","other acute and subacute forms of ischemic heart disease",7,"69","coronary atherosclerosis and other heart disease","I24","Other acute ischaemic heart diseases",9,"9",0,TRUE
+"412","old myocardial infarction",7,"69","coronary atherosclerosis and other heart disease","I25","Chronic ischaemic heart disease",9,"9",0,TRUE
+"413","angina pectoris",7,"69","coronary atherosclerosis and other heart disease","I20","Angina pectoris",9,"9",0,TRUE
+"414","other forms of chronic ischemic heart disease",7,"69","coronary atherosclerosis and other heart disease","I25","Chronic ischaemic heart disease",9,"9",0,TRUE
+"415","acute pulmonary heart disease",7,"70","pulmonary heart disease","I26","Pulmonary embolism",9,"9",0,TRUE
+"416","chronic pulmonary heart disease",7,"70","pulmonary heart disease","I27","Other pulmonary heart diseases",9,"9",0,TRUE
+"416","chronic pulmonary heart disease",7,"70","pulmonary heart disease","I52","Other heart disorders in diseases classified elsewhere",9,"9",0,TRUE
+"417","other diseases of pulmonary circulation",7,"70","pulmonary heart disease","I28","Other diseases of pulmonary vessels",9,"9",0,TRUE
+"423","other diseases of pericardium",7,"64","peri endo and myocarditis cardiomyopathy","I23","Certain current complications following acute myocardial infarction",9,"9",0,TRUE
+"423","other diseases of pericardium",7,"64","peri endo and myocarditis cardiomyopathy","I31","Other diseases of pericardium",9,"9",0,TRUE
+"424","other diseases of endocardium",7,"65","heart valve disorders","I34","Nonrheumatic mitral valve disorders",9,"9",0,TRUE
+"424","other diseases of endocardium",7,"65","heart valve disorders","I35","Nonrheumatic aortic valve disorders",9,"9",0,TRUE
+"424","other diseases of endocardium",7,"65","heart valve disorders","I36","Nonrheumatic tricuspid valve disorders",9,"9",0,TRUE
+"424","other diseases of endocardium",7,"65","heart valve disorders","I37","Pulmonary valve disorders",9,"9",0,TRUE
+"424","other diseases of endocardium",7,"65","heart valve disorders","I38","Endocarditis, valve unspecified",9,"9",0,TRUE
+"424","other diseases of endocardium",7,"65","heart valve disorders","I39","Endocarditis and heart valve disorders in diseases classified elsewhere",9,"9",0,TRUE
+"425","cardiomyopathy",7,"64","peri endo and myocarditis cardiomyopathy","I42","Cardiomyopathy",9,"9",0,TRUE
+"425","cardiomyopathy",7,"64","peri endo and myocarditis cardiomyopathy","I43","Cardiomyopathy in diseases classified elsewhere",9,"9",0,TRUE
+"425","cardiomyopathy",7,"64","peri endo and myocarditis cardiomyopathy","I52","Other heart disorders in diseases classified elsewhere",9,"9",0,TRUE
+"425","cardiomyopathy",7,"64","peri endo and myocarditis cardiomyopathy","I98","Other disorders of circulatory system in diseases classified elsewhere",9,"9",0,TRUE
+"426","conduction disorders",7,"71","conduction disorders","I44","Atrioventricular and left bundle-branch block",9,"9",0,TRUE
+"426","conduction disorders",7,"71","conduction disorders","I45","Other conduction disorders",9,"9",0,TRUE
+"427","cardiac dysrhythmias",7,"72","cardiac dysrhythmias arrest chf and ventricular fibrillation","I46","Cardiac arrest",9,"9",0,TRUE
+"427","cardiac dysrhythmias",7,"72","cardiac dysrhythmias arrest chf and ventricular fibrillation","I47","Paroxysmal tachycardia",9,"9",0,TRUE
+"427","cardiac dysrhythmias",7,"72","cardiac dysrhythmias arrest chf and ventricular fibrillation","I48","Atrial fibrillation and flutter",9,"9",0,TRUE
+"427","cardiac dysrhythmias",7,"72","cardiac dysrhythmias arrest chf and ventricular fibrillation","I49","Other cardiac arrhythmias",9,"9",0,TRUE
+"427","cardiac dysrhythmias",7,"72","cardiac dysrhythmias arrest chf and ventricular fibrillation","R00","Abnormalities of heart beat",18,"9",2,FALSE
+"428","heart failure",7,"72","cardiac dysrhythmias arrest chf and ventricular fibrillation","I50","Heart failure",9,"9",0,TRUE
+"429","illdefined descriptions and complications of heart disease",7,"73","other and illdefined heart disease","B33","Other viral diseases, not elsewhere classified",1,"9",2,FALSE
+"429","illdefined descriptions and complications of heart disease",7,"73","other and illdefined heart disease","I23","Certain current complications following acute myocardial infarction",9,"9",0,TRUE
+"429","illdefined descriptions and complications of heart disease",7,"73","other and illdefined heart disease","I25","Chronic ischaemic heart disease",9,"9",0,TRUE
+"429","illdefined descriptions and complications of heart disease",7,"73","other and illdefined heart disease","I41","Myocarditis in diseases classified elsewhere",9,"9",0,TRUE
+"429","illdefined descriptions and complications of heart disease",7,"73","other and illdefined heart disease","I46","Cardiac arrest",9,"9",0,TRUE
+"429","illdefined descriptions and complications of heart disease",7,"73","other and illdefined heart disease","I51","Complications and ill-defined descriptions of heart disease",9,"9",0,TRUE
+"429","illdefined descriptions and complications of heart disease",7,"73","other and illdefined heart disease","I97","Postprocedural disorders of circulatory system, not elsewhere classified",9,"9",0,TRUE
+"430","subarachnoid hemorrhage",7,"74","acute cerebrovascular disease","I60","Subarachnoid haemorrhage",9,"9",0,TRUE
+"431","intracerebral hemorrhage",7,"74","acute cerebrovascular disease","I61","Intracerebral haemorrhage",9,"9",0,TRUE
+"432","other and unspecified intracranial hemorrhage",7,"74","acute cerebrovascular disease","I62","Other nontraumatic intracranial haemorrhage",9,"9",0,TRUE
+"433","occlusion and stenosis of precerebral arteries",7,"74","acute cerebrovascular disease","I63","Cerebral infarction",9,"9",0,TRUE
+"433","occlusion and stenosis of precerebral arteries",7,"74","acute cerebrovascular disease","I65","Occlusion and stenosis of precerebral arteries, not resulting in cerebral infarction",9,"9",0,TRUE
+"433","occlusion and stenosis of precerebral arteries",7,"74","acute cerebrovascular disease","I66","Occlusion and stenosis of cerebral arteries, not resulting in cerebral infarction",9,"9",0,TRUE
+"434","occlusion of cerebral arteries",7,"74","acute cerebrovascular disease","G46","Vascular syndromes of brain in cerebrovascular diseases (I60-I67)",6,"9",1,FALSE
+"434","occlusion of cerebral arteries",7,"74","acute cerebrovascular disease","I63","Cerebral infarction",9,"9",0,TRUE
+"434","occlusion of cerebral arteries",7,"74","acute cerebrovascular disease","I66","Occlusion and stenosis of cerebral arteries, not resulting in cerebral infarction",9,"9",0,TRUE
+"435","transient cerebral ischemia",7,"75","transient cerebral ischemia","G45","Transient cerebral ischaemic attacks and related syndromes",6,"9",1,FALSE
+"436","acute but illdefined cerebrovascular disease",7,"74","acute cerebrovascular disease","G46","Vascular syndromes of brain in cerebrovascular diseases (I60-I67)",6,"9",1,FALSE
+"436","acute but illdefined cerebrovascular disease",7,"74","acute cerebrovascular disease","I64","Stroke, not specified as haemorrhage or infarction",9,"9",0,TRUE
+"437","other and illdefined cerebrovascular disease",7,"76","other and illdefined cerebrovascular disease","G45","Transient cerebral ischaemic attacks and related syndromes",6,"9",1,FALSE
+"437","other and illdefined cerebrovascular disease",7,"76","other and illdefined cerebrovascular disease","I63","Cerebral infarction",9,"9",0,TRUE
+"437","other and illdefined cerebrovascular disease",7,"76","other and illdefined cerebrovascular disease","I67","Other cerebrovascular diseases",9,"9",0,TRUE
+"437","other and illdefined cerebrovascular disease",7,"76","other and illdefined cerebrovascular disease","I68","Cerebrovascular disorders in diseases classified elsewhere",9,"9",0,TRUE
+"438","late effects of cerebrovascular disease",7,"76","other and illdefined cerebrovascular disease","I69","Sequelae of cerebrovascular disease",9,"9",0,TRUE
+"440","atherosclerosis",7,"77","other circulatory disease","I70","Atherosclerosis",9,"9",0,TRUE
+"441","aortic aneurysm and dissection",7,"77","other circulatory disease","I71","Aortic aneurysm and dissection",9,"9",0,TRUE
+"442","other aneurysm",7,"77","other circulatory disease","I72","Other aneurysm and dissection",9,"9",0,TRUE
+"443","other peripheral vascular disease",7,"77","other circulatory disease","I73","Other peripheral vascular diseases",9,"9",0,TRUE
+"443","other peripheral vascular disease",7,"77","other circulatory disease","I79","Disorders of arteries, arterioles and capillaries in diseases classified elsewhere",9,"9",0,TRUE
+"444","arterial embolism and thrombosis",7,"78","aortic and peripheral arterial embolism or thrombosis","I74","Arterial embolism and thrombosis",9,"9",0,TRUE
+"446","polyarteritis nodosa and allied conditions",7,"77","other circulatory disease","M30","Polyarteritis nodosa and related conditions",13,"9",2,FALSE
+"446","polyarteritis nodosa and allied conditions",7,"77","other circulatory disease","M31","Other necrotizing vasculopathies",13,"9",2,FALSE
+"447","other disorders of arteries and arterioles",7,"77","other circulatory disease","I77","Other disorders of arteries and arterioles",9,"9",0,TRUE
+"447","other disorders of arteries and arterioles",7,"77","other circulatory disease","M30","Polyarteritis nodosa and related conditions",13,"9",2,FALSE
+"447","other disorders of arteries and arterioles",7,"77","other circulatory disease","M31","Other necrotizing vasculopathies",13,"9",2,FALSE
+"448","disease of capillaries",7,"77","other circulatory disease","I78","Diseases of capillaries",9,"9",0,TRUE
+"448","disease of capillaries",7,"77","other circulatory disease","I79","Disorders of arteries, arterioles and capillaries in diseases classified elsewhere",9,"9",0,TRUE
+"453","other venous embolism and thrombosis",7,"79","phlebitis thrombophlebitis and thromboembolism","I82","Other venous embolism and thrombosis",9,"9",0,TRUE
+"456","varicose veins of other sites",7,"80","other diseases of veins and lymphatics","I85","Oesophageal varices",9,"9",0,TRUE
+"456","varicose veins of other sites",7,"80","other diseases of veins and lymphatics","I86","Varicose veins of other sites",9,"9",0,TRUE
+"456","varicose veins of other sites",7,"80","other diseases of veins and lymphatics","I98","Other disorders of circulatory system in diseases classified elsewhere",9,"9",0,TRUE
+"457","noninfectious disorders of lymphatic channels",7,"80","other diseases of veins and lymphatics","I89","Other noninfective disorders of lymphatic vessels and lymph nodes",9,"9",0,TRUE
+"457","noninfectious disorders of lymphatic channels",7,"80","other diseases of veins and lymphatics","I97","Postprocedural disorders of circulatory system, not elsewhere classified",9,"9",0,TRUE
+"459","other disorders of circulatory system",7,"80","other diseases of veins and lymphatics","I87","Other disorders of veins",9,"9",0,TRUE
+"459","other disorders of circulatory system",7,"80","other diseases of veins and lymphatics","I99","Other and unspecified disorders of circulatory system",9,"9",0,TRUE
+"459","other disorders of circulatory system",7,"80","other diseases of veins and lymphatics","R58","Haemorrhage, not elsewhere classified",18,"9",2,FALSE
+"472","chronic pharyngitis and nasopharyngitis",8,"81","other upper respiratory disease","J31","Chronic rhinitis, nasopharyngitis and pharyngitis",10,"10",0,TRUE
+"473","chronic sinusitis",8,"82","other upper respiratory infections","J32","Chronic sinusitis",10,"10",0,TRUE
+"474","chronic disease of tonsils and adenoids",8,"83","acute and chronic tonsillitis","J35","Chronic diseases of tonsils and adenoids",10,"10",0,TRUE
+"476","chronic laryngitis and laryngotracheitis",8,"81","other upper respiratory disease","J37","Chronic laryngitis and laryngotracheitis",10,"10",0,TRUE
+"477","allergic rhinitis",8,"81","other upper respiratory disease","J30","Vasomotor and allergic rhinitis",10,"10",0,TRUE
+"478","other diseases of upper respiratory tract",8,"81","other upper respiratory disease","J34","Other disorders of nose and nasal sinuses",10,"10",0,TRUE
+"478","other diseases of upper respiratory tract",8,"81","other upper respiratory disease","J38","Diseases of vocal cords and larynx, not elsewhere classified",10,"10",0,TRUE
+"478","other diseases of upper respiratory tract",8,"81","other upper respiratory disease","J39","Other diseases of upper respiratory tract",10,"10",0,TRUE
+"478","other diseases of upper respiratory tract",8,"81","other upper respiratory disease","J95","Postprocedural respiratory disorders, not elsewhere classified",10,"10",0,TRUE
+"491","chronic bronchitis",8,"84","chronic obstructive pulmonary disease copd","J41","Simple and mucopurulent chronic bronchitis",10,"10",0,TRUE
+"491","chronic bronchitis",8,"84","chronic obstructive pulmonary disease copd","J42","Unspecified chronic bronchitis",10,"10",0,TRUE
+"491","chronic bronchitis",8,"84","chronic obstructive pulmonary disease copd","J44","Other chronic obstructive pulmonary disease",10,"10",0,TRUE
+"492","emphysema",8,"84","chronic obstructive pulmonary disease copd","J43","Emphysema",10,"10",0,TRUE
+"493","asthma",8,"85","asthma","J45","Asthma",10,"10",0,TRUE
+"494","bronchiectasis",8,"84","chronic obstructive pulmonary disease copd","J47","Bronchiectasis",10,"10",0,TRUE
+"495","extrinsic allergic alveolitis",8,"86","lung disease due to external agents","J67","Hypersensitivity pneumonitis due to organic dust",10,"10",0,TRUE
+"496","chronic airway obstruction not elsewhere classified",8,"84","chronic obstructive pulmonary disease copd","J44","Other chronic obstructive pulmonary disease",10,"10",0,TRUE
+"500","coal workers pneumoconiosis",8,"86","lung disease due to external agents","J60","Coalworker's pneumoconiosis",10,"10",0,TRUE
+"501","asbestosis",8,"86","lung disease due to external agents","J61","Pneumoconiosis due to asbestos and other mineral fibres",10,"10",0,TRUE
+"502","pneumoconiosis due to other silica or silicates",8,"86","lung disease due to external agents","J62","Pneumoconiosis due to dust containing silica",10,"10",0,TRUE
+"503","pneumoconiosis due to other inorganic dust",8,"86","lung disease due to external agents","J63","Pneumoconiosis due to other inorganic dusts",10,"10",0,TRUE
+"504","pneumonopathy due to inhalation of other dust",8,"86","lung disease due to external agents","J66","Airway disease due to specific organic dust",10,"10",0,TRUE
+"505","pneumoconiosis unspecified",8,"86","lung disease due to external agents","J64","Unspecified pneumoconiosis",10,"10",0,TRUE
+"505","pneumoconiosis unspecified",8,"86","lung disease due to external agents","J65","Pneumoconiosis associated with tuberculosis",10,"10",0,TRUE
+"506","respiratory conditions due to chemical fumes and vapors",8,"86","lung disease due to external agents","J68","Respiratory conditions due to inhalation of chemicals, gases, fumes and vapours",10,"10",0,TRUE
+"508","respiratory conditions due to other and unspecified external agents",8,"86","lung disease due to external agents","J70","Respiratory conditions due to other external agents",10,"10",0,TRUE
+"512","pneumothorax and air leak",8,"87","other lower respiratory disease","J93","Pneumothorax",10,"10",0,TRUE
+"512","pneumothorax and air leak",8,"87","other lower respiratory disease","J95","Postprocedural respiratory disorders, not elsewhere classified",10,"10",0,TRUE
+"514","pulmonary congestion and hypostasis",8,"87","other lower respiratory disease","J18","Pneumonia, organism unspecified",10,"10",0,TRUE
+"516","other alveolar and parietoalveolar pneumonopathy",8,"87","other lower respiratory disease","J84","Other interstitial pulmonary diseases",10,"10",0,TRUE
+"517","lung involvement in conditions classified elsewhere",8,"87","other lower respiratory disease","J99","Respiratory disorders in diseases classified elsewhere",10,"10",0,TRUE
+"518","other diseases of lung",8,"88","respiratory failure pulmonary collapse","J80","Adult respiratory distress syndrome",10,"10",0,TRUE
+"518","other diseases of lung",8,"88","respiratory failure pulmonary collapse","J81","Pulmonary oedema",10,"10",0,TRUE
+"518","other diseases of lung",8,"88","respiratory failure pulmonary collapse","J82","Pulmonary eosinophilia, not elsewhere classified",10,"10",0,TRUE
+"518","other diseases of lung",8,"88","respiratory failure pulmonary collapse","J95","Postprocedural respiratory disorders, not elsewhere classified",10,"10",0,TRUE
+"518","other diseases of lung",8,"88","respiratory failure pulmonary collapse","J96","Respiratory failure, not elsewhere classified",10,"10",0,TRUE
+"518","other diseases of lung",8,"88","respiratory failure pulmonary collapse","J98","Other respiratory disorders",10,"10",0,TRUE
+"518","other diseases of lung",8,"88","respiratory failure pulmonary collapse","Z90","Acquired absence of organs, not elsewhere classified",21,"10",2,FALSE
+"523","gingival and periodontal diseases",9,"89","disorders of teeth and jaw","K03","Other diseases of hard tissues of teeth",11,"11",0,TRUE
+"523","gingival and periodontal diseases",9,"89","disorders of teeth and jaw","K05","Gingivitis and periodontal diseases",11,"11",0,TRUE
+"523","gingival and periodontal diseases",9,"89","disorders of teeth and jaw","K06","Other disorders of gingiva and edentulous alveolar ridge",11,"11",0,TRUE
+"525","other diseases and conditions of the teeth and supporting structures",9,"89","disorders of teeth and jaw","K08","Other disorders of teeth and supporting structures",11,"11",0,TRUE
+"530","diseases of oesophagus",9,"90","esophageal disorders","K20","Oesophagitis",11,"11",0,TRUE
+"530","diseases of oesophagus",9,"90","esophageal disorders","K21","Gastro-oesophageal reflux disease",11,"11",0,TRUE
+"530","diseases of oesophagus",9,"90","esophageal disorders","K22","Other diseases of oesophagus",11,"11",0,TRUE
+"530","diseases of oesophagus",9,"90","esophageal disorders","K23","Disorders of oesophagus in diseases classified elsewhere",11,"11",0,TRUE
+"531","gastric ulcer",9,"91","gasduo ulcer without hemorrhage","K25","Gastric ulcer",11,"11",0,TRUE
+"532","duodenal ulcer",9,"91","gasduo ulcer without hemorrhage","K26","Duodenal ulcer",11,"11",0,TRUE
+"533","peptic ulcer site unspecified",9,"91","gasduo ulcer without hemorrhage","K27","Peptic ulcer, site unspecified",11,"11",0,TRUE
+"534","gastrojejunal ulcer",9,"91","gasduo ulcer without hemorrhage","K28","Gastrojejunal ulcer",11,"11",0,TRUE
+"535","gastritis and duodenitis",9,"92","gastritis and duodenitis","K29","Gastritis and duodenitis",11,"11",0,TRUE
+"537","other diseases of stomach and duodenum",9,"93","other disorders of stomach and duodenum","K31","Other diseases of stomach and duodenum",11,"11",0,TRUE
+"555","regional enteritis",9,"94","regional enteritis and ulcerative colitis","K50","Crohn's disease [regional enteritis]",11,"11",0,TRUE
+"556","ulcerative colitis",9,"94","regional enteritis and ulcerative colitis","K51","Ulcerative colitis",11,"11",0,TRUE
+"557","vascular insufficiency of intestine",9,"77","other circulatory disease","K55","Vascular disorders of intestine",11,"11",0,TRUE
+"558","other and unspecified noninfectious gastroenteritis and colitis",9,"95","noninfectious gastroenteritis","A09","Other gastroenteritis and colitis of infectious and unspecified origin",1,"11",2,FALSE
+"558","other and unspecified noninfectious gastroenteritis and colitis",9,"95","noninfectious gastroenteritis","K52","Other noninfective gastroenteritis and colitis",11,"11",0,TRUE
+"562","diverticula of intestine",9,"96","diverticulosis and diverticulitis","K57","Diverticular disease of intestine",11,"11",0,TRUE
+"564","functional digestive disorders not elsewhere classified",9,"97","other gastrointestinal disorders","K58","Irritable bowel syndrome",11,"11",0,TRUE
+"564","functional digestive disorders not elsewhere classified",9,"97","other gastrointestinal disorders","K59","Other functional intestinal disorders",11,"11",0,TRUE
+"564","functional digestive disorders not elsewhere classified",9,"97","other gastrointestinal disorders","K91","Postprocedural disorders of digestive system, not elsewhere classified",11,"11",0,TRUE
+"564","functional digestive disorders not elsewhere classified",9,"97","other gastrointestinal disorders","K93","Disorders of other digestive organs in diseases classified elsewhere",11,"11",0,TRUE
+"571","chronic liver disease and cirrhosis",9,"98","hepatitis and other liver diseases","K70","Alcoholic liver disease",11,"11",0,TRUE
+"571","chronic liver disease and cirrhosis",9,"98","hepatitis and other liver diseases","K73","Chronic hepatitis, not elsewhere classified",11,"11",0,TRUE
+"571","chronic liver disease and cirrhosis",9,"98","hepatitis and other liver diseases","K74","Fibrosis and cirrhosis of liver",11,"11",0,TRUE
+"571","chronic liver disease and cirrhosis",9,"98","hepatitis and other liver diseases","K76","Other diseases of liver",11,"11",0,TRUE
+"572","liver abscess and sequelae of chronic liver disease",9,"98","hepatitis and other liver diseases","K70","Alcoholic liver disease",11,"11",0,TRUE
+"572","liver abscess and sequelae of chronic liver disease",9,"98","hepatitis and other liver diseases","K72","Hepatic failure, not elsewhere classified",11,"11",0,TRUE
+"572","liver abscess and sequelae of chronic liver disease",9,"98","hepatitis and other liver diseases","K75","Other inflammatory liver diseases",11,"11",0,TRUE
+"572","liver abscess and sequelae of chronic liver disease",9,"98","hepatitis and other liver diseases","K76","Other diseases of liver",11,"11",0,TRUE
+"572","liver abscess and sequelae of chronic liver disease",9,"98","hepatitis and other liver diseases","K77","Liver disorders in diseases classified elsewhere",11,"11",0,TRUE
+"573","other diseases of liver",9,"98","hepatitis and other liver diseases","K71","Toxic liver disease",11,"11",0,TRUE
+"573","other diseases of liver",9,"98","hepatitis and other liver diseases","K75","Other inflammatory liver diseases",11,"11",0,TRUE
+"573","other diseases of liver",9,"98","hepatitis and other liver diseases","K76","Other diseases of liver",11,"11",0,TRUE
+"573","other diseases of liver",9,"98","hepatitis and other liver diseases","K77","Liver disorders in diseases classified elsewhere",11,"11",0,TRUE
+"575","other disorders of gallbladder",9,"99","biliary tract disease","K81","Cholecystitis",11,"11",0,TRUE
+"575","other disorders of gallbladder",9,"99","biliary tract disease","K82","Other diseases of gallbladder",11,"11",0,TRUE
+"575","other disorders of gallbladder",9,"99","biliary tract disease","K87","Disorders of gallbladder, biliary tract and pancreas in diseases classified elsewhere",11,"11",0,TRUE
+"576","other disorders of biliary tract",9,"99","biliary tract disease","K83","Other diseases of biliary tract",11,"11",0,TRUE
+"576","other disorders of biliary tract",9,"99","biliary tract disease","K91","Postprocedural disorders of digestive system, not elsewhere classified",11,"11",0,TRUE
+"577","diseases of pancreas",9,"100","pancreatic disorders excluding diabetes","K85","Acute pancreatitis",11,"11",0,TRUE
+"577","diseases of pancreas",9,"100","pancreatic disorders excluding diabetes","K86","Other diseases of pancreas",11,"11",0,TRUE
+"577","diseases of pancreas",9,"100","pancreatic disorders excluding diabetes","K87","Disorders of gallbladder, biliary tract and pancreas in diseases classified elsewhere",11,"11",0,TRUE
+"579","intestinal malabsorption",9,"97","other gastrointestinal disorders","K90","Intestinal malabsorption",11,"11",0,TRUE
+"579","intestinal malabsorption",9,"97","other gastrointestinal disorders","K91","Postprocedural disorders of digestive system, not elsewhere classified",11,"11",0,TRUE
+"581","nephrotic syndrome",10,"101","chronic kideny disease and related conditions","N04","Nephrotic syndrome",14,"14",0,TRUE
+"581","nephrotic syndrome",10,"101","chronic kideny disease and related conditions","N05","Unspecified nephritic syndrome",14,"14",0,TRUE
+"581","nephrotic syndrome",10,"101","chronic kideny disease and related conditions","N08","Glomerular disorders in diseases classified elsewhere",14,"14",0,TRUE
+"581","nephrotic syndrome",10,"101","chronic kideny disease and related conditions","N16","Renal tubulo-interstitial disorders in diseases classified elsewhere",14,"14",0,TRUE
+"582","chronic glomerulonephritis",10,"101","chronic kideny disease and related conditions","N03","Chronic nephritic syndrome",14,"14",0,TRUE
+"582","chronic glomerulonephritis",10,"101","chronic kideny disease and related conditions","N08","Glomerular disorders in diseases classified elsewhere",14,"14",0,TRUE
+"583","nephritis and nephropathy not specified as acute or chronic",10,"101","chronic kideny disease and related conditions","N01","Rapidly progressive nephritic syndrome",14,"14",0,TRUE
+"583","nephritis and nephropathy not specified as acute or chronic",10,"101","chronic kideny disease and related conditions","N05","Unspecified nephritic syndrome",14,"14",0,TRUE
+"583","nephritis and nephropathy not specified as acute or chronic",10,"101","chronic kideny disease and related conditions","N07","Hereditary nephropathy, not elsewhere classified",14,"14",0,TRUE
+"583","nephritis and nephropathy not specified as acute or chronic",10,"101","chronic kideny disease and related conditions","N08","Glomerular disorders in diseases classified elsewhere",14,"14",0,TRUE
+"583","nephritis and nephropathy not specified as acute or chronic",10,"101","chronic kideny disease and related conditions","N14","Drug- and heavy-metal-induced tubulo-interstitial and tubular conditions",14,"14",0,TRUE
+"583","nephritis and nephropathy not specified as acute or chronic",10,"101","chronic kideny disease and related conditions","N15","Other renal tubulo-interstitial diseases",14,"14",0,TRUE
+"583","nephritis and nephropathy not specified as acute or chronic",10,"101","chronic kideny disease and related conditions","N29","Other disorders of kidney and ureter in diseases classified elsewhere",14,"14",0,TRUE
+"585","chronic kidney disease",10,"101","chronic kideny disease and related conditions","N18","Chronic kidney disease",14,"14",0,TRUE
+"586","renal failure unspecified",10,"101","chronic kideny disease and related conditions","N19","Unspecified kidney failure",14,"14",0,TRUE
+"587","renal sclerosis unspecified",10,"101","chronic kideny disease and related conditions","N26","Unspecified contracted kidney",14,"14",0,TRUE
+"588","disorders resulting from impaired renal function",10,"102","other diseases of kidney and ureters","N25","Disorders resulting from impaired renal tubular function",14,"14",0,TRUE
+"590","infections of kidney",10,"103","urinary tract infections","N10","Acute tubulo-interstitial nephritis",14,"14",0,TRUE
+"590","infections of kidney",10,"103","urinary tract infections","N11","Chronic tubulo-interstitial nephritis",14,"14",0,TRUE
+"590","infections of kidney",10,"103","urinary tract infections","N12","Tubulo-interstitial nephritis, not specified as acute or chronic",14,"14",0,TRUE
+"590","infections of kidney",10,"103","urinary tract infections","N13","Obstructive and reflux uropathy",14,"14",0,TRUE
+"590","infections of kidney",10,"103","urinary tract infections","N15","Other renal tubulo-interstitial diseases",14,"14",0,TRUE
+"590","infections of kidney",10,"103","urinary tract infections","N16","Renal tubulo-interstitial disorders in diseases classified elsewhere",14,"14",0,TRUE
+"590","infections of kidney",10,"103","urinary tract infections","N28","Other disorders of kidney and ureter, not elsewhere classified",14,"14",0,TRUE
+"595","cystitis",10,"103","urinary tract infections","N30","Cystitis",14,"14",0,TRUE
+"595","cystitis",10,"103","urinary tract infections","N33","Bladder disorders in diseases classified elsewhere",14,"14",0,TRUE
+"596","other disorders of bladder",10,"104","other diseases of bladder and urethra","N31","Neuromuscular dysfunction of bladder, not elsewhere classified",14,"14",0,TRUE
+"596","other disorders of bladder",10,"104","other diseases of bladder and urethra","N32","Other disorders of bladder",14,"14",0,TRUE
+"596","other disorders of bladder",10,"104","other diseases of bladder and urethra","N33","Bladder disorders in diseases classified elsewhere",14,"14",0,TRUE
+"596","other disorders of bladder",10,"104","other diseases of bladder and urethra","Z90","Acquired absence of organs, not elsewhere classified",21,"14",2,FALSE
+"599","other disorders of urethra and urinary tract",10,"104","other diseases of bladder and urethra","N02","Recurrent and persistent haematuria",14,"14",0,TRUE
+"599","other disorders of urethra and urinary tract",10,"104","other diseases of bladder and urethra","N13","Obstructive and reflux uropathy",14,"14",0,TRUE
+"599","other disorders of urethra and urinary tract",10,"104","other diseases of bladder and urethra","N36","Other disorders of urethra",14,"14",0,TRUE
+"599","other disorders of urethra and urinary tract",10,"104","other diseases of bladder and urethra","N37","Urethral disorders in diseases classified elsewhere",14,"14",0,TRUE
+"599","other disorders of urethra and urinary tract",10,"104","other diseases of bladder and urethra","N39","Other disorders of urinary system",14,"14",0,TRUE
+"599","other disorders of urethra and urinary tract",10,"104","other diseases of bladder and urethra","R31","Unspecified haematuria",18,"14",2,FALSE
+"600","hyperplasia of prostate",10,"105","hyperplasia of prostate","N40","Hyperplasia of prostate",14,"14",0,TRUE
+"601","inflammatory diseases of prostate",10,"106","other male genital disorders","N41","Inflammatory diseases of prostate",14,"14",0,TRUE
+"607","disorders of penis",10,"106","other male genital disorders","N48","Other disorders of penis",14,"14",0,TRUE
+"607","disorders of penis",10,"106","other male genital disorders","N51","Disorders of male genital organs in diseases classified elsewhere",14,"14",0,TRUE
+"610","benign mammary dysplasias",10,"107","nonmalignant breast conditions","N60","Benign mammary dysplasia",14,"14",0,TRUE
+"614","inflammatory disease of ovary fallopian tube pelvic cellular tissue and peritoneum",10,"108","other female genital disorders","N70","Salpingitis and oophoritis",14,"14",0,TRUE
+"614","inflammatory disease of ovary fallopian tube pelvic cellular tissue and peritoneum",10,"108","other female genital disorders","N73","Other female pelvic inflammatory diseases",14,"14",0,TRUE
+"614","inflammatory disease of ovary fallopian tube pelvic cellular tissue and peritoneum",10,"108","other female genital disorders","N74","Female pelvic inflammatory disorders in diseases classified elsewhere",14,"14",0,TRUE
+"614","inflammatory disease of ovary fallopian tube pelvic cellular tissue and peritoneum",10,"108","other female genital disorders","N99","Postprocedural disorders of genitourinary system, not elsewhere classified",14,"14",0,TRUE
+"615","inflammatory diseases of uterus except cervix",10,"108","other female genital disorders","N71","Inflammatory disease of uterus, except cervix",14,"14",0,TRUE
+"617","endometriosis",10,"108","other female genital disorders","N80","Endometriosis",14,"14",0,TRUE
+"618","genital prolapse",10,"110","prolapse of female genital organs","N81","Female genital prolapse",14,"14",0,TRUE
+"618","genital prolapse",10,"110","prolapse of female genital organs","N99","Postprocedural disorders of genitourinary system, not elsewhere classified",14,"14",0,TRUE
+"619","fistula involving female genital tract",10,"108","other female genital disorders","N82","Fistulae involving female genital tract",14,"14",0,TRUE
+"621","disorders of uterus not elsewhere classified",10,"108","other female genital disorders","N84","Polyp of female genital tract",14,"14",0,TRUE
+"621","disorders of uterus not elsewhere classified",10,"108","other female genital disorders","N85","Other noninflammatory disorders of uterus, except cervix",14,"14",0,TRUE
+"625","pain and other symptoms associated with female genital organs",10,"108","other female genital disorders","N39","Other disorders of urinary system",14,"14",0,TRUE
+"625","pain and other symptoms associated with female genital organs",10,"108","other female genital disorders","N94","Pain and other conditions associated with female genital organs and menstrual cycle",14,"14",0,TRUE
+"626","disorders of menstruation and other abnormal bleeding from female genital tract",10,"109","menstrual disorders","N89","Other noninflammatory disorders of vagina",14,"14",0,TRUE
+"626","disorders of menstruation and other abnormal bleeding from female genital tract",10,"109","menstrual disorders","N91","Absent, scanty and rare menstruation",14,"14",0,TRUE
+"626","disorders of menstruation and other abnormal bleeding from female genital tract",10,"109","menstrual disorders","N92","Excessive, frequent and irregular menstruation",14,"14",0,TRUE
+"626","disorders of menstruation and other abnormal bleeding from female genital tract",10,"109","menstrual disorders","N93","Other abnormal uterine and vaginal bleeding",14,"14",0,TRUE
+"627","menopausal and postmenopausal disorders",10,"111","menopausal disorders","N92","Excessive, frequent and irregular menstruation",14,"14",0,TRUE
+"627","menopausal and postmenopausal disorders",10,"111","menopausal disorders","N95","Menopausal and other perimenopausal disorders",14,"14",0,TRUE
+"628","female infertility",10,"112","female infertility","N97","Female infertility",14,"14",0,TRUE
+"629","other disorders of female genital organs",10,"108","other female genital disorders","N84","Polyp of female genital tract",14,"14",0,TRUE
+"629","other disorders of female genital organs",10,"108","other female genital disorders","N94","Pain and other conditions associated with female genital organs and menstrual cycle",14,"14",0,TRUE
+"629","other disorders of female genital organs",10,"108","other female genital disorders","N96","Habitual aborter",14,"14",0,TRUE
+"691","atopic dermatitis and related conditions",12,"113","allergic reactions","L20","Atopic dermatitis",12,"12",0,TRUE
+"691","atopic dermatitis and related conditions",12,"113","allergic reactions","L22","Diaper [napkin] dermatitis",12,"12",0,TRUE
+"694","bullous dermatoses",12,"114","other inflammatory condition of skin","L10","Pemphigus",12,"12",0,TRUE
+"694","bullous dermatoses",12,"114","other inflammatory condition of skin","L12","Pemphigoid",12,"12",0,TRUE
+"694","bullous dermatoses",12,"114","other inflammatory condition of skin","L13","Other bullous disorders",12,"12",0,TRUE
+"694","bullous dermatoses",12,"114","other inflammatory condition of skin","L14","Bullous disorders in diseases classified elsewhere",12,"12",0,TRUE
+"694","bullous dermatoses",12,"114","other inflammatory condition of skin","L40","Psoriasis",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L00","Staphylococcal scalded skin syndrome",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L26","Exfoliative dermatitis",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L30","Other dermatitis",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L51","Erythema multiforme",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L52","Erythema nodosum",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L53","Other erythematous conditions",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L54","Erythema in diseases classified elsewhere",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L71","Rosacea",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L92","Granulomatous disorders of skin and subcutaneous tissue",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L93","Lupus erythematosus",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L95","Vasculitis limited to skin, not elsewhere classified",12,"12",0,TRUE
+"695","erythematous conditions",12,"114","other inflammatory condition of skin","L98","Other disorders of skin and subcutaneous tissue, not elsewhere classified",12,"12",0,TRUE
+"696","psoriasis and similar disorders",12,"114","other inflammatory condition of skin","L30","Other dermatitis",12,"12",0,TRUE
+"696","psoriasis and similar disorders",12,"114","other inflammatory condition of skin","L40","Psoriasis",12,"12",0,TRUE
+"696","psoriasis and similar disorders",12,"114","other inflammatory condition of skin","L41","Parapsoriasis",12,"12",0,TRUE
+"696","psoriasis and similar disorders",12,"114","other inflammatory condition of skin","L42","Pityriasis rosea",12,"12",0,TRUE
+"696","psoriasis and similar disorders",12,"114","other inflammatory condition of skin","L44","Other papulosquamous disorders",12,"12",0,TRUE
+"696","psoriasis and similar disorders",12,"114","other inflammatory condition of skin","L94","Other localized connective tissue disorders",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L11","Other acantholytic disorders",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L57","Skin changes due to chronic exposure to nonionizing radiation",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L66","Cicatricial alopecia [scarring hair loss]",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L83","Acanthosis nigricans",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L85","Other epidermal thickening",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L86","Keratoderma in diseases classified elsewhere",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L87","Transepidermal elimination disorders",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L90","Atrophic disorders of skin",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L91","Hypertrophic disorders of skin",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L94","Other localized connective tissue disorders",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L95","Vasculitis limited to skin, not elsewhere classified",12,"12",0,TRUE
+"701","other hypertrophic and atrophic conditions of skin",12,"115","other skin disorders","L98","Other disorders of skin and subcutaneous tissue, not elsewhere classified",12,"12",0,TRUE
+"705","diseases of sweat glands",12,"115","other skin disorders","L30","Other dermatitis",12,"12",0,TRUE
+"705","diseases of sweat glands",12,"115","other skin disorders","L73","Other follicular disorders",12,"12",0,TRUE
+"705","diseases of sweat glands",12,"115","other skin disorders","L74","Eccrine sweat disorders",12,"12",0,TRUE
+"705","diseases of sweat glands",12,"115","other skin disorders","L75","Apocrine sweat disorders",12,"12",0,TRUE
+"707","chronic ulcer of skin",12,"116","chronic ulcer of skin","L89","Decubitus [pressure] ulcer and pressure area",12,"12",0,TRUE
+"707","chronic ulcer of skin",12,"116","chronic ulcer of skin","L97","Ulcer of lower limb, not elsewhere classified",12,"12",0,TRUE
+"707","chronic ulcer of skin",12,"116","chronic ulcer of skin","L98","Other disorders of skin and subcutaneous tissue, not elsewhere classified",12,"12",0,TRUE
+"710","diffuse diseases of connective tissue",13,"117","systemic lupus erythematosus and connective tissue disorders","L87","Transepidermal elimination disorders",12,"13",1,FALSE
+"710","diffuse diseases of connective tissue",13,"117","systemic lupus erythematosus and connective tissue disorders","M32","Systemic lupus erythematosus",13,"13",0,TRUE
+"710","diffuse diseases of connective tissue",13,"117","systemic lupus erythematosus and connective tissue disorders","M33","Dermatopolymyositis",13,"13",0,TRUE
+"710","diffuse diseases of connective tissue",13,"117","systemic lupus erythematosus and connective tissue disorders","M34","Systemic sclerosis",13,"13",0,TRUE
+"710","diffuse diseases of connective tissue",13,"117","systemic lupus erythematosus and connective tissue disorders","M35","Other systemic involvement of connective tissue",13,"13",0,TRUE
+"710","diffuse diseases of connective tissue",13,"117","systemic lupus erythematosus and connective tissue disorders","M36","Systemic disorders of connective tissue in diseases classified elsewhere",13,"13",0,TRUE
+"712","crystal arthropathies",13,"37","gout and other crystal arthropathies","M11","Other crystal arthropathies",13,"13",0,TRUE
+"713","arthropathy associated with other disorders classified elsewhere",13,"118","joint disorders","M07","Psoriatic and enteropathic arthropathies",13,"13",0,TRUE
+"713","arthropathy associated with other disorders classified elsewhere",13,"118","joint disorders","M14","Arthropathies in other diseases classified elsewhere",13,"13",0,TRUE
+"713","arthropathy associated with other disorders classified elsewhere",13,"118","joint disorders","M36","Systemic disorders of connective tissue in diseases classified elsewhere",13,"13",0,TRUE
+"713","arthropathy associated with other disorders classified elsewhere",13,"118","joint disorders","M49","Spondylopathies in diseases classified elsewhere",13,"13",0,TRUE
+"714","rheumatoid arthritis and other inflammatory polyarthropathies",13,"119","rheumatoid arthritis and related disease","M05","Seropositive rheumatoid arthritis",13,"13",0,TRUE
+"714","rheumatoid arthritis and other inflammatory polyarthropathies",13,"119","rheumatoid arthritis and related disease","M06","Other rheumatoid arthritis",13,"13",0,TRUE
+"714","rheumatoid arthritis and other inflammatory polyarthropathies",13,"119","rheumatoid arthritis and related disease","M08","Juvenile arthritis",13,"13",0,TRUE
+"714","rheumatoid arthritis and other inflammatory polyarthropathies",13,"119","rheumatoid arthritis and related disease","M09","Juvenile arthritis in diseases classified elsewhere",13,"13",0,TRUE
+"714","rheumatoid arthritis and other inflammatory polyarthropathies",13,"119","rheumatoid arthritis and related disease","M12","Other specific arthropathies",13,"13",0,TRUE
+"715","osteoarthrosis and allied disorders",13,"120","osteoarthritis","M15","Polyarthrosis",13,"13",0,TRUE
+"715","osteoarthrosis and allied disorders",13,"120","osteoarthritis","M16","Coxarthrosis [arthrosis of hip]",13,"13",0,TRUE
+"715","osteoarthrosis and allied disorders",13,"120","osteoarthritis","M17","Gonarthrosis [arthrosis of knee]",13,"13",0,TRUE
+"715","osteoarthrosis and allied disorders",13,"120","osteoarthritis","M18","Arthrosis of first carpometacarpal joint",13,"13",0,TRUE
+"715","osteoarthrosis and allied disorders",13,"120","osteoarthritis","M19","Other arthrosis",13,"13",0,TRUE
+"715","osteoarthrosis and allied disorders",13,"120","osteoarthritis","M89","Other disorders of bone",13,"13",0,TRUE
+"716","other and unspecified arthropathies",13,"118","joint disorders","M02","Reactive arthropathies",13,"13",0,TRUE
+"716","other and unspecified arthropathies",13,"118","joint disorders","M12","Other specific arthropathies",13,"13",0,TRUE
+"716","other and unspecified arthropathies",13,"118","joint disorders","M13","Other arthritis",13,"13",0,TRUE
+"716","other and unspecified arthropathies",13,"118","joint disorders","M15","Polyarthrosis",13,"13",0,TRUE
+"717","internal derangement of knee",13,"118","joint disorders","M22","Disorders of patella",13,"13",0,TRUE
+"717","internal derangement of knee",13,"118","joint disorders","M23","Internal derangement of knee",13,"13",0,TRUE
+"718","other derangement of joint",13,"118","joint disorders","M22","Disorders of patella",13,"13",0,TRUE
+"718","other derangement of joint",13,"118","joint disorders","M23","Internal derangement of knee",13,"13",0,TRUE
+"718","other derangement of joint",13,"118","joint disorders","M24","Other specific joint derangements",13,"13",0,TRUE
+"718","other derangement of joint",13,"118","joint disorders","M25","Other joint disorders, not elsewhere classified",13,"13",0,TRUE
+"719","other and unspecified disorders of joint",13,"118","joint disorders","M12","Other specific arthropathies",13,"13",0,TRUE
+"719","other and unspecified disorders of joint",13,"118","joint disorders","M25","Other joint disorders, not elsewhere classified",13,"13",0,TRUE
+"719","other and unspecified disorders of joint",13,"118","joint disorders","R26","Abnormalities of gait and mobility",18,"13",2,FALSE
+"719","other and unspecified disorders of joint",13,"118","joint disorders","R29","Other symptoms and signs involving the nervous and musculoskeletal systems",18,"13",2,FALSE
+"720","ankylosing spondylitis and other inflammatory spondylopathies",13,"121","spondylosis intervertebral disc disorders other back problems","M08","Juvenile arthritis",13,"13",0,TRUE
+"720","ankylosing spondylitis and other inflammatory spondylopathies",13,"121","spondylosis intervertebral disc disorders other back problems","M45","Ankylosing spondylitis",13,"13",0,TRUE
+"720","ankylosing spondylitis and other inflammatory spondylopathies",13,"121","spondylosis intervertebral disc disorders other back problems","M46","Other inflammatory spondylopathies",13,"13",0,TRUE
+"720","ankylosing spondylitis and other inflammatory spondylopathies",13,"121","spondylosis intervertebral disc disorders other back problems","M49","Spondylopathies in diseases classified elsewhere",13,"13",0,TRUE
+"721","spondylosis and allied disorders",13,"121","spondylosis intervertebral disc disorders other back problems","M47","Spondylosis",13,"13",0,TRUE
+"721","spondylosis and allied disorders",13,"121","spondylosis intervertebral disc disorders other back problems","M48","Other spondylopathies",13,"13",0,TRUE
+"722","intervertebral disc disorders",13,"121","spondylosis intervertebral disc disorders other back problems","M46","Other inflammatory spondylopathies",13,"13",0,TRUE
+"722","intervertebral disc disorders",13,"121","spondylosis intervertebral disc disorders other back problems","M50","Cervical disc disorders",13,"13",0,TRUE
+"722","intervertebral disc disorders",13,"121","spondylosis intervertebral disc disorders other back problems","M51","Other intervertebral disc disorders",13,"13",0,TRUE
+"722","intervertebral disc disorders",13,"121","spondylosis intervertebral disc disorders other back problems","M96","Postprocedural musculoskeletal disorders, not elsewhere classified",13,"13",0,TRUE
+"730","osteomyelitis periostitis and other infections involving bone",13,"122","infective arthritis and osteomyelitis","M46","Other inflammatory spondylopathies",13,"13",0,TRUE
+"730","osteomyelitis periostitis and other infections involving bone",13,"122","infective arthritis and osteomyelitis","M86","Osteomyelitis",13,"13",0,TRUE
+"730","osteomyelitis periostitis and other infections involving bone",13,"122","infective arthritis and osteomyelitis","M87","Osteonecrosis",13,"13",0,TRUE
+"730","osteomyelitis periostitis and other infections involving bone",13,"122","infective arthritis and osteomyelitis","M89","Other disorders of bone",13,"13",0,TRUE
+"730","osteomyelitis periostitis and other infections involving bone",13,"122","infective arthritis and osteomyelitis","M90","Osteopathies in diseases classified elsewhere",13,"13",0,TRUE
+"731","osteitis deformans and osteopathies associated with other disorders classified elsewhere",13,"123","osteoporosis and other bone disease","M88","Paget's disease of bone [osteitis deformans]",13,"13",0,TRUE
+"731","osteitis deformans and osteopathies associated with other disorders classified elsewhere",13,"123","osteoporosis and other bone disease","M89","Other disorders of bone",13,"13",0,TRUE
+"731","osteitis deformans and osteopathies associated with other disorders classified elsewhere",13,"123","osteoporosis and other bone disease","M90","Osteopathies in diseases classified elsewhere",13,"13",0,TRUE
+"732","osteochondropathies",13,"123","osteoporosis and other bone disease","M42","Spinal osteochondrosis",13,"13",0,TRUE
+"732","osteochondropathies",13,"123","osteoporosis and other bone disease","M91","Juvenile osteochondrosis of hip and pelvis",13,"13",0,TRUE
+"732","osteochondropathies",13,"123","osteoporosis and other bone disease","M92","Other juvenile osteochondrosis",13,"13",0,TRUE
+"732","osteochondropathies",13,"123","osteoporosis and other bone disease","M93","Other osteochondropathies",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M48","Other spondylopathies",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M49","Spondylopathies in diseases classified elsewhere",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M80","Osteoporosis with pathological fracture",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M81","Osteoporosis without pathological fracture",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M82","Osteoporosis in diseases classified elsewhere",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M83","Adult osteomalacia",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M84","Disorders of continuity of bone",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M85","Other disorders of bone density and structure",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M87","Osteonecrosis",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M89","Other disorders of bone",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M90","Osteopathies in diseases classified elsewhere",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M94","Other disorders of cartilage",13,"13",0,TRUE
+"733","other disorders of bone and cartilage",13,"123","osteoporosis and other bone disease","M96","Postprocedural musculoskeletal disorders, not elsewhere classified",13,"13",0,TRUE
+"735","acquired deformities of toe",13,"124","acquired foot deformities","M20","Acquired deformities of fingers and toes",13,"13",0,TRUE
+"737","curvature of spine",13,"125","other acquired deformities","M40","Kyphosis and lordosis",13,"13",0,TRUE
+"737","curvature of spine",13,"125","other acquired deformities","M41","Scoliosis",13,"13",0,TRUE
+"737","curvature of spine",13,"125","other acquired deformities","M43","Other deforming dorsopathies",13,"13",0,TRUE
+"737","curvature of spine",13,"125","other acquired deformities","M49","Spondylopathies in diseases classified elsewhere",13,"13",0,TRUE
+"737","curvature of spine",13,"125","other acquired deformities","M96","Postprocedural musculoskeletal disorders, not elsewhere classified",13,"13",0,TRUE
+"740","anencephalus and similar anomalies",14,"126","nervous system congenital anomalies","Q00","Anencephaly and similar malformations",17,"17",0,TRUE
+"741","spina bifida",14,"126","nervous system congenital anomalies","Q05","Spina bifida",17,"17",0,TRUE
+"741","spina bifida",14,"126","nervous system congenital anomalies","Q07","Other congenital malformations of nervous system",17,"17",0,TRUE
+"742","other congenital anomalies of nervous system",14,"126","nervous system congenital anomalies","G90","Disorders of autonomic nervous system",6,"17",2,FALSE
+"742","other congenital anomalies of nervous system",14,"126","nervous system congenital anomalies","Q01","Encephalocele",17,"17",0,TRUE
+"742","other congenital anomalies of nervous system",14,"126","nervous system congenital anomalies","Q02","Microcephaly",17,"17",0,TRUE
+"742","other congenital anomalies of nervous system",14,"126","nervous system congenital anomalies","Q03","Congenital hydrocephalus",17,"17",0,TRUE
+"742","other congenital anomalies of nervous system",14,"126","nervous system congenital anomalies","Q04","Other congenital malformations of brain",17,"17",0,TRUE
+"742","other congenital anomalies of nervous system",14,"126","nervous system congenital anomalies","Q06","Other congenital malformations of spinal cord",17,"17",0,TRUE
+"742","other congenital anomalies of nervous system",14,"126","nervous system congenital anomalies","Q07","Other congenital malformations of nervous system",17,"17",0,TRUE
+"743","congenital anomalies of eye",14,"127","other congenital anomalies","Q10","Congenital malformations of eyelid, lacrimal apparatus and orbit",17,"17",0,TRUE
+"743","congenital anomalies of eye",14,"127","other congenital anomalies","Q11","Anophthalmos, microphthalmos and macrophthalmos",17,"17",0,TRUE
+"743","congenital anomalies of eye",14,"127","other congenital anomalies","Q12","Congenital lens malformations",17,"17",0,TRUE
+"743","congenital anomalies of eye",14,"127","other congenital anomalies","Q13","Congenital malformations of anterior segment of eye",17,"17",0,TRUE
+"743","congenital anomalies of eye",14,"127","other congenital anomalies","Q14","Congenital malformations of posterior segment of eye",17,"17",0,TRUE
+"743","congenital anomalies of eye",14,"127","other congenital anomalies","Q15","Other congenital malformations of eye",17,"17",0,TRUE
+"744","congenital anomalies of ear face and neck",14,"127","other congenital anomalies","Q16","Congenital malformations of ear causing impairment of hearing",17,"17",0,TRUE
+"744","congenital anomalies of ear face and neck",14,"127","other congenital anomalies","Q17","Other congenital malformations of ear",17,"17",0,TRUE
+"744","congenital anomalies of ear face and neck",14,"127","other congenital anomalies","Q18","Other congenital malformations of face and neck",17,"17",0,TRUE
+"745","bulbus cordis anomalies and anomalies of cardiac septal closure",14,"128","cardiac and circulatory congenital anomalies","Q20","Congenital malformations of cardiac chambers and connections",17,"17",0,TRUE
+"745","bulbus cordis anomalies and anomalies of cardiac septal closure",14,"128","cardiac and circulatory congenital anomalies","Q21","Congenital malformations of cardiac septa",17,"17",0,TRUE
+"746","other congenital anomalies of heart",14,"128","cardiac and circulatory congenital anomalies","Q20","Congenital malformations of cardiac chambers and connections",17,"17",0,TRUE
+"746","other congenital anomalies of heart",14,"128","cardiac and circulatory congenital anomalies","Q22","Congenital malformations of pulmonary and tricuspid valves",17,"17",0,TRUE
+"746","other congenital anomalies of heart",14,"128","cardiac and circulatory congenital anomalies","Q23","Congenital malformations of aortic and mitral valves",17,"17",0,TRUE
+"746","other congenital anomalies of heart",14,"128","cardiac and circulatory congenital anomalies","Q24","Other congenital malformations of heart",17,"17",0,TRUE
+"747","other congenital anomalies of circulatory system",14,"128","cardiac and circulatory congenital anomalies","P29","Cardiovascular disorders originating in the perinatal period",16,"17",2,FALSE
+"747","other congenital anomalies of circulatory system",14,"128","cardiac and circulatory congenital anomalies","Q25","Congenital malformations of great arteries",17,"17",0,TRUE
+"747","other congenital anomalies of circulatory system",14,"128","cardiac and circulatory congenital anomalies","Q26","Congenital malformations of great veins",17,"17",0,TRUE
+"747","other congenital anomalies of circulatory system",14,"128","cardiac and circulatory congenital anomalies","Q27","Other congenital malformations of peripheral vascular system",17,"17",0,TRUE
+"747","other congenital anomalies of circulatory system",14,"128","cardiac and circulatory congenital anomalies","Q28","Other congenital malformations of circulatory system",17,"17",0,TRUE
+"748","congenital anomalies of respiratory system",14,"127","other congenital anomalies","Q30","Congenital malformations of nose",17,"17",0,TRUE
+"748","congenital anomalies of respiratory system",14,"127","other congenital anomalies","Q31","Congenital malformations of larynx",17,"17",0,TRUE
+"748","congenital anomalies of respiratory system",14,"127","other congenital anomalies","Q32","Congenital malformations of trachea and bronchus",17,"17",0,TRUE
+"748","congenital anomalies of respiratory system",14,"127","other congenital anomalies","Q33","Congenital malformations of lung",17,"17",0,TRUE
+"748","congenital anomalies of respiratory system",14,"127","other congenital anomalies","Q34","Other congenital malformations of respiratory system",17,"17",0,TRUE
+"749","cleft palate and cleft lip",14,"127","other congenital anomalies","Q35","Cleft palate",17,"17",0,TRUE
+"749","cleft palate and cleft lip",14,"127","other congenital anomalies","Q36","Cleft lip",17,"17",0,TRUE
+"749","cleft palate and cleft lip",14,"127","other congenital anomalies","Q37","Cleft palate with cleft lip",17,"17",0,TRUE
+"750","other congenital anomalies of upper alimentary tract",14,"129","digestive congenital anomalies","Q38","Other congenital malformations of tongue, mouth and pharynx",17,"17",0,TRUE
+"750","other congenital anomalies of upper alimentary tract",14,"129","digestive congenital anomalies","Q39","Congenital malformations of oesophagus",17,"17",0,TRUE
+"750","other congenital anomalies of upper alimentary tract",14,"129","digestive congenital anomalies","Q40","Other congenital malformations of upper alimentary tract",17,"17",0,TRUE
+"751","other congenital anomalies of digestive system",14,"129","digestive congenital anomalies","Q41","Congenital absence, atresia and stenosis of small intestine",17,"17",0,TRUE
+"751","other congenital anomalies of digestive system",14,"129","digestive congenital anomalies","Q42","Congenital absence, atresia and stenosis of large intestine",17,"17",0,TRUE
+"751","other congenital anomalies of digestive system",14,"129","digestive congenital anomalies","Q43","Other congenital malformations of intestine",17,"17",0,TRUE
+"751","other congenital anomalies of digestive system",14,"129","digestive congenital anomalies","Q44","Congenital malformations of gallbladder, bile ducts and liver",17,"17",0,TRUE
+"751","other congenital anomalies of digestive system",14,"129","digestive congenital anomalies","Q45","Other congenital malformations of digestive system",17,"17",0,TRUE
+"752","congenital anomalies of genital organs",14,"130","genitourinary congenital anomalies","Q50","Congenital malformations of ovaries, fallopian tubes and broad ligaments",17,"17",0,TRUE
+"752","congenital anomalies of genital organs",14,"130","genitourinary congenital anomalies","Q51","Congenital malformations of uterus and cervix",17,"17",0,TRUE
+"752","congenital anomalies of genital organs",14,"130","genitourinary congenital anomalies","Q52","Other congenital malformations of female genitalia",17,"17",0,TRUE
+"752","congenital anomalies of genital organs",14,"130","genitourinary congenital anomalies","Q53","Undescended testicle",17,"17",0,TRUE
+"752","congenital anomalies of genital organs",14,"130","genitourinary congenital anomalies","Q54","Hypospadias",17,"17",0,TRUE
+"752","congenital anomalies of genital organs",14,"130","genitourinary congenital anomalies","Q55","Other congenital malformations of male genital organs",17,"17",0,TRUE
+"752","congenital anomalies of genital organs",14,"130","genitourinary congenital anomalies","Q56","Indeterminate sex and pseudohermaphroditism",17,"17",0,TRUE
+"752","congenital anomalies of genital organs",14,"130","genitourinary congenital anomalies","Q64","Other congenital malformations of urinary system",17,"17",0,TRUE
+"753","congenital anomalies of urinary system",14,"130","genitourinary congenital anomalies","Q60","Renal agenesis and other reduction defects of kidney",17,"17",0,TRUE
+"753","congenital anomalies of urinary system",14,"130","genitourinary congenital anomalies","Q61","Cystic kidney disease",17,"17",0,TRUE
+"753","congenital anomalies of urinary system",14,"130","genitourinary congenital anomalies","Q62","Congenital obstructive defects of renal pelvis and congenital malformations of ureter",17,"17",0,TRUE
+"753","congenital anomalies of urinary system",14,"130","genitourinary congenital anomalies","Q63","Other congenital malformations of kidney",17,"17",0,TRUE
+"753","congenital anomalies of urinary system",14,"130","genitourinary congenital anomalies","Q64","Other congenital malformations of urinary system",17,"17",0,TRUE
+"754","certain congenital musculoskeletal deformities",14,"127","other congenital anomalies","Q65","Congenital deformities of hip",17,"17",0,TRUE
+"754","certain congenital musculoskeletal deformities",14,"127","other congenital anomalies","Q66","Congenital deformities of feet",17,"17",0,TRUE
+"754","certain congenital musculoskeletal deformities",14,"127","other congenital anomalies","Q67","Congenital musculoskeletal deformities of head, face, spine and chest",17,"17",0,TRUE
+"754","certain congenital musculoskeletal deformities",14,"127","other congenital anomalies","Q68","Other congenital musculoskeletal deformities",17,"17",0,TRUE
+"754","certain congenital musculoskeletal deformities",14,"127","other congenital anomalies","Q76","Congenital malformations of spine and bony thorax",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q65","Congenital deformities of hip",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q66","Congenital deformities of feet",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q68","Other congenital musculoskeletal deformities",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q69","Polydactyly",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q70","Syndactyly",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q71","Reduction defects of upper limb",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q72","Reduction defects of lower limb",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q73","Reduction defects of unspecified limb",17,"17",0,TRUE
+"755","other congenital anomalies of limbs",14,"127","other congenital anomalies","Q74","Other congenital malformations of limb(s)",17,"17",0,TRUE
+"756","other congenital musculoskeletal anomalies",14,"127","other congenital anomalies","Q68","Other congenital musculoskeletal deformities",17,"17",0,TRUE
+"756","other congenital musculoskeletal anomalies",14,"127","other congenital anomalies","Q75","Other congenital malformations of skull and face bones",17,"17",0,TRUE
+"756","other congenital musculoskeletal anomalies",14,"127","other congenital anomalies","Q76","Congenital malformations of spine and bony thorax",17,"17",0,TRUE
+"756","other congenital musculoskeletal anomalies",14,"127","other congenital anomalies","Q77","Osteochondrodysplasia with defects of growth of tubular bones and spine",17,"17",0,TRUE
+"756","other congenital musculoskeletal anomalies",14,"127","other congenital anomalies","Q78","Other osteochondrodysplasias",17,"17",0,TRUE
+"756","other congenital musculoskeletal anomalies",14,"127","other congenital anomalies","Q79","Congenital malformations of the musculoskeletal system, not elsewhere classified",17,"17",0,TRUE
+"757","congenital anomalies of the integument",14,"127","other congenital anomalies","Q80","Congenital ichthyosis",17,"17",0,TRUE
+"757","congenital anomalies of the integument",14,"127","other congenital anomalies","Q81","Epidermolysis bullosa",17,"17",0,TRUE
+"757","congenital anomalies of the integument",14,"127","other congenital anomalies","Q82","Other congenital malformations of skin",17,"17",0,TRUE
+"757","congenital anomalies of the integument",14,"127","other congenital anomalies","Q83","Congenital malformations of breast",17,"17",0,TRUE
+"757","congenital anomalies of the integument",14,"127","other congenital anomalies","Q84","Other congenital malformations of integument",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q90","Down's syndrome",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q91","Edwards' syndrome and Patau's syndrome",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q92","Other trisomies and partial trisomies of the autosomes, not elsewhere classified",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q93","Monosomies and deletions from the autosomes, not elsewhere classified",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q95","Balanced rearrangements and structural markers, not elsewhere classified",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q96","Turner's syndrome",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q97","Other sex chromosome abnormalities, female phenotype, not elsewhere classified",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q98","Other sex chromosome abnormalities, male phenotype, not elsewhere classified",17,"17",0,TRUE
+"758","chromosomal anomalies",14,"127","other congenital anomalies","Q99","Other chromosome abnormalities, not elsewhere classified",17,"17",0,TRUE
+"759","other and unspecified congenital anomalies",14,"127","other congenital anomalies","Q85","Phakomatoses, not elsewhere classified",17,"17",0,TRUE
+"759","other and unspecified congenital anomalies",14,"127","other congenital anomalies","Q86","Congenital malformation syndromes due to known exogenous causes, not elsewhere classified",17,"17",0,TRUE
+"759","other and unspecified congenital anomalies",14,"127","other congenital anomalies","Q87","Other specified congenital malformation syndromes affecting multiple systems",17,"17",0,TRUE
+"759","other and unspecified congenital anomalies",14,"127","other congenital anomalies","Q89","Other congenital malformations, not elsewhere classified",17,"17",0,TRUE
+"759","other and unspecified congenital anomalies",14,"127","other congenital anomalies","Q99","Other chromosome abnormalities, not elsewhere classified",17,"17",0,TRUE
