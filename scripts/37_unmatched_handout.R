@@ -41,14 +41,14 @@ fq <- function(x) ifelse(is.na(x), "no data",
                          formatC(x, format = "f", digits = 1, big.mark = ",")))
 
 # minimal html table, no library, the numbers are already rounded upstream
-tbl <- function(df, headers, align_right) {
+tbl <- function(df, headers, align_right, cls = "") {
   th <- paste0("<th>", headers, "</th>", collapse = "")
   rows <- apply(df, 1, function(r) {
     td <- vapply(seq_along(r), function(i)
       sprintf("<td class=\"%s\">%s</td>", if (align_right[i]) "num" else "txt", r[i]), character(1))
     paste0("<tr>", paste(td, collapse = ""), "</tr>")
   })
-  paste0("<table><thead><tr>", th, "</tr></thead><tbody>",
+  paste0("<table class=\"", cls, "\"><thead><tr>", th, "</tr></thead><tbody>",
          paste(rows, collapse = ""), "</tbody></table>")
 }
 
@@ -56,6 +56,7 @@ tbl <- function(df, headers, align_right) {
 # for, and it needs the codes that do have a match as the comparison ----
 GRP <- c("no reference match", "has a reference match")
 lab <- c("no reference match" = "no match", "has a reference match" = "has a match")
+tgt <- c("10_9" = "ICD-10-CA", "8_9" = "ICDA-8")
 
 grp_rows <- function(sig) {
   summ %>% filter(signal == sig, is.na(model) | model == MODEL) %>%
@@ -64,23 +65,23 @@ grp_rows <- function(sig) {
 
 grp_sim_tbl <- function() {
   d <- grp_rows("cosine similarity") %>%
-    transmute(track_label, group = lab[group], codes = fn(codes),
+    transmute(target = tgt[track], group = lab[group], codes = fn(codes),
               mean = f3(mean_similarity), min = f3(min_of_max), q1 = f3(q1_of_max),
               median = f3(median_of_max), q3 = f3(q3_of_max), max = f3(max_of_max))
-  tbl(d, c("Crosswalk", "Group", "Codes", "Average of every score",
+  tbl(d, c("Target system", "Group", "Codes", "Average of every score",
            "Best score, lowest", "25th", "Median", "75th", "Best score, highest"),
-      c(FALSE, FALSE, rep(TRUE, 7)))
+      c(FALSE, FALSE, rep(TRUE, 7)), "grp")
 }
 
 grp_cooc_tbl <- function() {
   d <- grp_rows("co-occurrence frequency") %>%
-    transmute(track_label, group = lab[group], codes = fn(codes),
+    transmute(target = tgt[track], group = lab[group], codes = fn(codes),
               absent = fn(no_cooccurrence_data), partners = fq(median_partners),
               min = fn(min_of_max), q1 = fq(q1_of_max), median = fq(median_of_max),
               q3 = fq(q3_of_max), max = fn(max_of_max))
-  tbl(d, c("Crosswalk", "Group", "Codes", "Not in the file", "Median partners",
+  tbl(d, c("Target system", "Group", "Codes", "Not in the file", "Median partners",
            "Highest count, lowest", "25th", "Median", "75th", "Highest count, highest"),
-      c(FALSE, FALSE, rep(TRUE, 8)))
+      c(FALSE, FALSE, rep(TRUE, 8)), "grp")
 }
 
 # ---- per code ----
@@ -155,18 +156,19 @@ style <- '
 <meta charset="utf-8">
 <title>Codes with no match</title>
 <style>
-  @page { size: letter landscape; margin: 10mm 14mm; }
-  body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #000; line-height: 1.28; }
-  h1 { font-size: 13pt; margin: 0 0 8px 0; }
-  h2 { font-size: 11pt; margin: 12px 0 4px 0; }
-  .break + h2 { margin-top: 0; }
-  p { margin: 4px 0; max-width: 250mm; }
-  table { border-collapse: collapse; width: 100%; font-size: 7.3pt; line-height: 1.12; margin: 5px 0; }
+  @page { size: letter portrait; margin: 25.4mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #000; line-height: 1.35; }
+  h1 { font-size: 14pt; margin: 0 0 12px 0; }
+  h2 { font-size: 11.5pt; margin: 18px 0 6px 0; }
+  p { margin: 7px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 7pt; line-height: 1.15; margin: 8px 0; }
   th { text-align: left; border-bottom: 1px solid #000; padding: 2px 5px 3px 5px; }
   td { border-bottom: 0.5px solid #ccc; padding: 1px 5px; vertical-align: top; }
   td.num { text-align: right; white-space: nowrap; }
-  img { max-width: 232mm; max-height: 82mm; width: auto; height: auto; margin: 4px 0; }
-  .break { page-break-before: always; }
+  h2 { page-break-after: avoid; }
+  table, img { page-break-inside: avoid; }
+  table.grp td.txt { white-space: nowrap; }
+  img { max-width: 100%; height: auto; margin: 8px 0; }
 </style>
 '
 
@@ -180,13 +182,15 @@ and any mapping the algorithm produces for them is a false positive.</p>
 <p>The algorithm decides using two numbers. One is how often a pair of codes shows up on the same
 patient record. The other is the cosine similarity between the two code labels, which here comes
 from ClinicalBERT. Below are both numbers, first for the two groups together and then for each of
-these codes on its own, with the codes that do have a match alongside for comparison.</p>
+these codes on its own, with the codes that do have a match alongside for comparison. The
+analysis is scripts/36_unmatched_descriptives.R and scripts/35_unmatched_codes.R on the main
+branch, written up in report.md Section 11.</p>
 '
 
 outcome <- sprintf('
-<h2>What the algorithm does with these codes at the moment</h2>
+<h2>Algorithm output</h2>
 
-<p>Taking the outcome first, since it is what the rest of this is explaining. On ICD-9-CM to
+<p>The outcome that the rest of this describes. On ICD-9-CM to
 ICD-10-CA the algorithm produces a mapping for all %d of the codes that should get none. Every one
 of them is a false positive and not one is correctly rejected. On ICD-9-CM to ICDA-8 it is the
 other way round. It stays silent on all %d, which is the right answer, but it also stays silent on
@@ -197,9 +201,9 @@ for it on the ordinary ones.</p>
   h("8_9", "wrongly_silent"), h("8_9", "n_matched"))
 
 groups <- sprintf('
-<h2>The two groups side by side</h2>
+<h2>Group summary</h2>
 
-<p>Co-occurrence first, since that is the one we expected to be low. A code is only listed in the
+<p>Co-occurrence first, this being the signal expected to be low. A code is only listed in the
 co-occurrence file if it shares a record with at least one target code, so a code that is not in
 the file has no data rather than a low count. Partners is how many different target codes a code
 turned up with, and the last five columns describe each group by the highest count any one of its
@@ -214,7 +218,7 @@ either, it is simply not there at all.</p>
 <p>Then cosine similarity. Each ICD-9-CM code is scored against every target code, 2038 of them for
 ICD-10-CA and 858 for ICDA-8, so the average column below is over all of those scores and all of
 the codes in the group. The last five columns describe the group by each code\'s single best score,
-which is the one that decides whether a mapping gets made.</p>
+which is the one that decides whether a mapping is made.</p>
 
 %s
 
@@ -224,19 +228,18 @@ is the finding in one line, and the per code tables below are where it comes fro
   grp_cooc_tbl(), grp_sim_tbl())
 
 t10 <- sprintf('
-<div class="break"></div>
-<h2>ICD-9-CM to ICD-10-CA, the 9 codes one at a time</h2>
+<h2>ICD-9-CM to ICD-10-CA</h2>
 
 <p>Co-occurrence.</p>
 
 %s
 
-<p>They are not low. Code 338, pain not elsewhere classified, turned up with 827 different
+<p>The counts are not low. Code 338, pain not elsewhere classified, turned up with 827 different
 ICD-10-CA codes, and with E11, type 2 diabetes mellitus, 13,431 times. Code 515 reaches 5,194 and
 code 239 reaches 4,862. Across the %d ICD-9-CM codes that do have a match the middle value of the
 highest count is %s, and %d of these 9 are above it.</p>
 
-<p>Two do behave the way we expected. Code 445, atheroembolism, has 2 partners and never gets past
+<p>Two behave as expected. Code 445, atheroembolism, has 2 partners and never gets past
 16, and code 339, other headache syndromes, has 58 partners and a top count of 54.</p>
 
 <p>The count seems to track how often a code gets written down, not whether it has a valid target.
@@ -255,33 +258,32 @@ a code has a real match.</p>
 neoplasm of male breast and its closest ICD-10-CA code is C30, malignant neoplasm of nasal cavity
 and middle ear, at 0.955. Code 515 is postinflammatory pulmonary fibrosis and its closest is N72,
 inflammatory disease of cervix uteri. The model is picking up shared words rather than shared
-meaning, and since both signals point the wrong way at once, all 9 come out as mappings.</p>
+meaning, and with both signals pointing the same way all 9 come out as mappings.</p>
 
 <p>The one worth a second look is code 338. Its closest target is R52, and both are labelled pain
-not elsewhere classified, but the crosswalk still records no match for it. I wanted to flag it in
-case that one is an error in the reference rather than in the algorithm.</p>
+not elsewhere classified, but the crosswalk still records no match for it. That one may be an
+error in the reference rather than in the algorithm.</p>
 ',
   cooc_tbl("10_9"), n_of("10_9", "has a reference match"), cooc_mid("10_9"),
   n_above_mid("10_9"), sim_tbl("10_9"), rng("10_9", "no reference match"),
   n_of("10_9", "has a reference match"), rng("10_9", "has a reference match"))
 
 t8 <- sprintf('
-<div class="break"></div>
-<h2>ICD-9-CM to ICDA-8, the 52 codes one at a time</h2>
+<h2>ICD-9-CM to ICDA-8</h2>
 
 <p>These behave completely differently. None of the 52 appear in the co-occurrence data at all. Not
 a low count, no row, so there is nothing to tabulate for that signal.</p>
 
-<p>That works out in our favour, because it means the algorithm returns no match for all 52. But it
-gets there for a reason that costs us elsewhere. It will not accept a pair without co-occurrence
+<p>This produces the right answer, since the algorithm returns no match for all 52, but it gets
+there for a reason that costs the crosswalk elsewhere. It will not accept a pair without co-occurrence
 data, and 32 of the %d ICD-9-CM codes that do have a valid ICDA-8 match are missing from that file
 too, which is where the %d lost mappings come from. The 52 are being got right by an accident of
 missing data rather than by either threshold doing its job.</p>
 
 <p>Similarity looks much the same as it did on the other crosswalk. The best score for the 52 runs
 from %s, against %s for the %d that do have a match, so again there is no gap between the two
-groups. Rather than list all 52 I have put the four highest and the four lowest below, and I have
-the rest if you want them.</p>
+groups. The four highest and the four lowest are below, and the full 52 are in the summary
+files.</p>
 
 %s
 ',
@@ -290,8 +292,7 @@ the rest if you want them.</p>
   n_of("8_9", "has a reference match"), sim_tbl("8_9", ends = 4))
 
 figs <- '
-<div class="break"></div>
-<h2>The same thing as a picture</h2>
+<h2>Distributions</h2>
 
 <p>Each point is one ICD-9-CM code, placed at its highest cosine similarity against any target
 code. In both panels the upper row is the codes that do have a match and the lower row is the codes
@@ -307,8 +308,7 @@ in the file.</p>
 '
 
 thresh <- sprintf('
-<div class="break"></div>
-<h2>Whether a threshold on either number would catch these</h2>
+<h2>Threshold scenarios</h2>
 
 <p>Not on its own. On ICD-10-CA a similarity cut-off high enough to clear all 9 would have to sit
 above %s, and that also removes %d of the %d codes that are correct. On ICDA-8 the cut-off would be
@@ -325,53 +325,38 @@ the 52 are already being caught by the missing data rather than by any threshold
   cut_of("10_9", "co-occurrence frequency", "cost"), n_cooc_present("10_9"))
 
 mech <- sprintf('
-<h2>What the algorithm is actually doing with these two numbers</h2>
+<h2>Threshold implementation</h2>
 
-<p>While I was checking the above I found something I was not expecting, and I think it is a more
-useful answer to why the special cases are not being caught.</p>
+<p>A check of the implementation gives a more direct answer to why these cases are not caught.</p>
 
 <p>Neither threshold in the pipeline is an absolute one.</p>
 
 <p>The similarity threshold is applied as the threshold multiplied by that code\'s own highest
-score, separately inside each ICD-9-CM column. The value we vary from 0.95 to 0.999 is a fraction
-of the code\'s own best score, not a score. So the top target of every code clears it however low
+score, separately inside each ICD-9-CM column. The value varied from 0.95 to 0.999 is a fraction of
+the code\'s own best score, not a score. So the top target of every code clears it however low
 the score actually is. The weakest code in the ICD-9-CM to ICD-10-CA set has a best score of %s and
 it still produces a candidate. There is no value a cosine similarity can fall below and be
 rejected.</p>
 
 <p>Co-occurrence works the same way. The rule keeps each code\'s top n partners ranked by frequency,
-with n varied from 3 to 30, and the count itself is never compared against anything. The smallest
+with n varied from 3 to 30, and the count itself is never compared against a value. The smallest
 highest count in the file is %s and it is kept on the same terms as the code with %s.</p>
 
-<p>So the rule we describe as a cosine similarity above one value and a co-occurrence above another
-is not the rule the code is applying. Both are relative to the code being mapped. The only two
+<p>So the rule described as a cosine similarity above one value and a co-occurrence above another
+is not the rule the code applies. Both are relative to the code being mapped. The only two
 things that make the algorithm stay quiet are the chapter filter removing every candidate, or,
 under the flag settings that require co-occurrence, the code being absent from the co-occurrence
 file. That second one is what is happening to all 52 on the ICDA-8 side, and it is why all 9 on the
 ICD-10-CA side come out as false positives. Nothing in the pipeline was ever going to reject
 them.</p>
 
-<p>I think that is worth settling before we test the abstain scenarios, because those scenarios
-assume a floor that is not in the code yet. Putting a real absolute threshold in would be a change
-to the pipeline rather than a change to a parameter, and going by the numbers above it would cost a
-lot of correct mappings, so I have not made it.</p>
+<p>This is worth settling before the abstain scenarios are tested, since those scenarios assume a
+floor that is not in the code. Adding an absolute threshold would be a change to the pipeline
+rather than to a parameter, and on the numbers above it would cost a large share of the correct
+mappings.</p>
 ',
   weakest_best("10_9"), cooc_span("10_9", "low"), cooc_span("10_9", "high"))
 
-closing <- '
-<h2>Two notes</h2>
-
-<p>The ICDA-8 count. In the meeting the figure was 54 codes with no match. The exclusion sheet in
-the validation workbook lists 52, and 52 is the number used throughout here, so it is worth
-checking which is right before any of this gets written up.</p>
-
-<p>Where it is in the repository. The analysis is scripts/36_unmatched_descriptives.R on the main
-branch, which reads only committed data and writes the four csv files in results/ that everything
-above comes from. The outcome counts are scripts/35_unmatched_codes.R. It is written up in
-report.md Section 11, and this handout is scripts/37_unmatched_handout.R. This covers the one to no
-match case only, so the one to one and one to many cases are still to do.</p>
-'
-
-writeLines(paste0(style, intro, outcome, groups, t10, t8, figs, thresh, mech, closing),
+writeLines(paste0(style, intro, outcome, groups, t10, t8, figs, thresh, mech),
            file.path(OUT, "unmatched_codes_handout.html"))
 cat("wrote results/unmatched_codes_handout.html\n")

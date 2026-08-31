@@ -28,7 +28,7 @@ larger parameter searches described below practical.
 
 ---
 
-## 2. Scoring Every Code, Including Those With No Correct Answer
+## 2. Including the Unmatched Codes in Scoring
 
 Every number in this report depends on which codes get graded, so this comes
 before the results.
@@ -191,7 +191,7 @@ constraint.
 
 ---
 
-## 4. Finding Where Correct Mappings Were Lost
+## 4. Error Analysis
 
 This section contains the central finding of the work.
 
@@ -236,7 +236,7 @@ unrecoverable.
 
 ---
 
-## 5. Including the Code Number in the Text
+## 5. Code Numbers in the Embedded Text
 
 The original analysis combined each ICD code with its label into a single text
 string before embedding, so that the model received text such as "250 diabetes
@@ -291,7 +291,7 @@ relying on the code number more heavily than the others.
 
 ---
 
-## 6. Choosing a Standard Stop Word Dictionary
+## 6. Stop Word Dictionary Choice
 
 Stop words are common words such as "the", "of" and "and" that carry little
 meaning on their own. The original analysis did not remove them.
@@ -323,7 +323,7 @@ all.
 
 ---
 
-## 7. Applying Stop Word Removal to ClinicalBERT
+## 7. Stop Word Removal With ClinicalBERT
 
 I reran ClinicalBERT under all four combinations of removing stop words and
 removing the code number, using the same parameter search each time, so that the
@@ -391,13 +391,13 @@ the letter that identifies several vitamin deficiency and hepatitis codes.
 
 ---
 
-## 8. What the Similarity and Co-occurrence Numbers Look Like
+## 8. Distributions of the Two Signals
 
 Steps 1 and 2 of the original pipeline each cut a list short using a number.
 Step 1 uses the similarity score and Step 2 uses how often two codes appear
 together in the health records.
 
-### The similarity score
+### Cosine similarity
 
 For each of the 354 ICD-9-CM codes I took its best similarity score against any
 target code.
@@ -432,7 +432,7 @@ not. This is the simplest explanation for why every ICDA-8 result in this
 document is higher than the matching ICD-10-CA result. It is a difference
 between the code sets, not between the methods.
 
-### How often two codes appear together
+### Co-occurrence frequency
 
 **Table 11. How often the most frequent partner of each ICD-9-CM code appears
 alongside it.**
@@ -460,7 +460,7 @@ contributes nothing and the mapping rests entirely on the labels.
 
 ---
 
-## 9. How Much These Numbers Move
+## 9. Variability
 
 Every score in this document is a single number measured on one set of 354
 ICD-9-CM codes. That leaves the question of how much of a difference is a real
@@ -557,7 +557,7 @@ spread above because each fold is scored on a fifth of the codes.
 
 ---
 
-## 10. Performance Across All 130 CCS Categories
+## 10. Performance by CCS Category
 
 The 354 ICD-9-CM codes are grouped into 130 CCS categories, clinical groupings
 such as breast cancer, asthma or other nervous system conditions. I scored each
@@ -640,7 +640,7 @@ pipeline uses point at several codes at once. This is the multi-target problem
 in a second form, and it is a property of the clinical area rather than of any
 one category, which is why the pattern is so regular.
 
-### The charts
+### Figures
 
 One bar per category, ranked best to worst and dealt into three columns so all
 130 fit on a page. The bracketed number after each name is how many ICD-9-CM
@@ -701,7 +701,7 @@ largest, 0.333, is a one-code category where a single pair decides the score.
 On ICDA-8 the 25 losses include one full category, which is again a single-code
 category scored on one pair.
 
-### The text preparation arms
+### Text preparation arms
 
 The same breakdown was run on the four ClinicalBERT text preparations from
 Section 7, to see whether the text cleaning helps in particular clinical areas
@@ -751,7 +751,7 @@ and the category counts behind Figures 12 to 15 are in
 
 ---
 
-## 11. The Codes With No Correct Answer, One At A Time
+## 11. Codes With No Correct Answer
 
 Section 2 scored these codes and reported one pooled F1 per model. A pooled score
 averages 9 or 52 codes in with the 345 or 302 that do have answers, so it cannot
@@ -762,7 +762,7 @@ labels and how often the two codes appear together in patient records. Every cod
 below is described on both. The model is ClinicalBERT, the one the original
 pipeline used.
 
-### ICD-9-CM to ICD-10-CA, the 9 codes with no match
+### ICD-9-CM to ICD-10-CA
 
 Each ICD-9-CM code is scored against all 2038 ICD-10-CA codes, so each row below
 is a distribution over 2038 numbers.
@@ -830,7 +830,7 @@ Co-occurrence counts how often a code is recorded, not whether it has a target.
 Pain, sleep disorders and unspecified neoplasms are recorded constantly, so they
 co-occur with whatever else the patient has.
 
-### ICD-9-CM to ICDA-8, the 52 codes with no match
+### ICD-9-CM to ICDA-8
 
 Co-occurrence first, because there is nothing to tabulate. None of the 52 codes
 appear in the co-occurrence file at all. A code is listed there only if it shares
@@ -915,7 +915,7 @@ bar covers the quartiles and the dark dot is the maximum. Every code's quartiles
 sit in a narrow band, so what differs between codes is only how far the single
 best target stands out from the rest.
 
-### Can a threshold separate these codes
+### Threshold scenarios
 
 Not on similarity. To clear all 9 ICD-10-CA codes the cutoff on the maximum score
 has to sit above 0.955, and that also removes 286 of the 345 codes that do have
@@ -962,7 +962,7 @@ SapBERT and all-mpnet-base-v2 were run through the same descriptives and give th
 same answer, with the scores sitting lower and spread wider. Their numbers are in
 the summary file below.
 
-### Where this is
+### Source
 
 `scripts/36_unmatched_descriptives.R` produces all of it and takes about three
 minutes. It reads the committed data and changes nothing in the pipeline.
