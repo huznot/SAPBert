@@ -2,121 +2,62 @@
 <meta charset="utf-8">
 <title>Codes with no match</title>
 <style>
-  @page { size: letter landscape; margin: 14mm 12mm; }
-  body { font-family: Georgia, "Times New Roman", serif; font-size: 10.5pt; color: #111; line-height: 1.45; }
-  h1 { font-size: 17pt; margin: 0 0 2px 0; }
-  h2 { font-size: 12.5pt; margin: 22px 0 6px 0; border-bottom: 1px solid #999; padding-bottom: 3px; }
-  h3 { font-size: 11pt; margin: 16px 0 4px 0; }
-  .date { color: #555; font-size: 9.5pt; margin-bottom: 14px; }
-  p { margin: 6px 0; max-width: 175mm; }
-  table { border-collapse: collapse; width: 100%; font-family: Helvetica, Arial, sans-serif;
-          font-size: 7.6pt; margin: 8px 0 4px 0; }
-  th { text-align: left; border-bottom: 1.2px solid #333; padding: 3px 5px; font-weight: 600; }
-  td { border-bottom: 0.5px solid #ddd; padding: 2.5px 5px; vertical-align: top; }
+  @page { size: letter landscape; margin: 10mm 12mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #000; line-height: 1.35; }
+  h1 { font-size: 13pt; margin: 0 0 10px 0; }
+  h2 { font-size: 11pt; margin: 14px 0 4px 0; }
+  p { margin: 5px 0; max-width: 250mm; }
+  table { border-collapse: collapse; width: 100%; font-size: 6.5pt; line-height: 1.05;
+          margin: 4px 0; }
+  th { text-align: left; border-bottom: 1px solid #000; padding: 1.5px 5px 2.5px 5px; }
+  td { border-bottom: 0.5px solid #ccc; padding: 0.5px 5px; vertical-align: top; }
   td.num { text-align: right; white-space: nowrap; }
-  tbody tr:nth-child(even) { background: #f7f7f7; }
-  img { width: 100%; max-width: 250mm; margin: 8px 0; }
-  .note { font-size: 9pt; color: #444; }
   .break { page-break-before: always; }
+  .break + h2 { margin-top: 0; }
 </style>
 
-<h1>ICD-9-CM codes with no match in the target system</h1>
-<div class="date">Descriptive analysis, 27 August 2026</div>
+<h1>ICD-9-CM codes with no match in the target system &mdash; 27 August 2026</h1>
 
-<p>There are 9 ICD-9-CM codes with no ICD-10-CA match and 52 with no ICDA-8 match.
-The reference crosswalk lists them with no partner, so the right answer for them
-is no mapping at all.</p>
-
-<p>The algorithm uses two numbers to decide. How often the two codes appear
-together in patient records, and the cosine similarity between the two code
-labels. This describes both of those for each of these codes on its own, rather
-than as an average over the crosswalk. The similarity scores are ClinicalBERT.</p>
+<p>There are 9 ICD-9-CM codes with no ICD-10-CA match and 52 with no ICDA-8 match. The algorithm
+uses two numbers to decide: how often a pair of codes appears together in patient records, and the
+cosine similarity between the two code labels. Both are described below for each code separately.
+Similarity is from ClinicalBERT.</p>
 
 <h2>ICD-9-CM to ICD-10-CA, the 9 codes</h2>
 
-<h3>Co-occurrence</h3>
-
-<p>All 9 codes appear in the co-occurrence data. Partners is the number of
-different ICD-10-CA codes each one shares a record with, and the columns after it
-describe the counts across those partners. The source data does not report a count below 7, which is why every code has a minimum of 7.</p>
+<p>Co-occurrence. Partners is the number of different ICD-10-CA codes the code shares a record
+with, and the columns after it describe the counts across those partners. The source data does not
+report a count below 7.</p>
 
 <table><thead><tr><th>Code</th><th>Label</th><th>Partners</th><th>Min</th><th>25th</th><th>Median</th><th>75th</th><th>Max</th><th>Most frequent partner</th></tr></thead><tbody><tr><td class="txt">338</td><td class="txt">pain not elsewhere classified</td><td class="num">827</td><td class="num">7</td><td class="num">18</td><td class="num">49</td><td class="num">181.5</td><td class="num">13,431</td><td class="txt">E11, Type 2 diabetes mellitus</td></tr><tr><td class="txt">515</td><td class="txt">postinflammatory pulmonary fibrosis</td><td class="num">306</td><td class="num">7</td><td class="num">13</td><td class="num">24</td><td class="num">53.8</td><td class="num">5,194</td><td class="txt">J84, Other interstitial pulmonary diseases</td></tr><tr><td class="txt">239</td><td class="txt">neoplasms of unspecified nature</td><td class="num">585</td><td class="num">7</td><td class="num">14</td><td class="num">34</td><td class="num">91</td><td class="num">4,862</td><td class="txt">I10, Essential (primary) hypertension</td></tr><tr><td class="txt">327</td><td class="txt">organic sleep disorders</td><td class="num">349</td><td class="num">7</td><td class="num">12</td><td class="num">23</td><td class="num">49</td><td class="num">3,108</td><td class="txt">G47, Other sleep disorders</td></tr><tr><td class="txt">249</td><td class="txt">secondary diabetes mellitus</td><td class="num">161</td><td class="num">7</td><td class="num">12</td><td class="num">18</td><td class="num">38</td><td class="num">1,783</td><td class="txt">E11, Type 2 diabetes mellitus</td></tr><tr><td class="txt">209</td><td class="txt">neuroendocrine tumors</td><td class="num">124</td><td class="num">7</td><td class="num">11.8</td><td class="num">17</td><td class="num">31.8</td><td class="num">506</td><td class="txt">C78, Secondary malignant neoplasm of respiratory and digestive organs</td></tr><tr><td class="txt">175</td><td class="txt">malignant neoplasm of male breast</td><td class="num">24</td><td class="num">7</td><td class="num">8</td><td class="num">10.5</td><td class="num">22.5</td><td class="num">131</td><td class="txt">C79, Secondary malignant neoplasm of other and unspecified sites</td></tr><tr><td class="txt">339</td><td class="txt">other headache syndromes</td><td class="num">58</td><td class="num">7</td><td class="num">9.2</td><td class="num">15</td><td class="num">17.8</td><td class="num">54</td><td class="txt">E11, Type 2 diabetes mellitus</td></tr><tr><td class="txt">445</td><td class="txt">atheroembolism</td><td class="num">2</td><td class="num">7</td><td class="num">9.2</td><td class="num">11.5</td><td class="num">13.8</td><td class="num">16</td><td class="txt">I74, Arterial embolism and thrombosis</td></tr></tbody></table>
 
-<p>These counts are not low. Code 338 shares a record with 827 different
-ICD-10-CA codes, and its highest count is 13,431. Codes 515, 239 and 327 all
-reach the thousands. For comparison, across the 345 codes that do have a match the
-middle value of the highest count is 1,288.5, so this group sits slightly above
-that rather than below it.</p>
+<p>These counts are not low. Code 338 shares a record with 827 different ICD-10-CA codes and its
+highest count is 13,431. Codes 515, 239 and 327 also reach the thousands. Across the 345 codes that
+do have a match, the middle value of the highest count is 1,288.5, so this group sits above it rather
+than below. Only 445 and 339 are low. The counts look like they reflect how often a code is
+recorded, not whether it has a valid target.</p>
 
-<p>The two exceptions are 445 and 339 at the bottom of the table. Those are the
-only two that look the way a code with no valid target was expected to look.</p>
-
-<p>What the counts seem to reflect is how often a code is recorded, not whether
-it has a valid target. Pain, sleep disorders and unspecified neoplasms are
-recorded constantly, so they turn up next to whatever else the patient has.</p>
-
-<h3>Cosine similarity</h3>
-
-<p>Each code is scored against all 2038 ICD-10-CA codes, so each row below
-describes 2038 numbers.</p>
+<p>Cosine similarity, each code scored against all 2038 ICD-10-CA codes.</p>
 
 <table><thead><tr><th>Code</th><th>Label</th><th>Average</th><th>Min</th><th>25th</th><th>Median</th><th>75th</th><th>Max</th><th>Closest target code</th></tr></thead><tbody><tr><td class="txt">175</td><td class="txt">malignant neoplasm of male breast</td><td class="num">0.825</td><td class="num">0.641</td><td class="num">0.796</td><td class="num">0.826</td><td class="num">0.849</td><td class="num">0.955</td><td class="txt">C30, Malignant neoplasm of nasal cavity and middle ear</td></tr><tr><td class="txt">249</td><td class="txt">secondary diabetes mellitus</td><td class="num">0.817</td><td class="num">0.663</td><td class="num">0.774</td><td class="num">0.817</td><td class="num">0.859</td><td class="num">0.951</td><td class="txt">O24, Diabetes mellitus in pregnancy</td></tr><tr><td class="txt">239</td><td class="txt">neoplasms of unspecified nature</td><td class="num">0.831</td><td class="num">0.662</td><td class="num">0.804</td><td class="num">0.833</td><td class="num">0.859</td><td class="num">0.942</td><td class="txt">D15, Benign neoplasm of other and unspecified intrathoracic organs</td></tr><tr><td class="txt">515</td><td class="txt">postinflammatory pulmonary fibrosis</td><td class="num">0.852</td><td class="num">0.694</td><td class="num">0.823</td><td class="num">0.858</td><td class="num">0.886</td><td class="num">0.932</td><td class="txt">N72, Inflammatory disease of cervix uteri</td></tr><tr><td class="txt">209</td><td class="txt">neuroendocrine tumors</td><td class="num">0.836</td><td class="num">0.693</td><td class="num">0.808</td><td class="num">0.842</td><td class="num">0.867</td><td class="num">0.915</td><td class="txt">A74, Other diseases caused by chlamydiae</td></tr><tr><td class="txt">327</td><td class="txt">organic sleep disorders</td><td class="num">0.770</td><td class="num">0.541</td><td class="num">0.725</td><td class="num">0.773</td><td class="num">0.823</td><td class="num">0.915</td><td class="txt">P78, Other perinatal digestive system disorders</td></tr><tr><td class="txt">339</td><td class="txt">other headache syndromes</td><td class="num">0.816</td><td class="num">0.648</td><td class="num">0.786</td><td class="num">0.820</td><td class="num">0.851</td><td class="num">0.915</td><td class="txt">A69, Other spirochaetal infections</td></tr><tr><td class="txt">338</td><td class="txt">pain not elsewhere classified</td><td class="num">0.805</td><td class="num">0.685</td><td class="num">0.785</td><td class="num">0.807</td><td class="num">0.827</td><td class="num">0.893</td><td class="txt">R52, Pain, not elsewhere classified</td></tr><tr><td class="txt">445</td><td class="txt">atheroembolism</td><td class="num">0.711</td><td class="num">0.552</td><td class="num">0.686</td><td class="num">0.713</td><td class="num">0.736</td><td class="num">0.853</td><td class="txt">M66, Spontaneous rupture of synovium and tendon</td></tr></tbody></table>
 
-<p>These scores are not low either. The highest score for these 9 runs from 0.853 to 0.955.
-Across the 345 codes that do have a match it runs from 0.861 to 0.981, so the two groups sit
-on top of each other.</p>
-
-<p>The closest ICD-10-CA code is clinically unrelated in 8 of the 9 rows. Code
-175, malignant neoplasm of male breast, comes out closest to C30, malignant
-neoplasm of nasal cavity and middle ear, at 0.955. Code 515, postinflammatory
-pulmonary fibrosis, comes out closest to N72, inflammatory disease of cervix
-uteri. The scores are as high as the ones the algorithm gets right, and the
-answers are not close.</p>
-
-<p>The one exception is code 338, whose closest target is R52, and both are
-labelled pain not elsewhere classified. The reference crosswalk still records no
-match for it, so that one may be worth checking rather than assuming the
-algorithm is wrong.</p>
+<p>The highest score for these 9 runs from 0.853 to 0.955. Across the 345 codes that do have a match it runs
+from 0.861 to 0.981, so the two groups overlap. The closest ICD-10-CA code is clinically unrelated in 8 of the
+9: code 175, malignant neoplasm of male breast, is closest to C30, malignant neoplasm of nasal
+cavity and middle ear, at 0.955. The exception is code 338, whose closest target R52 carries the
+same label, pain not elsewhere classified, yet the reference crosswalk records no match for it.</p>
 
 <div class="break"></div>
 <h2>ICD-9-CM to ICDA-8, the 52 codes</h2>
 
-<h3>Co-occurrence</h3>
+<p>None of the 52 appear in the co-occurrence data at all, so there is nothing to tabulate for
+that signal. That is why the algorithm returns no match for them, and also why it returns no match
+for 39 codes that do have one, since 32 of the 302 matched codes are missing from the same data.</p>
 
-<p>There is nothing to tabulate here. None of the 52 codes appear in the
-co-occurrence data at all. A code is only listed if it shares a record with at
-least one ICDA-8 code, so for these 52 there is no data rather than a low count.</p>
-
-<p>This is why the algorithm returns no match for them, which is the answer we
-want. It gets there by requiring co-occurrence data before it will accept a pair.
-The same gap covers 32 of the 302 codes that do have a valid ICDA-8 match, so it
-stays silent on those as well.</p>
-
-<h3>Cosine similarity</h3>
-
-<p>Each code is scored against all 858 ICDA-8 codes.</p>
+<p>Cosine similarity, each code scored against all 858 ICDA-8 codes. The highest score for these
+52 runs from 0.883 to 0.985, against 0.865 to 1.000 for the 302 codes that do have a match. On both crosswalks the codes
+with no match sit inside the range of the codes that do, so no cut-off on either signal separates
+them without also losing a large share of the correct mappings.</p>
 
 <table><thead><tr><th>Code</th><th>Label</th><th>Average</th><th>Min</th><th>25th</th><th>Median</th><th>75th</th><th>Max</th><th>Closest target code</th></tr></thead><tbody><tr><td class="txt">164</td><td class="txt">malignant neoplasm of thymus heart and mediastinum</td><td class="num">0.813</td><td class="num">0.584</td><td class="num">0.776</td><td class="num">0.810</td><td class="num">0.846</td><td class="num">0.985</td><td class="txt">142, malignant neoplasm of salivary gland</td></tr><tr><td class="txt">175</td><td class="txt">malignant neoplasm of male breast</td><td class="num">0.816</td><td class="num">0.578</td><td class="num">0.782</td><td class="num">0.816</td><td class="num">0.848</td><td class="num">0.984</td><td class="txt">174, malignant neoplasm of breast</td></tr><tr><td class="txt">237</td><td class="txt">neoplasm of uncertain behavior of endocrine glands and nervous system</td><td class="num">0.821</td><td class="num">0.594</td><td class="num">0.785</td><td class="num">0.822</td><td class="num">0.855</td><td class="num">0.984</td><td class="txt">238, neoplasm of unspecified nature of eye brain and other parts of nervous system</td></tr><tr><td class="txt">179</td><td class="txt">malignant neoplasm of uterus part unspecified</td><td class="num">0.812</td><td class="num">0.633</td><td class="num">0.780</td><td class="num">0.810</td><td class="num">0.842</td><td class="num">0.980</td><td class="txt">149, malignant neoplasm of pharynx unspecified</td></tr><tr><td class="txt">238</td><td class="txt">neoplasm of uncertain behavior of other and unspecified sites and tissues</td><td class="num">0.814</td><td class="num">0.626</td><td class="num">0.777</td><td class="num">0.811</td><td class="num">0.845</td><td class="num">0.977</td><td class="txt">237, neoplasm of unspecified nature of other genitourinary organs</td></tr><tr><td class="txt">585</td><td class="txt">chronic kidney disease</td><td class="num">0.848</td><td class="num">0.680</td><td class="num">0.813</td><td class="num">0.847</td><td class="num">0.886</td><td class="num">0.973</td><td class="txt">582, chronic nephritis</td></tr><tr><td class="txt">165</td><td class="txt">malignant neoplasm of other and illdefined sites within the respiratory system and intrathoracic organs</td><td class="num">0.796</td><td class="num">0.587</td><td class="num">0.755</td><td class="num">0.795</td><td class="num">0.832</td><td class="num">0.971</td><td class="txt">195, malignant neoplasm of illdefined sites</td></tr><tr><td class="txt">615</td><td class="txt">inflammatory diseases of uterus except cervix</td><td class="num">0.855</td><td class="num">0.631</td><td class="num">0.828</td><td class="num">0.863</td><td class="num">0.890</td><td class="num">0.971</td><td class="txt">621, other diseases of cervix</td></tr><tr><td class="txt">334</td><td class="txt">spinocerebellar disease</td><td class="num">0.864</td><td class="num">0.704</td><td class="num">0.833</td><td class="num">0.867</td><td class="num">0.898</td><td class="num">0.968</td><td class="txt">348, motor neurone disease</td></tr><tr><td class="txt">721</td><td class="txt">spondylosis and allied disorders</td><td class="num">0.863</td><td class="num">0.675</td><td class="num">0.830</td><td class="num">0.868</td><td class="num">0.902</td><td class="num">0.968</td><td class="txt">721, osteitis deformans</td></tr><tr><td class="txt">234</td><td class="txt">carcinoma in situ of other and unspecified sites</td><td class="num">0.828</td><td class="num">0.632</td><td class="num">0.794</td><td class="num">0.828</td><td class="num">0.857</td><td class="num">0.966</td><td class="txt">195, malignant neoplasm of illdefined sites</td></tr><tr><td class="txt">335</td><td class="txt">anterior horn cell disease</td><td class="num">0.851</td><td class="num">0.674</td><td class="num">0.816</td><td class="num">0.856</td><td class="num">0.889</td><td class="num">0.965</td><td class="txt">365, choroiditis</td></tr><tr><td class="txt">249</td><td class="txt">secondary diabetes mellitus</td><td class="num">0.821</td><td class="num">0.638</td><td class="num">0.780</td><td class="num">0.827</td><td class="num">0.864</td><td class="num">0.964</td><td class="txt">250, diabetes mellitus</td></tr><tr><td class="txt">712</td><td class="txt">crystal arthropathies</td><td class="num">0.832</td><td class="num">0.673</td><td class="num">0.790</td><td class="num">0.833</td><td class="num">0.878</td><td class="num">0.964</td><td class="txt">523, periodontal diseases</td></tr><tr><td class="txt">230</td><td class="txt">carcinoma in situ of digestive organs</td><td class="num">0.839</td><td class="num">0.616</td><td class="num">0.808</td><td class="num">0.840</td><td class="num">0.873</td><td class="num">0.963</td><td class="txt">189, malignant neoplasm of other and unspecified urinary organs</td></tr><tr><td class="txt">233</td><td class="txt">carcinoma in situ of breast and genitourinary system</td><td class="num">0.820</td><td class="num">0.583</td><td class="num">0.785</td><td class="num">0.822</td><td class="num">0.859</td><td class="num">0.962</td><td class="txt">184, malignant neoplasm of other and unspecified female genital organs</td></tr><tr><td class="txt">516</td><td class="txt">other alveolar and parietoalveolar pneumonopathy</td><td class="num">0.868</td><td class="num">0.686</td><td class="num">0.849</td><td class="num">0.873</td><td class="num">0.896</td><td class="num">0.961</td><td class="txt">517, other chronic interstitial pneumonia</td></tr><tr><td class="txt">417</td><td class="txt">other diseases of pulmonary circulation</td><td class="num">0.826</td><td class="num">0.697</td><td class="num">0.796</td><td class="num">0.825</td><td class="num">0.858</td><td class="num">0.960</td><td class="txt">447, other diseases of arteries and arterioles</td></tr><tr><td class="txt">617</td><td class="txt">endometriosis</td><td class="num">0.864</td><td class="num">0.698</td><td class="num">0.831</td><td class="num">0.865</td><td class="num">0.901</td><td class="num">0.958</td><td class="txt">582, chronic nephritis</td></tr><tr><td class="txt">576</td><td class="txt">other disorders of biliary tract</td><td class="num">0.854</td><td class="num">0.680</td><td class="num">0.823</td><td class="num">0.858</td><td class="num">0.888</td><td class="num">0.956</td><td class="txt">508, other diseases of upper respiratory tract</td></tr><tr><td class="txt">176</td><td class="txt">kaposis sarcoma</td><td class="num">0.855</td><td class="num">0.668</td><td class="num">0.826</td><td class="num">0.862</td><td class="num">0.888</td><td class="num">0.955</td><td class="txt">218, uterine fibroma</td></tr><tr><td class="txt">263</td><td class="txt">other and unspecified proteincalorie malnutrition</td><td class="num">0.783</td><td class="num">0.651</td><td class="num">0.763</td><td class="num">0.785</td><td class="num">0.805</td><td class="num">0.954</td><td class="txt">267, protein malnutrition</td></tr><tr><td class="txt">358</td><td class="txt">myoneural disorders</td><td class="num">0.849</td><td class="num">0.691</td><td class="num">0.810</td><td class="num">0.851</td><td class="num">0.889</td><td class="num">0.954</td><td class="txt">523, periodontal diseases</td></tr><tr><td class="txt">515</td><td class="txt">postinflammatory pulmonary fibrosis</td><td class="num">0.868</td><td class="num">0.680</td><td class="num">0.847</td><td class="num">0.874</td><td class="num">0.895</td><td class="num">0.952</td><td class="txt">354, polyneuritis and polyradiculitis</td></tr><tr><td class="txt">231</td><td class="txt">carcinoma in situ of respiratory system</td><td class="num">0.836</td><td class="num">0.603</td><td class="num">0.805</td><td class="num">0.839</td><td class="num">0.874</td><td class="num">0.951</td><td class="txt">212, benign neoplasm of respiratory system</td></tr><tr><td class="txt">555</td><td class="txt">regional enteritis</td><td class="num">0.851</td><td class="num">0.655</td><td class="num">0.823</td><td class="num">0.854</td><td class="num">0.879</td><td class="num">0.950</td><td class="txt">422, acute myocarditis</td></tr><tr><td class="txt">331</td><td class="txt">other cerebral degenerations</td><td class="num">0.832</td><td class="num">0.679</td><td class="num">0.803</td><td class="num">0.835</td><td class="num">0.862</td><td class="num">0.949</td><td class="txt">344, other cerebral paralysis</td></tr><tr><td class="txt">405</td><td class="txt">secondary hypertension</td><td class="num">0.836</td><td class="num">0.649</td><td class="num">0.807</td><td class="num">0.840</td><td class="num">0.869</td><td class="num">0.949</td><td class="txt">401, essential benign hypertension</td></tr><tr><td class="txt">333</td><td class="txt">other extrapyramidal disease and abnormal movement disorders</td><td class="num">0.835</td><td class="num">0.651</td><td class="num">0.805</td><td class="num">0.844</td><td class="num">0.871</td><td class="num">0.945</td><td class="txt">360, conjunctivitis and ophthalmia</td></tr><tr><td class="txt">557</td><td class="txt">vascular insufficiency of intestine</td><td class="num">0.867</td><td class="num">0.711</td><td class="num">0.842</td><td class="num">0.870</td><td class="num">0.898</td><td class="num">0.945</td><td class="txt">424, chronic disease of endocardium</td></tr><tr><td class="txt">720</td><td class="txt">ankylosing spondylitis and other inflammatory spondylopathies</td><td class="num">0.823</td><td class="num">0.581</td><td class="num">0.789</td><td class="num">0.830</td><td class="num">0.869</td><td class="num">0.945</td><td class="txt">321, phlebitis and thrombophlebitis of intracranial venous sinuses</td></tr><tr><td class="txt">495</td><td class="txt">extrinsic allergic alveolitis</td><td class="num">0.863</td><td class="num">0.649</td><td class="num">0.844</td><td class="num">0.866</td><td class="num">0.891</td><td class="num">0.944</td><td class="txt">092, early syphilis latent</td></tr><tr><td class="txt">619</td><td class="txt">fistula involving female genital tract</td><td class="num">0.856</td><td class="num">0.682</td><td class="num">0.837</td><td class="num">0.862</td><td class="num">0.882</td><td class="num">0.943</td><td class="txt">939, foreign body in genitourinary tract</td></tr><tr><td class="txt">359</td><td class="txt">muscular dystrophies and other myopathies</td><td class="num">0.842</td><td class="num">0.663</td><td class="num">0.805</td><td class="num">0.847</td><td class="num">0.885</td><td class="num">0.942</td><td class="txt">733, other diseases of muscle tendon and fascia</td></tr><tr><td class="txt">382</td><td class="txt">suppurative and unspecified otitis media</td><td class="num">0.863</td><td class="num">0.658</td><td class="num">0.844</td><td class="num">0.868</td><td class="num">0.888</td><td class="num">0.939</td><td class="txt">612, acute salpingitis and oophoritis</td></tr><tr><td class="txt">316</td><td class="txt">psychic factors associated with diseases classified elsewhere</td><td class="num">0.824</td><td class="num">0.601</td><td class="num">0.796</td><td class="num">0.836</td><td class="num">0.862</td><td class="num">0.938</td><td class="txt">305, physical disorders of presumably psychogenic origin</td></tr><tr><td class="txt">496</td><td class="txt">chronic airway obstruction not elsewhere classified</td><td class="num">0.862</td><td class="num">0.703</td><td class="num">0.841</td><td class="num">0.868</td><td class="num">0.884</td><td class="num">0.937</td><td class="txt">584, renal sclerosis unqualified</td></tr><tr><td class="txt">713</td><td class="txt">arthropathy associated with other disorders classified elsewhere</td><td class="num">0.844</td><td class="num">0.625</td><td class="num">0.822</td><td class="num">0.855</td><td class="num">0.878</td><td class="num">0.935</td><td class="txt">775, hemolytic disease of newborn without mention of kernicterus</td></tr><tr><td class="txt">508</td><td class="txt">respiratory conditions due to other and unspecified external agents</td><td class="num">0.821</td><td class="num">0.689</td><td class="num">0.800</td><td class="num">0.822</td><td class="num">0.842</td><td class="num">0.932</td><td class="txt">515, pneumoconiosis due to silica and silicates</td></tr><tr><td class="txt">586</td><td class="txt">renal failure unspecified</td><td class="num">0.847</td><td class="num">0.697</td><td class="num">0.824</td><td class="num">0.850</td><td class="num">0.871</td><td class="num">0.929</td><td class="txt">583, nephritis unqualified</td></tr><tr><td class="txt">259</td><td class="txt">other endocrine disorders</td><td class="num">0.818</td><td class="num">0.667</td><td class="num">0.784</td><td class="num">0.821</td><td class="num">0.853</td><td class="num">0.928</td><td class="txt">117, other systemic mycosis</td></tr><tr><td class="txt">745</td><td class="txt">bulbus cordis anomalies and anomalies of cardiac septal closure</td><td class="num">0.845</td><td class="num">0.724</td><td class="num">0.825</td><td class="num">0.846</td><td class="num">0.870</td><td class="num">0.928</td><td class="txt">605, redundant prepuce and phimosis</td></tr><tr><td class="txt">330</td><td class="txt">cerebral degenerations usually manifest in childhood</td><td class="num">0.761</td><td class="num">0.495</td><td class="num">0.723</td><td class="num">0.768</td><td class="num">0.812</td><td class="num">0.921</td><td class="txt">095, other forms of late syphilis with symptoms</td></tr><tr><td class="txt">308</td><td class="txt">acute reaction to stress</td><td class="num">0.769</td><td class="num">0.616</td><td class="num">0.738</td><td class="num">0.773</td><td class="num">0.804</td><td class="num">0.917</td><td class="txt">307, transient situational disturbances</td></tr><tr><td class="txt">327</td><td class="txt">organic sleep disorders</td><td class="num">0.804</td><td class="num">0.617</td><td class="num">0.765</td><td class="num">0.803</td><td class="num">0.849</td><td class="num">0.917</td><td class="txt">717, other nonarticular rheumatism</td></tr><tr><td class="txt">517</td><td class="txt">lung involvement in conditions classified elsewhere</td><td class="num">0.840</td><td class="num">0.662</td><td class="num">0.822</td><td class="num">0.849</td><td class="num">0.867</td><td class="num">0.917</td><td class="txt">776, anoxic and hypoxic conditions not elsewhere classifiable</td></tr><tr><td class="txt">305</td><td class="txt">nondependent abuse of drugs</td><td class="num">0.800</td><td class="num">0.566</td><td class="num">0.773</td><td class="num">0.811</td><td class="num">0.837</td><td class="num">0.913</td><td class="txt">308, behavior disorders of childhood</td></tr><tr><td class="txt">338</td><td class="txt">pain not elsewhere classified</td><td class="num">0.811</td><td class="num">0.687</td><td class="num">0.786</td><td class="num">0.814</td><td class="num">0.837</td><td class="num">0.907</td><td class="txt">490, bronchitis unqualified</td></tr><tr><td class="txt">588</td><td class="txt">disorders resulting from impaired renal function</td><td class="num">0.820</td><td class="num">0.700</td><td class="num">0.801</td><td class="num">0.822</td><td class="num">0.840</td><td class="num">0.901</td><td class="txt">515, pneumoconiosis due to silica and silicates</td></tr><tr><td class="txt">312</td><td class="txt">disturbance of conduct not elsewhere classified</td><td class="num">0.775</td><td class="num">0.678</td><td class="num">0.751</td><td class="num">0.775</td><td class="num">0.797</td><td class="num">0.895</td><td class="txt">306, special symptoms not elsewhere classified</td></tr><tr><td class="txt">625</td><td class="txt">pain and other symptoms associated with female genital organs</td><td class="num">0.762</td><td class="num">0.540</td><td class="num">0.727</td><td class="num">0.768</td><td class="num">0.807</td><td class="num">0.893</td><td class="txt">781, other symptoms referable to nervous system and special senses</td></tr><tr><td class="txt">315</td><td class="txt">specific delays in development</td><td class="num">0.777</td><td class="num">0.671</td><td class="num">0.752</td><td class="num">0.776</td><td class="num">0.800</td><td class="num">0.883</td><td class="txt">066, late effects of viral encephalitis</td></tr></tbody></table>
-
-<p>The highest score for these 52 runs from 0.883 to 0.985. Across the 302 codes that do have
-a match it runs from 0.865 to 1.000. As with ICD-10-CA, the two groups overlap.</p>
-
-<div class="break"></div>
-<h2>The same thing as a picture</h2>
-
-<p>Each line is one code with no match. The grey line runs from its lowest to its
-highest similarity score against any target code, the red bar covers the middle
-half of its scores, the white dot is the median and the dark dot is the highest.</p>
-
-<img src="plot_unmatched_similarity_spread.png">
-
-<p>The next one puts the codes with no match against the codes that do have one.
-Each point is a single ICD-9-CM code, placed at its highest similarity score.</p>
-
-<img src="plot_unmatched_similarity_max.png">
-
-<p class="note">The scores for the codes with no match sit inside the range of
-the codes that do have one, on both crosswalks, so there is no cut-off on either
-signal that would separate them without also removing a large share of the
-mappings that are correct.</p>
 
