@@ -62,6 +62,26 @@ d$`Pipeline output` <- vapply(d$`Pipeline output`, function(cell) {
   if (!length(cs)) cell else paste(cs, collapse = " / ")
 }, character(1), USE.NAMES = FALSE)
 
+# one plain sentence per code on why the pipeline landed where it did. the
+# numbers come from the ClinicalBERT matrix at threshold 0.995, where the cutoff
+# is 0.995 x the highest score in that code's column. kept in a named vector and
+# re-applied every run, with any previous copy stripped off first, so re-running
+# never stacks the same sentence twice
+why <- c(
+  "339" = "G44 was not the highest score in the column, an unrelated infection code A69 was, at 0.9155. that set the cutoff at 0.9109 and G44 at 0.9050 fell just under it. G43 then came in through co-occurrence, not similarity",
+  "338" = "the chapter filter threw out R52 before the pipeline could pick it, so it had to choose from what was left",
+  "175" = "this one worked, C50 scored 0.9532 and cleared the 0.9504 cutoff. C30 and C79 are extras that came in through co-occurrence",
+  "249" = "the top score in the column was O24 diabetes in pregnancy at 0.9507, which set the cutoff at 0.9459. E13 at 0.9252 was cut, and E11 came in through co-occurrence",
+  "239" = "the top score was D15 at 0.9416, setting the cutoff at 0.9369, and D48 at 0.9319 missed it by 0.005. C71 came in through co-occurrence",
+  "445" = "the top score was M66 a tendon rupture code at 0.8527, setting the cutoff at 0.8485, so I74 at 0.8010 was cut on similarity and only came in through co-occurrence",
+  "209" = "the pipeline has no way to answer no match. co-occurrence always hands back its top N codes, so something is always returned even when nothing fits"
+)
+
+MARK <- ". Why the pipeline missed it: "
+d$Notes <- sub(paste0("[.]? ?", substring(MARK, 3), ".*$"), "", d$Notes)
+w <- why[as.character(d$`ICD-9-CM`)]
+d$Notes <- ifelse(is.na(w), d$Notes, paste0(trimws(d$Notes), MARK, w))
+
 d <- d[, c("ICD-9-CM", "ICD-9-CM label", "Correct ICD-10-CA", "ICD-10-CA label",
            "Pipeline output", "Pipeline output label", "Verdict", "Notes")]
 
@@ -70,7 +90,7 @@ addWorksheet(wb, SH)
 writeData(wb, SH, d, headerStyle = createStyle(textDecoration = "bold", valign = "bottom"))
 addStyle(wb, SH, createStyle(valign = "top", wrapText = TRUE),
          rows = 2:(nrow(d) + 1), cols = 1:ncol(d), gridExpand = TRUE, stack = TRUE)
-setColWidths(wb, SH, cols = 1:8, widths = c(10, 28, 16, 32, 16, 32, 26, 55))
+setColWidths(wb, SH, cols = 1:8, widths = c(10, 28, 16, 32, 16, 32, 26, 80))
 freezePane(wb, SH, firstActiveRow = 2)
 saveWorkbook(wb, XLS, overwrite = TRUE)
 cat("wrote", XLS, "\n")
