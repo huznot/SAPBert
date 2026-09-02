@@ -70,7 +70,7 @@ for (tr in names(TRACKS)) {
 }
 
 res <- bind_rows(rows)
-write.csv(res, "results/code_prefix_test.csv", row.names = FALSE)
+write.csv(res, out_path("code_prefix_test.csv"), row.names = FALSE)
 
 cat("\n===== label only minus with code =====\n")
 for (m in c("sapbert", "mpnet", "clinicalbert")) {

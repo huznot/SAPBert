@@ -22,13 +22,13 @@ folds   <- bind_rows(lapply(p, `[[`, "folds"))
 imp     <- bind_rows(lapply(p, `[[`, "imp"))
 preds   <- bind_rows(lapply(p, `[[`, "preds"))
 
-write.csv(results, file.path(OUT_DIR, "cv_rerank_results.csv"), row.names = FALSE)
-write.csv(folds,   file.path(OUT_DIR, "cv_rerank_folds.csv"),   row.names = FALSE)
-saveRDS(preds, file.path(OUT_DIR, "cv_rerank_predictions.rds"))
+write.csv(results, out_path("cv_rerank_results.csv"), row.names = FALSE)
+write.csv(folds,   out_path("cv_rerank_folds.csv"),   row.names = FALSE)
+saveRDS(preds, out_path("cv_rerank_predictions.rds"))
 
 importance <- imp %>% group_by(track, Feature) %>%
   summarise(gain = mean(Gain), .groups = "drop") %>% arrange(track, desc(gain))
-write.csv(importance, file.path(OUT_DIR, "cv_rerank_importance.csv"), row.names = FALSE)
+write.csv(importance, out_path("cv_rerank_importance.csv"), row.names = FALSE)
 
 cat(sprintf("Merged: %d result rows, %d fold rows, %d prediction rows, tracks: %s\n",
             nrow(results), nrow(folds), nrow(preds),

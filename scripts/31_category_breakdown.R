@@ -75,7 +75,7 @@ for (tr in names(TRACKS)) {
   TRACKS[[tr]]$cooc   <- load_cooccurrence_df(file.path(ORIG_BASE, TRACKS[[tr]]$cooc_file))
 }
 
-best <- read.csv(file.path(OUT_DIR, "full_grid_best.csv"), stringsAsFactors = FALSE)
+best <- read.csv(out_path("full_grid_best.csv"), stringsAsFactors = FALSE)
 
 per_category <- function(track_name, sheets, thr, tn, fc) {
   tk  <- TRACKS[[track_name]]
@@ -126,7 +126,7 @@ for (track_name in names(TRACKS)) {
     select(CCS_ID, description, n_codes, model, n_codes_evaluated,
            n_manual_pairs, TP, FP, FN, precision, recall, f1, accuracy) %>%
     arrange(CCS_ID, model)
-  write.csv(out, file.path(OUT_DIR, sprintf("ccs_all_categories_%s.csv", track_name)),
+  write.csv(out, out_path(sprintf("ccs_all_categories_%s.csv", track_name)),
             row.names = FALSE)
 }
 
@@ -150,7 +150,7 @@ category_summary <- breakdown %>%
               2 * p * r / (p + r)
             }, 3),
             .groups = "drop")
-write.csv(category_summary, file.path(OUT_DIR, "ccs_category_summary.csv"), row.names = FALSE)
+write.csv(category_summary, out_path("ccs_category_summary.csv"), row.names = FALSE)
 
 # same spread split by how many codes a category holds, to show that the low
 # scoring tail is mostly the small categories
@@ -161,7 +161,7 @@ size_summary <- breakdown %>%
   group_by(track, model, size_group) %>%
   summarise(n_categories = n(), mean_f1 = round(mean(f1), 3),
             sd_f1 = round(sd(f1), 3), .groups = "drop")
-write.csv(size_summary, file.path(OUT_DIR, "ccs_category_by_size.csv"), row.names = FALSE)
+write.csv(size_summary, out_path("ccs_category_by_size.csv"), row.names = FALSE)
 
 # --- charts -----------------------------------------------------------
 
@@ -234,11 +234,11 @@ model_tag <- c(`ClinicalBERT-original` = "clinicalbert", `SapBERT-base` = "sapbe
                `mpnet-base` = "mpnet")
 for (track_name in names(TRACKS)) {
   for (model in CHARTED) {
-    ggsave(file.path(OUT_DIR, sprintf("plot_ccs_f1_all_%s_%s.png", track_name, model_tag[[model]])),
+    ggsave(out_path(sprintf("plot_ccs_f1_all_%s_%s.png", track_name, model_tag[[model]])),
            f1_chart(track_name, model), width = 15, height = 10, dpi = 150)
   }
   for (nm in names(DELTA_PAIRS)) {
-    ggsave(file.path(OUT_DIR, sprintf("plot_ccs_delta_%s_%s.png", nm, track_name)),
+    ggsave(out_path(sprintf("plot_ccs_delta_%s_%s.png", nm, track_name)),
            delta_chart(track_name, DELTA_PAIRS[[nm]]), width = 15, height = 10, dpi = 150)
   }
 }
@@ -257,7 +257,7 @@ delta_summary <- bind_rows(lapply(names(DELTA_PAIRS), function(nm) {
            largest_loss = round(min(d$delta), 3))
   }))
 }))
-write.csv(delta_summary, file.path(OUT_DIR, "ccs_delta_summary.csv"), row.names = FALSE)
+write.csv(delta_summary, out_path("ccs_delta_summary.csv"), row.names = FALSE)
 
 # the spread itself, which is what the per category standard deviation measures
 dist <- breakdown %>%
@@ -291,7 +291,7 @@ p <- ggplot(dist, aes(x = f1, fill = size_group)) +
   theme(legend.position = "top", plot.title = element_text(face = "bold"),
         panel.grid.minor = element_blank(),
         strip.text.y = element_text(angle = 0, face = "bold"))
-ggsave(file.path(OUT_DIR, "plot_ccs_f1_distribution.png"), p, width = 10, height = 7.5, dpi = 150)
+ggsave(out_path("plot_ccs_f1_distribution.png"), p, width = 10, height = 7.5, dpi = 150)
 
 cat("\n=== per category f1, spread over categories ===\n")
 print(as.data.frame(category_summary))

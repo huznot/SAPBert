@@ -108,23 +108,23 @@ all_results[[length(all_results) + 1]] <- run_grid_reduced(
   manual_target_col = "ICDA-8", thresholds = thresholds_8_9, top_ns = top_ns_8_9)
 
 extended_grid <- bind_rows(all_results)
-write.csv(extended_grid, file.path(OUT_DIR, "extended_grid_results.csv"), row.names = FALSE)
+write.csv(extended_grid, out_path("extended_grid_results.csv"), row.names = FALSE)
 
 best_extended <- extended_grid %>%
   group_by(track, model) %>%
   slice_max(order_by = f1, n = 1, with_ties = FALSE) %>%
   ungroup()
-write.csv(best_extended, file.path(OUT_DIR, "extended_best_by_model.csv"), row.names = FALSE)
+write.csv(best_extended, out_path("extended_best_by_model.csv"), row.names = FALSE)
 
 cat("\n=== Best combination per track x model (extended, reduced grid) ===\n")
 print(best_extended)
 
-old_best <- read.csv(file.path(OUT_DIR, "best_by_model.csv"), stringsAsFactors = FALSE)
+old_best <- read.csv(out_path("best_by_model.csv"), stringsAsFactors = FALSE)
 cat("\n=== Old (original grid) vs new (this run) best F1/Accuracy ===\n")
 comparison <- bind_rows(
   old_best %>% mutate(source = "original_full_grid"),
   best_extended %>% select(track, model, similarity_threshold, top_n, flag_combination, precision, recall, f1, accuracy) %>%
     mutate(source = "extended_reduced_grid")
 ) %>% arrange(track, model, source)
-write.csv(comparison, file.path(OUT_DIR, "old_vs_new_comparison.csv"), row.names = FALSE)
+write.csv(comparison, out_path("old_vs_new_comparison.csv"), row.names = FALSE)
 print(comparison)

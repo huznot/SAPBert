@@ -86,8 +86,8 @@ for (tr in names(TRACKS)) {
 
 sim_all  <- bind_rows(sim_all)
 cooc_all <- bind_rows(cooc_all)
-write.csv(sim_all,  file.path(OUT, "freq_dist_max_similarity.csv"), row.names = FALSE)
-write.csv(cooc_all, file.path(OUT, "freq_dist_top_cooccurrence.csv"), row.names = FALSE)
+write.csv(sim_all,  out_path("freq_dist_max_similarity.csv"), row.names = FALSE)
+write.csv(cooc_all, out_path("freq_dist_top_cooccurrence.csv"), row.names = FALSE)
 
 sim_all <- sim_all %>% mutate(max_similarity_plot = pmin(max_similarity, 1))
 
@@ -97,7 +97,7 @@ g1 <- ggplot(sim_all, aes(max_similarity_plot)) +
   labs(x = "maximum cosine similarity for an ICD-9-CM code", y = "number of codes",
        title = "Distribution of maximum similarity score (ClinicalBERT)") +
   theme_minimal(base_size = 11)
-ggsave(file.path(OUT, "plot_freq_dist_max_similarity.png"), g1, width = 7, height = 6, dpi = 150)
+ggsave(out_path("plot_freq_dist_max_similarity.png"), g1, width = 7, height = 6, dpi = 150)
 
 g2 <- ggplot(cooc_all, aes(top_frequency)) +
   geom_histogram(bins = 40, fill = "#31a354", colour = "white") +
@@ -107,7 +107,7 @@ g2 <- ggplot(cooc_all, aes(top_frequency)) +
        y = "number of codes",
        title = "Distribution of the most frequent co-occurring code") +
   theme_minimal(base_size = 11)
-ggsave(file.path(OUT, "plot_freq_dist_top_cooccurrence.png"), g2, width = 7, height = 6, dpi = 150)
+ggsave(out_path("plot_freq_dist_top_cooccurrence.png"), g2, width = 7, height = 6, dpi = 150)
 
 cat("\nwrote results/freq_dist_max_similarity.csv\n")
 cat("wrote results/freq_dist_top_cooccurrence.csv\n")

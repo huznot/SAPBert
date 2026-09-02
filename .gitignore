@@ -1,7 +1,10 @@
 .Rhistory
 .RData
 .Rproj.user/
+Rplots.pdf
+~$*
 *.docx
+docs/*.docx
 clean_paper.txt
 __pycache__/
 *.pyc

@@ -259,8 +259,8 @@ for (tr in names(TRACKS)) {
   cat(sprintf("  candidates per code: %.1f\n", nrow(feat) / n_distinct(feat$ICD_9_CM)))
 
   attr(feat, "n_true_pairs") <- nrow(tp_df)
-  saveRDS(feat, file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
-  cat(sprintf("  wrote %s\n", file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr))))
+  saveRDS(feat, out_path(sprintf("rerank_features_%s.rds", tr)))
+  cat(sprintf("  wrote %s\n", out_path(sprintf("rerank_features_%s.rds", tr))))
 }
 
 cat("\nDone.\n")

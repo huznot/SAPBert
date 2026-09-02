@@ -4,7 +4,7 @@
 
 source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 
-R <- "results/full_grid"
+R <- "results/grid/conditions"
 get <- function(tag) {
   p <- file.path(R, paste0(tag, ".csv"))
   if (!file.exists(p)) return(NULL)
@@ -84,6 +84,6 @@ if (nrow(cells)) {
          title = "ClinicalBERT: stop words and code numbers",
          subtitle = "same parameter grid in every cell, only the input text changes") +
     theme_minimal(base_size = 11) + theme(legend.position = "top")
-  ggsave("results/plot_stopwords_codes.png", g, width = 8, height = 4.5, dpi = 150)
+  ggsave(out_path("plot_stopwords_codes.png"), g, width = 8, height = 4.5, dpi = 150)
   cat("\nwrote results/plot_stopwords_codes.png\n")
 }

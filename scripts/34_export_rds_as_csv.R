@@ -8,12 +8,12 @@
 
 source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 
-OUT <- "results/csv_export"
+OUT <- "results/rerank/csv_export"
 dir.create(OUT, showWarnings = FALSE, recursive = TRUE)
 
-files <- c("results/cv_rerank_predictions.rds",
-           "results/heldout_counts_10_9.rds",
-           "results/heldout_counts_8_9.rds")
+files <- c(out_path("cv_rerank_predictions.rds"),
+           out_path("heldout_counts_10_9.rds"),
+           out_path("heldout_counts_8_9.rds"))
 
 for (f in files) {
   if (!file.exists(f)) {

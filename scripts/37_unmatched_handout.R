@@ -28,11 +28,11 @@ suppressMessages({library(dplyr)})
 OUT <- "results"
 MODEL <- "ClinicalBERT"
 
-sim   <- read.csv(file.path(OUT, "unmatched_similarity_by_code.csv"), stringsAsFactors = FALSE)
-cooc  <- read.csv(file.path(OUT, "unmatched_cooccurrence_by_code.csv"), stringsAsFactors = FALSE)
-pairs <- read.csv(file.path(OUT, "unmatched_top_cooccurrence_pairs.csv"), stringsAsFactors = FALSE)
-summ  <- read.csv(file.path(OUT, "unmatched_descriptives_summary.csv"), stringsAsFactors = FALSE)
-hand  <- read.csv(file.path(OUT, "unmatched_code_handling.csv"), stringsAsFactors = FALSE)
+sim   <- read.csv(out_path("unmatched_similarity_by_code.csv"), stringsAsFactors = FALSE)
+cooc  <- read.csv(out_path("unmatched_cooccurrence_by_code.csv"), stringsAsFactors = FALSE)
+pairs <- read.csv(out_path("unmatched_top_cooccurrence_pairs.csv"), stringsAsFactors = FALSE)
+summ  <- read.csv(out_path("unmatched_descriptives_summary.csv"), stringsAsFactors = FALSE)
+hand  <- read.csv(out_path("unmatched_code_handling.csv"), stringsAsFactors = FALSE)
 
 f3 <- function(x) ifelse(is.na(x), "no data", formatC(x, format = "f", digits = 3))
 fn <- function(x) ifelse(is.na(x), "no data", formatC(x, format = "d", big.mark = ","))
@@ -314,5 +314,5 @@ second applies to all 52 ICDA-8 codes.</p>
   cooc_span("10_9", "low"), cooc_span("10_9", "high"))
 
 writeLines(paste0(style, intro, outcome, groups, t10, t8, thresh, mech),
-           file.path(OUT, "unmatched_codes_handout.html"))
+           out_path("unmatched_codes_handout.html"))
 cat("wrote results/unmatched_codes_handout.html\n")

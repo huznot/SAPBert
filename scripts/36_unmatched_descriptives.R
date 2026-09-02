@@ -33,13 +33,16 @@ TRACKS <- list(
                 target_labels = "ICDA-8-3Level")
 )
 
+# the label only matrices. the ICD code used to be pasted onto the front of
+# every label before embedding, which broke the similarity scores. see
+# 41_identical_labels.R for the proof
 SIM <- list(
-  ClinicalBERT = list(`10_9` = file.path(ORIG, "Cosine_Similarity_Matrices/cosine_similarity_matrices_10_9_ClinicalBERT.xlsx"),
-                      `8_9`  = file.path(ORIG, "Cosine_Similarity_Matrices/cosine_similarity_matrices_8_9_ClinicalBERT.xlsx")),
-  SapBERT      = list(`10_9` = file.path(SAP, "cosine_similarity_matrices_10_9_SapBERT.xlsx"),
-                      `8_9`  = file.path(SAP, "cosine_similarity_matrices_8_9_SapBERT.xlsx")),
-  mpnet        = list(`10_9` = file.path(GEN, "cosine_similarity_matrices_10_9_mpnet_base.xlsx"),
-                      `8_9`  = file.path(GEN, "cosine_similarity_matrices_8_9_mpnet_base.xlsx"))
+  ClinicalBERT = list(`10_9` = file.path(GEN, "cosine_similarity_matrices_10_9_clinicalbert_base_nocode.xlsx"),
+                      `8_9`  = file.path(GEN, "cosine_similarity_matrices_8_9_clinicalbert_base_nocode.xlsx")),
+  SapBERT      = list(`10_9` = file.path(GEN, "cosine_similarity_matrices_10_9_sapbert_base_nocode.xlsx"),
+                      `8_9`  = file.path(GEN, "cosine_similarity_matrices_8_9_sapbert_base_nocode.xlsx")),
+  mpnet        = list(`10_9` = file.path(GEN, "cosine_similarity_matrices_10_9_mpnet_base_nocode.xlsx"),
+                      `8_9`  = file.path(GEN, "cosine_similarity_matrices_8_9_mpnet_base_nocode.xlsx"))
 )
 
 # the similarity workbook is one sheet per ccs category, all target codes as
@@ -232,11 +235,11 @@ sim_by_code  <- bind_rows(sim_by_code) %>% left_join(icd9_labels, by = "icd9")
 cooc_by_code <- bind_rows(cooc_by_code) %>% left_join(icd9_labels, by = "icd9")
 group_summary <- bind_rows(group_rows)
 
-write.csv(r3(sim_by_code),  file.path(OUT, "unmatched_similarity_by_code.csv"), row.names = FALSE)
-write.csv(cooc_by_code,     file.path(OUT, "unmatched_cooccurrence_by_code.csv"), row.names = FALSE)
-write.csv(r3(group_summary), file.path(OUT, "unmatched_descriptives_summary.csv"), row.names = FALSE)
+write.csv(r3(sim_by_code),  out_path("unmatched_similarity_by_code.csv"), row.names = FALSE)
+write.csv(cooc_by_code,     out_path("unmatched_cooccurrence_by_code.csv"), row.names = FALSE)
+write.csv(r3(group_summary), out_path("unmatched_descriptives_summary.csv"), row.names = FALSE)
 if (length(top_pairs))
-  write.csv(bind_rows(top_pairs), file.path(OUT, "unmatched_top_cooccurrence_pairs.csv"), row.names = FALSE)
+  write.csv(bind_rows(top_pairs), out_path("unmatched_top_cooccurrence_pairs.csv"), row.names = FALSE)
 
 # ---- charts ----
 # groups differ in size, 9 against 345 and 52 against 302, so counts on a
@@ -257,7 +260,7 @@ g1 <- ggplot(lvl(sim_by_code %>% filter(model == "ClinicalBERT")), aes(group, ma
   theme_minimal(base_size = 11) +
   theme(legend.position = "none", panel.grid.major.y = element_blank(),
         strip.text = element_text(face = "bold"))
-ggsave(file.path(OUT, "plot_unmatched_similarity_max.png"), g1, width = 9.5, height = 4, dpi = 150)
+ggsave(out_path("plot_unmatched_similarity_max.png"), g1, width = 9.5, height = 4, dpi = 150)
 
 # the whole distribution for each code with no match, which is what was asked
 # for. the box is min to max with the quartiles inside
@@ -278,7 +281,7 @@ g2 <- ggplot(spread, aes(pos)) +
        x = "ICD-9-CM code", y = "cosine similarity") +
   theme_minimal(base_size = 10) +
   theme(panel.grid.major.y = element_blank(), strip.text = element_text(face = "bold"))
-ggsave(file.path(OUT, "plot_unmatched_similarity_spread.png"), g2, width = 10, height = 7.5, dpi = 150)
+ggsave(out_path("plot_unmatched_similarity_spread.png"), g2, width = 10, height = 7.5, dpi = 150)
 
 cooc_plot <- cooc_by_code %>% filter(!is.na(max))
 missing_lab <- cooc_by_code %>% group_by(track_label, group) %>%
@@ -299,7 +302,7 @@ g3 <- ggplot(lvl(cooc_plot), aes(group, max, colour = group)) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "none", panel.grid.major.y = element_blank(),
         strip.text = element_text(face = "bold"))
-ggsave(file.path(OUT, "plot_unmatched_cooccurrence.png"), g3, width = 9.5, height = 5, dpi = 150)
+ggsave(out_path("plot_unmatched_cooccurrence.png"), g3, width = 9.5, height = 5, dpi = 150)
 
 cat("\n\nwrote results/unmatched_similarity_by_code.csv\n")
 cat("wrote results/unmatched_cooccurrence_by_code.csv\n")

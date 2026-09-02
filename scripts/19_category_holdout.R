@@ -84,7 +84,7 @@ rows <- list()
 
 for (tr in tracks) {
   cfg <- CFG[[tr]]
-  fa <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
+  fa <- readRDS(out_path(sprintf("rerank_features_%s.rds", tr)))
   base <- fa %>% filter(has_truth == 1)
   truth <- base %>% filter(y == 1) %>% select(ICD_9_CM, target)
   feat <- apply_retrieval(base, cfg)
@@ -126,7 +126,7 @@ for (tr in tracks) {
 }
 
 res <- bind_rows(rows)
-write.csv(res, file.path(OUT_DIR, sprintf("category_holdout_%s.csv",
+write.csv(res, out_path(sprintf("category_holdout_%s.csv",
           paste(tracks, collapse = "_"))), row.names = FALSE)
 
 cat("\n===== cost of holding out whole clinical areas =====\n")

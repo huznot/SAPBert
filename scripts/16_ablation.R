@@ -111,7 +111,7 @@ rows <- list()
 
 for (tr in tracks) {
   cat(sprintf("\n################ TRACK %s ################\n", tr))
-  feat_all <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
+  feat_all <- readRDS(out_path(sprintf("rerank_features_%s.rds", tr)))
   base <- feat_all %>% filter(has_truth == 1)
   # truth comes from the FULL pool, before retrieval. Taking it after would
   # drop the positives retrieval missed out of the recall denominator and
@@ -185,7 +185,7 @@ for (tr in tracks) {
 }
 
 res <- bind_rows(rows)
-out <- file.path(OUT_DIR, sprintf("ablation_%s.csv", paste(tracks, collapse = "_")))
+out <- out_path(sprintf("ablation_%s.csv", paste(tracks, collapse = "_")))
 write.csv(res, out, row.names = FALSE)
 
 cat("\n\n===== ablation, held-out =====\n")

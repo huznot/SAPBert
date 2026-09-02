@@ -92,7 +92,7 @@ rows <- list()
 
 for (tr in tracks) {
   cat(sprintf("\n################ TRACK %s ################\n", tr))
-  feat_all <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
+  feat_all <- readRDS(out_path(sprintf("rerank_features_%s.rds", tr)))
   base <- feat_all %>% filter(has_truth == 1)
   # truth comes from the full pool, before retrieval, so a positive that
   # retrieval missed still counts against recall
@@ -162,7 +162,7 @@ for (tr in tracks) {
 }
 
 res <- bind_rows(rows)
-write.csv(res, file.path(OUT_DIR, "portability.csv"), row.names = FALSE)
+write.csv(res, out_path("portability.csv"), row.names = FALSE)
 
 cat("\n\n===== what each setting needs, held out =====\n")
 cat("  full         code labels + linked health records + chapter table\n")

@@ -11,7 +11,7 @@ source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 source("scripts/pipeline_lib.R")
 
 OUT_DIR <- "results"
-preds <- readRDS(file.path(OUT_DIR, "cv_rerank_predictions.rds"))
+preds <- readRDS(out_path("cv_rerank_predictions.rds"))
 
 prf <- function(tp, fp, fn) {
   p <- if (tp + fp > 0) tp/(tp+fp) else NA_real_
@@ -85,12 +85,12 @@ for (tr in unique(preds$track)) {
 }
 
 curve <- bind_rows(curve_rows)
-write.csv(curve, file.path(OUT_DIR, "precision_coverage_curve.csv"), row.names = FALSE)
-write.csv(bind_rows(op_rows), file.path(OUT_DIR, "precision_coverage_operating_points.csv"), row.names = FALSE)
-write.csv(bind_rows(triage_rows), file.path(OUT_DIR, "precision_coverage_triage.csv"), row.names = FALSE)
+write.csv(curve, out_path("precision_coverage_curve.csv"), row.names = FALSE)
+write.csv(bind_rows(op_rows), out_path("precision_coverage_operating_points.csv"), row.names = FALSE)
+write.csv(bind_rows(triage_rows), out_path("precision_coverage_triage.csv"), row.names = FALSE)
 
 # plot
-png(file.path(OUT_DIR, "plot_precision_coverage.png"), width = 1100, height = 500, res = 110)
+png(out_path("plot_precision_coverage.png"), width = 1100, height = 500, res = 110)
 par(mfrow = c(1, 2), mar = c(4.2, 4.2, 3, 1))
 for (tr in unique(curve$track)) {
   cc <- curve %>% filter(track == tr, !is.na(precision)) %>% arrange(recall)

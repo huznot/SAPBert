@@ -66,4 +66,13 @@ run("36_unmatched_descriptives.R")   # those codes described on their own, secti
 run("37_unmatched_handout.R")        # standalone html of the same thing
 run("27_show_results.R")             # every headline number
 
+
+# the cutoff work and the reviewed unmatched codes. 44_review_workbook.R is not
+# run here on purpose, it rebuilds the review xlsx from scratch and would throw
+# away hand formatting. use 47_patch_notes.R to change wording in place instead.
+run("41_identical_labels.R")          # proof the code prefix broke the similarity
+run("45_absolute_threshold_grid.R")   # absolute cutoff against the relative one
+run("46_report_docx.R")               # the cutoff report
+run("43_e13_d48_review.R")            # per code look at 249 and 239
+
 cat("\nall done. results/ is rebuilt.\n")

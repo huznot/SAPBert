@@ -71,7 +71,7 @@ for (tr in SELECTED_TRACKS) {
   tk <- TRACKS[[tr]]
   cat(sprintf("\n################ TRACK %s ################\n", tr))
 
-  feat_all <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
+  feat_all <- readRDS(out_path(sprintf("rerank_features_%s.rds", tr)))
   n_true_pairs <- attr(feat_all, "n_true_pairs")
 
   # only codes with a known answer can be cross validated. the rest go to 14_,
@@ -88,7 +88,7 @@ for (tr in SELECTED_TRACKS) {
 
   # baseline emissions per thr/top_n/flag. same every run so cache them,
   # rm results/base_emit_<track>.rds to rebuild
-  base_cache <- file.path(OUT_DIR, sprintf("base_emit_%s.rds", tr))
+  base_cache <- out_path(sprintf("base_emit_%s.rds", tr))
   if (file.exists(base_cache)) {
     cat("Loading cached baseline emissions...\n")
     base_emit <- readRDS(base_cache)
@@ -258,7 +258,7 @@ for (tr in SELECTED_TRACKS) {
   # checkpoint before aggregating so a bug down there doesnt bin the whole run
   oof <- bind_rows(oof_pred)
   saveRDS(list(oof = oof, fold_base_key = fold_base_key, outer_folds = outer_folds),
-          file.path(OUT_DIR, sprintf("cv_rerank_checkpoint_%s.rds", tr)))
+          out_path(sprintf("cv_rerank_checkpoint_%s.rds", tr)))
 
   # pooled out-of-fold results
   em_all <- bind_rows(lapply(oof_pred, function(d) emit_from_scores(d, d$.tau[1], d$.rho[1])))
@@ -304,16 +304,16 @@ for (tr in SELECTED_TRACKS) {
                folds   = bind_rows(fold_rows) %>% filter(track == tr),
                imp     = bind_rows(imp_rows) %>% filter(track == tr),
                preds   = bind_rows(pred_rows) %>% filter(track == tr)),
-          file.path(OUT_DIR, sprintf("cv_rerank_part_%s.rds", tr)))
+          out_path(sprintf("cv_rerank_part_%s.rds", tr)))
 }
 
-write.csv(results, file.path(OUT_DIR, "cv_rerank_results.csv"), row.names = FALSE)
-write.csv(bind_rows(fold_rows), file.path(OUT_DIR, "cv_rerank_folds.csv"), row.names = FALSE)
-saveRDS(bind_rows(pred_rows), file.path(OUT_DIR, "cv_rerank_predictions.rds"))
+write.csv(results, out_path("cv_rerank_results.csv"), row.names = FALSE)
+write.csv(bind_rows(fold_rows), out_path("cv_rerank_folds.csv"), row.names = FALSE)
+saveRDS(bind_rows(pred_rows), out_path("cv_rerank_predictions.rds"))
 
 importance <- bind_rows(imp_rows) %>% group_by(track, Feature) %>%
   summarise(gain = mean(Gain), .groups = "drop") %>% arrange(track, desc(gain))
-write.csv(importance, file.path(OUT_DIR, "cv_rerank_importance.csv"), row.names = FALSE)
+write.csv(importance, out_path("cv_rerank_importance.csv"), row.names = FALSE)
 
 cat("\n\n================ FINAL ================\n")
 print(as.data.frame(results %>% mutate(across(where(is.numeric), ~round(.x, 3)))))

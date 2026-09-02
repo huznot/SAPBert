@@ -93,7 +93,7 @@ for (tr in names(TRACKS)) {
   TRACKS[[tr]]$cooc   <- load_cooccurrence_df(file.path(ORIG_BASE, TRACKS[[tr]]$cooc_file))
 }
 
-best <- read.csv(file.path(OUT_DIR, "full_grid_best.csv"), stringsAsFactors = FALSE)
+best <- read.csv(out_path("full_grid_best.csv"), stringsAsFactors = FALSE)
 
 # runs the original four step pipeline at one grid point and returns the
 # per code tp/fp/fn counts, which is everything the bootstrap needs
@@ -207,8 +207,8 @@ for (track_name in names(TRACKS)) {
 
 variability <- bind_rows(var_rows)
 deltas      <- bind_rows(delta_rows)
-write.csv(variability, file.path(OUT_DIR, "bootstrap_variability.csv"), row.names = FALSE)
-write.csv(deltas, file.path(OUT_DIR, "bootstrap_deltas.csv"), row.names = FALSE)
+write.csv(variability, out_path("bootstrap_variability.csv"), row.names = FALSE)
+write.csv(deltas, out_path("bootstrap_deltas.csv"), row.names = FALSE)
 
 cat("\n=== f1 with bootstrap standard deviation ===\n")
 print(as.data.frame(variability %>% filter(metric == "f1") %>% select(-metric)))
@@ -293,8 +293,8 @@ for (track_name in names(TRACKS)) {
 
 top1_var <- bind_rows(t1_rows)
 top1_delta <- bind_rows(t1_delta_rows)
-write.csv(top1_var, file.path(OUT_DIR, "bootstrap_top1.csv"), row.names = FALSE)
-write.csv(top1_delta, file.path(OUT_DIR, "bootstrap_top1_deltas.csv"), row.names = FALSE)
+write.csv(top1_var, out_path("bootstrap_top1.csv"), row.names = FALSE)
+write.csv(top1_delta, out_path("bootstrap_top1_deltas.csv"), row.names = FALSE)
 
 cat("\n=== top-1 retrieval with bootstrap standard deviation ===\n")
 print(as.data.frame(top1_var))
@@ -305,7 +305,7 @@ print(as.data.frame(top1_delta))
 
 # the reranker is evaluated by five fold cross validation, so its spread comes
 # straight from the folds rather than a bootstrap
-folds_path <- file.path(OUT_DIR, "cv_rerank_folds.csv")
+folds_path <- out_path("cv_rerank_folds.csv")
 if (file.exists(folds_path)) {
   folds <- read.csv(folds_path, stringsAsFactors = FALSE)
   fold_var <- folds %>%
@@ -314,7 +314,7 @@ if (file.exists(folds_path)) {
     group_by(track, metric) %>%
     summarise(n_folds = n(), mean = round(mean(value), 4), sd = round(sd(value), 4),
               min = round(min(value), 4), max = round(max(value), 4), .groups = "drop")
-  write.csv(fold_var, file.path(OUT_DIR, "cv_fold_variability.csv"), row.names = FALSE)
+  write.csv(fold_var, out_path("cv_fold_variability.csv"), row.names = FALSE)
   cat("\n=== across the five cross validation folds ===\n")
   print(as.data.frame(fold_var))
 }

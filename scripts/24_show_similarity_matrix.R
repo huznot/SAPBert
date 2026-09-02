@@ -67,12 +67,12 @@ g <- ggplot(hm, aes(icd9, target, fill = sim)) +
        title = "Cosine similarity between code label embeddings",
        subtitle = "x marks a pair the manual crosswalk says is correct") +
   theme_minimal(base_size = 11)
-ggsave(file.path(OUT, "plot_similarity_matrix_example.png"), g,
+ggsave(out_path("plot_similarity_matrix_example.png"), g,
        width = 7, height = 6, dpi = 150)
 
 write.csv(long %>% filter(icd9 %in% picks) %>% arrange(icd9, desc(sim)) %>%
             group_by(icd9) %>% slice_head(n = 25) %>% ungroup(),
-          file.path(OUT, "similarity_matrix_example.csv"), row.names = FALSE)
+          out_path("similarity_matrix_example.csv"), row.names = FALSE)
 
 cat("wrote results/plot_similarity_matrix_example.png\n")
 cat("wrote results/similarity_matrix_example.csv\n")

@@ -159,12 +159,28 @@ Then swap the paths in the `TRACKS` list at the top of `11_rerank_features.R`.
 ## Layout
 
 ```
-data/original/    labels, co-occurrence tables, manual crosswalks
-data/sapbert/     SapBERT similarity matrices
-data/generated/   regenerated / filler-stripped / mpnet matrices
-scripts/          pipeline code
-results/          csv output and charts
-results/csv_export/  the held-out predictions as csv
-run_all.R         rebuilds everything in dependency order
-report.md         every change from the original pipeline to now
+data/original/            labels, co-occurrence tables, manual crosswalks
+data/sapbert/             SapBERT similarity matrices
+data/generated/           regenerated / filler-stripped / mpnet matrices
+scripts/                  pipeline code
+docs/                     the paper drafts and the change log
+run_all.R                 rebuilds everything in dependency order
+
+results/tables/           headline csv output
+results/figures/          every plot
+results/grid/             parameter grid summaries
+results/grid/conditions/  one csv per embedding condition
+results/rerank/           candidate features, cv folds, precision-coverage
+results/rerank/csv_export/ the held-out predictions as csv
+results/unmatched/        the codes with no reference match
+results/review/           the reviewed nine codes and the cutoff work
 ```
+
+Scripts do not hardcode those subdirectories. They call `out_path("name.csv")`
+and `scripts/paths.R` decides where it goes from the file name, so the folder
+layout and the code cannot drift apart. If you add an output that should live
+somewhere new, add the rule in `results_subdir()` rather than at the call site.
+
+`data/` is committed, which is why the repository is about 350 MB. That keeps the
+analysis reproducible from a clone without a GPU, and it is also why cloning is
+slow. Deliberate, not an accident.

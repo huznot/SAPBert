@@ -133,7 +133,7 @@ for (tr in names(TRACKS)) {
 }
 
 study <- bind_rows(results)
-write.csv(study, file.path(OUT_DIR, "candidate_generation_study.csv"), row.names = FALSE)
+write.csv(study, out_path("candidate_generation_study.csv"), row.names = FALSE)
 
 cat("\n=== Best recall ceiling per track x model x chapter_filter ===\n")
 print(as.data.frame(study %>% group_by(track, model, chapter_filter) %>%
@@ -169,7 +169,7 @@ for (tr in names(TRACKS)) {
   cas[[length(cas)+1]] <- bad
 }
 casualties <- bind_rows(cas)
-write.csv(casualties, file.path(OUT_DIR, "chapter_filter_casualties.csv"), row.names = FALSE)
+write.csv(casualties, out_path("chapter_filter_casualties.csv"), row.names = FALSE)
 cat(sprintf("\n=== True pairs destroyed by the chapter filter: %d ===\n", nrow(casualties)))
 print(as.data.frame(casualties %>% count(track, chapter_icd9, chapter_target,
                                          allowed_target_chapters, sort = TRUE) %>% head(20)))

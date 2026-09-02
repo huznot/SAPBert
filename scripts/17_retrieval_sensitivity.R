@@ -69,7 +69,7 @@ rows <- list()
 
 for (tr in tracks) {
   cat(sprintf("\n######## %s ########\n", tr))
-  fa <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
+  fa <- readRDS(out_path(sprintf("rerank_features_%s.rds", tr)))
   base <- fa %>% filter(has_truth == 1)
   truth <- base %>% filter(y == 1) %>% select(ICD_9_CM, target)
   codes <- sort(unique(base$ICD_9_CM))
@@ -119,7 +119,7 @@ for (tr in tracks) {
 }
 
 res <- bind_rows(rows)
-write.csv(res, file.path(OUT_DIR, sprintf("retrieval_sensitivity_%s.csv",
+write.csv(res, out_path(sprintf("retrieval_sensitivity_%s.csv",
           paste(tracks, collapse = "_"))), row.names = FALSE)
 
 cat("\n===== summary =====\n")

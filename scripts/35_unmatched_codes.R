@@ -36,17 +36,20 @@ TRACKS <- list(
                 manual_target_col = "ICDA-8", run = run_pipeline_8_9_cached)
 )
 
+# the label only matrices. the ICD code used to be pasted onto the front of
+# every label before embedding, which broke the similarity scores. see
+# 41_identical_labels.R for the proof
 SIM <- list(
-  ClinicalBERT = list(`10_9` = file.path(ORIG, "Cosine_Similarity_Matrices/cosine_similarity_matrices_10_9_ClinicalBERT.xlsx"),
-                      `8_9`  = file.path(ORIG, "Cosine_Similarity_Matrices/cosine_similarity_matrices_8_9_ClinicalBERT.xlsx")),
-  SapBERT      = list(`10_9` = file.path(SAP, "cosine_similarity_matrices_10_9_SapBERT.xlsx"),
-                      `8_9`  = file.path(SAP, "cosine_similarity_matrices_8_9_SapBERT.xlsx")),
-  mpnet        = list(`10_9` = file.path(GEN, "cosine_similarity_matrices_10_9_mpnet_base.xlsx"),
-                      `8_9`  = file.path(GEN, "cosine_similarity_matrices_8_9_mpnet_base.xlsx"))
+  ClinicalBERT = list(`10_9` = file.path(GEN, "cosine_similarity_matrices_10_9_clinicalbert_base_nocode.xlsx"),
+                      `8_9`  = file.path(GEN, "cosine_similarity_matrices_8_9_clinicalbert_base_nocode.xlsx")),
+  SapBERT      = list(`10_9` = file.path(GEN, "cosine_similarity_matrices_10_9_sapbert_base_nocode.xlsx"),
+                      `8_9`  = file.path(GEN, "cosine_similarity_matrices_8_9_sapbert_base_nocode.xlsx")),
+  mpnet        = list(`10_9` = file.path(GEN, "cosine_similarity_matrices_10_9_mpnet_base_nocode.xlsx"),
+                      `8_9`  = file.path(GEN, "cosine_similarity_matrices_8_9_mpnet_base_nocode.xlsx"))
 )
 
-best <- read.csv(file.path(OUT, "full_grid_best.csv"), stringsAsFactors = FALSE)
-MODEL_KEY <- c(ClinicalBERT = "ClinicalBERT-original", SapBERT = "SapBERT-base", mpnet = "mpnet-base")
+best <- read.csv(out_path("full_grid_best.csv"), stringsAsFactors = FALSE)
+MODEL_KEY <- c(ClinicalBERT = "ClinicalBERT-base-nocode", SapBERT = "SapBERT-base-nocode", mpnet = "mpnet-base-nocode")
 
 rows <- list()
 for (tr in names(TRACKS)) {
@@ -78,7 +81,7 @@ for (tr in names(TRACKS)) {
 }
 
 out <- bind_rows(rows)
-write.csv(out, file.path(OUT, "unmatched_code_handling.csv"), row.names = FALSE)
+write.csv(out, out_path("unmatched_code_handling.csv"), row.names = FALSE)
 
 cat("\n=== codes with no correct answer, and the cost of the silence that gets them right ===\n")
 print(as.data.frame(out %>% select(-track_label)), row.names = FALSE)
@@ -108,6 +111,6 @@ g <- ggplot(fig, aes(model, n, fill = kind)) +
   theme_minimal(base_size = 12) +
   theme(legend.position = "top", panel.grid.major.x = element_blank(),
         strip.text = element_text(face = "bold"))
-ggsave(file.path(OUT, "plot_unmatched_code_handling.png"), g, width = 9.5, height = 5, dpi = 150)
+ggsave(out_path("plot_unmatched_code_handling.png"), g, width = 9.5, height = 5, dpi = 150)
 
 cat("\nwrote results/unmatched_code_handling.csv and results/plot_unmatched_code_handling.png\n")

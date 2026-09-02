@@ -9,7 +9,7 @@ ORIG_BASE    <- "data/original"
 SAPBERT_BASE <- "data/sapbert"
 OUT_DIR      <- "results"
 
-best_by_model <- read.csv(file.path(OUT_DIR, "best_by_model.csv"), stringsAsFactors = FALSE)
+best_by_model <- read.csv(out_path("best_by_model.csv"), stringsAsFactors = FALSE)
 
 ccs_df <- read_excel(file.path(ORIG_BASE, "ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx"),
                       sheet = "CCS ICD-9-CM-3Level") %>% select(ICD_9_CM, CCS_ID)
@@ -78,7 +78,7 @@ results <- bind_rows(
             run_pipeline_8_9_cached, run_pipeline_8_9_reverse_cached, "ICDA_8")
 )
 
-write.csv(results, file.path(OUT_DIR, "bidirectional_roundtrip.csv"), row.names = FALSE)
+write.csv(results, out_path("bidirectional_roundtrip.csv"), row.names = FALSE)
 cat("\n=== Summary ===\n")
 print(results)
 cat("\nWrote results/bidirectional_roundtrip.csv\n")

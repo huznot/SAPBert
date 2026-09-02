@@ -16,13 +16,13 @@ set.seed(20260819)
 OUT_DIR <- "results"
 TRACKS <- c("10_9", "8_9")
 
-curve <- read.csv(file.path(OUT_DIR, "precision_coverage_curve.csv"))
-folds <- read.csv(file.path(OUT_DIR, "cv_rerank_folds.csv"))
+curve <- read.csv(out_path("precision_coverage_curve.csv"))
+folds <- read.csv(out_path("cv_rerank_folds.csv"))
 
 out <- list(); summ <- list()
 
 for (tr in TRACKS) {
-  feat_all <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
+  feat_all <- readRDS(out_path(sprintf("rerank_features_%s.rds", tr)))
   train <- feat_all %>% filter(has_truth == 1)
   topred <- feat_all %>% filter(has_truth == 0)
 
@@ -100,8 +100,8 @@ for (tr in TRACKS) {
 
 if (length(out)) {
   res <- bind_rows(out)
-  write.csv(res, file.path(OUT_DIR, "predicted_crosswalk.csv"), row.names = FALSE)
-  write.csv(bind_rows(summ), file.path(OUT_DIR, "predicted_crosswalk_summary.csv"), row.names = FALSE)
+  write.csv(res, out_path("predicted_crosswalk.csv"), row.names = FALSE)
+  write.csv(bind_rows(summ), out_path("predicted_crosswalk_summary.csv"), row.names = FALSE)
   cat(sprintf("\nWrote results/predicted_crosswalk.csv (%d rows)\n", nrow(res)))
 } else {
   cat("\nNo codes without a known answer -- nothing written.\n")

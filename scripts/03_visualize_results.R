@@ -6,9 +6,9 @@ library(ggplot2)
 
 OUT_DIR <- "results"
 
-best_by_model <- read.csv(file.path(OUT_DIR, "best_by_model.csv"))
-ccs_10_9 <- read.csv(file.path(OUT_DIR, "ccs_breakdown_10_9.csv"))
-ccs_8_9  <- read.csv(file.path(OUT_DIR, "ccs_breakdown_8_9.csv"))
+best_by_model <- read.csv(out_path("best_by_model.csv"))
+ccs_10_9 <- read.csv(out_path("ccs_breakdown_10_9.csv"))
+ccs_8_9  <- read.csv(out_path("ccs_breakdown_8_9.csv"))
 
 track_labels <- c("10_9" = "ICD-9-CM -> ICD-10-CA", "8_9" = "ICD-9-CM -> ICDA-8")
 
@@ -33,7 +33,7 @@ p1 <- ggplot(comparison_long, aes(x = metric, y = value, fill = model)) +
   theme_minimal(base_size = 13) +
   theme(legend.position = "top", plot.title = element_text(face = "bold"))
 
-ggsave(file.path(OUT_DIR, "plot_f1_accuracy_comparison.png"), p1, width = 9, height = 5.5, dpi = 150)
+ggsave(out_path("plot_f1_accuracy_comparison.png"), p1, width = 9, height = 5.5, dpi = 150)
 
 make_ccs_breakdown_plot <- function(ccs_df, track_label, top_n_categories = 30) {
   wide <- ccs_df %>%
@@ -66,8 +66,8 @@ make_ccs_breakdown_plot <- function(ccs_df, track_label, top_n_categories = 30) 
 p2 <- make_ccs_breakdown_plot(ccs_10_9, track_labels["10_9"])
 p3 <- make_ccs_breakdown_plot(ccs_8_9, track_labels["8_9"])
 
-ggsave(file.path(OUT_DIR, "plot_ccs_breakdown_10_9.png"), p2, width = 8, height = 8, dpi = 150)
-ggsave(file.path(OUT_DIR, "plot_ccs_breakdown_8_9.png"), p3, width = 8, height = 8, dpi = 150)
+ggsave(out_path("plot_ccs_breakdown_10_9.png"), p2, width = 8, height = 8, dpi = 150)
+ggsave(out_path("plot_ccs_breakdown_8_9.png"), p3, width = 8, height = 8, dpi = 150)
 
 summarize_regressions <- function(ccs_df) {
   wide <- ccs_df %>%
@@ -89,7 +89,7 @@ regression_summary <- bind_rows(
   summarize_regressions(ccs_10_9) %>% mutate(track = track_labels["10_9"]),
   summarize_regressions(ccs_8_9) %>% mutate(track = track_labels["8_9"])
 )
-write.csv(regression_summary, file.path(OUT_DIR, "regression_summary.csv"), row.names = FALSE)
+write.csv(regression_summary, out_path("regression_summary.csv"), row.names = FALSE)
 
 cat("\n=== Per-CCS-category regression summary ===\n")
 print(regression_summary)

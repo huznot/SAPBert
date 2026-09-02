@@ -1,7 +1,7 @@
 "track","track_label","model","n_unmatched","correctly_silent","wrongly_mapped","n_matched","wrongly_silent","correct_rejection_rate"
-"10_9","ICD-9-CM to ICD-10-CA","ClinicalBERT",9,0,9,345,1,0
+"10_9","ICD-9-CM to ICD-10-CA","ClinicalBERT",9,0,9,345,0,0
 "10_9","ICD-9-CM to ICD-10-CA","SapBERT",9,0,9,345,0,0
 "10_9","ICD-9-CM to ICD-10-CA","mpnet",9,0,9,345,0,0
-"8_9","ICD-9-CM to ICDA-8","ClinicalBERT",52,52,0,302,39,1
-"8_9","ICD-9-CM to ICDA-8","SapBERT",52,2,50,302,5,0.038
-"8_9","ICD-9-CM to ICDA-8","mpnet",52,52,0,302,39,1
+"8_9","ICD-9-CM to ICDA-8","ClinicalBERT",52,52,0,302,36,1
+"8_9","ICD-9-CM to ICDA-8","SapBERT",52,52,0,302,35,1
+"8_9","ICD-9-CM to ICDA-8","mpnet",52,52,0,302,36,1

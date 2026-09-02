@@ -14,7 +14,7 @@ source("scripts/pipeline_lib.R")
 ORIG_BASE    <- "data/original"
 SAPBERT_BASE <- "data/sapbert"
 GEN_BASE     <- "data/generated"
-OUT_DIR      <- "results/full_grid"
+OUT_DIR      <- "results/grid/conditions"
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 thresholds <- c(0.95, 0.99, 0.995, 0.999)
@@ -45,6 +45,10 @@ CONDITIONS <- list(
   mpnet_stripped        = list(model = "mpnet-stripped",        family = "mpnet",        stripping = "stripped"),
   # the 2x2 asked for: stopwords in or out, code number in or out of the text.
   # clinicalbert_base is the top left cell of that square, it already exists above
+  sapbert_base_nocode = list(
+    model = "SapBERT-base-nocode", family = "SapBERT", stripping = "base"),
+  mpnet_base_nocode = list(
+    model = "mpnet-base-nocode", family = "mpnet", stripping = "base"),
   clinicalbert_base_nocode = list(
     model = "ClinicalBERT-base-nocode", family = "ClinicalBERT", stripping = "base"),
   clinicalbert_stopwords = list(

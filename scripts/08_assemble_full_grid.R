@@ -10,7 +10,7 @@
 source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 source("scripts/pipeline_lib.R")
 
-GRID_DIR <- "results/full_grid"
+GRID_DIR <- "results/grid/conditions"
 OUT_DIR  <- "results"
 
 files <- list.files(GRID_DIR, pattern = "\\.csv$", full.names = TRUE)
@@ -32,7 +32,7 @@ if (length(unique(pts$n_points)) != 1) {
 cat(sprintf("%d rows, %d conditions, %d points per condition x track\n",
             nrow(all_grid), length(unique(all_grid$model)), max(pts$n_points)))
 
-write.csv(all_grid, file.path(OUT_DIR, "full_grid_all.csv"), row.names = FALSE)
+write.csv(all_grid, out_path("full_grid_all.csv"), row.names = FALSE)
 
 # --- best point per condition x track ---------------------------------
 best <- all_grid %>%
@@ -40,7 +40,7 @@ best <- all_grid %>%
   slice_max(order_by = f1, n = 1, with_ties = FALSE) %>%
   ungroup() %>%
   arrange(track, desc(f1))
-write.csv(best, file.path(OUT_DIR, "full_grid_best.csv"), row.names = FALSE)
+write.csv(best, out_path("full_grid_best.csv"), row.names = FALSE)
 
 # paired within family and track, regenerated arms only, so base and stripped
 # differ only by the stripping
@@ -57,7 +57,7 @@ stripping <- paired %>%
   mutate(delta_best_f1 = round(best_f1_stripped - best_f1_base, 4),
          delta_mean_f1 = round(mean_f1_stripped - mean_f1_base, 4)) %>%
   arrange(track, family)
-write.csv(stripping, file.path(OUT_DIR, "full_grid_stripping.csv"), row.names = FALSE)
+write.csv(stripping, out_path("full_grid_stripping.csv"), row.names = FALSE)
 
 # win rate at matched points. better read than best-f1 for a small effect since
 # one arm can win just by finding a luckier corner of the grid
@@ -72,7 +72,7 @@ paired_points <- paired %>%
             base_better     = sum(stripped < base),
             mean_delta_f1   = round(mean(stripped - base), 4),
             .groups = "drop")
-write.csv(paired_points, file.path(OUT_DIR, "full_grid_stripping_paired.csv"), row.names = FALSE)
+write.csv(paired_points, out_path("full_grid_stripping_paired.csv"), row.names = FALSE)
 
 # --- task 2: general-purpose (mpnet) vs domain-specific ---------------
 family_best <- all_grid %>%
@@ -82,7 +82,7 @@ family_best <- all_grid %>%
   select(track, family, model, similarity_threshold, top_n, flag_combination,
          precision, recall, f1, accuracy) %>%
   arrange(track, desc(f1))
-write.csv(family_best, file.path(OUT_DIR, "full_grid_family.csv"), row.names = FALSE)
+write.csv(family_best, out_path("full_grid_family.csv"), row.names = FALSE)
 
 # rank by best over grid f1 vs f1 at the single point 06_ used. if they disagree
 # the single point comparison was measuring the point
@@ -115,7 +115,7 @@ sensitivity <- best %>%
          rank_changed     = rank_by_best != rank_at_shared) %>%
   ungroup() %>%
   arrange(track, rank_by_best)
-write.csv(sensitivity, file.path(OUT_DIR, "full_grid_sensitivity.csv"), row.names = FALSE)
+write.csv(sensitivity, out_path("full_grid_sensitivity.csv"), row.names = FALSE)
 
 cat("\n=== Best per condition x track (full grid) ===\n")
 print(as.data.frame(best %>% select(track, model, similarity_threshold, top_n,
@@ -172,7 +172,7 @@ if (nrow(fig)) {
     theme(legend.position = "none", panel.grid.major.x = element_blank(),
           strip.text = element_text(face = "bold"),
           axis.text.x = element_text(size = 9))
-  ggsave(file.path(OUT_DIR, "plot_f1_accuracy_comparison.png"), g,
+  ggsave(out_path("plot_f1_accuracy_comparison.png"), g,
          width = 9, height = 6.2, dpi = 150)
   cat("\nwrote results/plot_f1_accuracy_comparison.png\n")
 }

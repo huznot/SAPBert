@@ -95,8 +95,8 @@ res_sap_8_9   <- run_grid("8_9", "SapBERT", sheets_sap_8_9, cooc_8_9, manual_8_9
 grid_10_9 <- bind_rows(res_clin_10_9, res_sap_10_9)
 grid_8_9  <- bind_rows(res_clin_8_9, res_sap_8_9)
 
-write.csv(grid_10_9, file.path(OUT_DIR, "grid_results_10_9.csv"), row.names = FALSE)
-write.csv(grid_8_9,  file.path(OUT_DIR, "grid_results_8_9.csv"), row.names = FALSE)
+write.csv(grid_10_9, out_path("grid_results_10_9.csv"), row.names = FALSE)
+write.csv(grid_8_9,  out_path("grid_results_8_9.csv"), row.names = FALSE)
 
 all_grid <- bind_rows(grid_10_9, grid_8_9)
 
@@ -105,7 +105,7 @@ best_by_model <- all_grid %>%
   slice_max(order_by = f1, n = 1, with_ties = FALSE) %>%
   ungroup()
 
-write.csv(best_by_model, file.path(OUT_DIR, "best_by_model.csv"), row.names = FALSE)
+write.csv(best_by_model, out_path("best_by_model.csv"), row.names = FALSE)
 
 cat("\n=== Best combination per track x model (by F1) ===\n")
 print(best_by_model)
@@ -128,7 +128,7 @@ ccs_8_9 <- bind_rows(
   get_best_grouped("8_9", "SapBERT",      sheets_sap_8_9,  cooc_8_9, manual_8_9, excl_8_9, run_pipeline_8_9_cached)
 )
 
-write.csv(ccs_10_9, file.path(OUT_DIR, "ccs_breakdown_10_9.csv"), row.names = FALSE)
-write.csv(ccs_8_9,  file.path(OUT_DIR, "ccs_breakdown_8_9.csv"), row.names = FALSE)
+write.csv(ccs_10_9, out_path("ccs_breakdown_10_9.csv"), row.names = FALSE)
+write.csv(ccs_8_9,  out_path("ccs_breakdown_8_9.csv"), row.names = FALSE)
 
 cat("\nDone. Results written to", OUT_DIR, "\n")

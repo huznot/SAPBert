@@ -51,8 +51,8 @@ for (tr in names(TRACKS)) {
 # candidate sharing the letter prefix and within a numeric span, if the reranker
 # gave it at least a modest score
 cat("\n\n######## neighbour expansion on the auto-accepted set ########\n")
-preds <- readRDS(file.path(OUT_DIR, "cv_rerank_predictions.rds"))
-ops   <- read.csv(file.path(OUT_DIR, "precision_coverage_operating_points.csv"))
+preds <- readRDS(out_path("cv_rerank_predictions.rds"))
+ops   <- read.csv(out_path("precision_coverage_operating_points.csv"))
 
 for (tr in names(TRACKS)) {
   d <- preds %>% filter(track == tr)

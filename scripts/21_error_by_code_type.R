@@ -31,8 +31,8 @@ for (nm in c("ICD-10-CA", "ICDA-8")) {
 }
 
 cat("\n=== how complete are the auto-accepted mappings per code? ===\n")
-p <- readRDS("results/cv_rerank_predictions.rds")
-ops <- read.csv("results/precision_coverage_operating_points.csv")
+p <- readRDS(out_path("cv_rerank_predictions.rds"))
+ops <- read.csv(out_path("precision_coverage_operating_points.csv"))
 for (tr in c("10_9", "8_9")) {
   tau <- (ops %>% filter(track == tr, precision_target == 0.95))$tau
   d <- p %>% filter(track == tr)

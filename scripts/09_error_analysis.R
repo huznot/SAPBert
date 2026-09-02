@@ -166,8 +166,8 @@ for (tr in names(TRACKS)) {
 }
 
 summary_df <- bind_rows(rows)
-write.csv(summary_df, file.path(OUT_DIR, "error_analysis_summary.csv"), row.names = FALSE)
-write.csv(bind_rows(loss_rows), file.path(OUT_DIR, "error_analysis_losses.csv"), row.names = FALSE)
+write.csv(summary_df, out_path("error_analysis_summary.csv"), row.names = FALSE)
+write.csv(bind_rows(loss_rows), out_path("error_analysis_losses.csv"), row.names = FALSE)
 
 cat("\n\n================ SUMMARY ================\n")
 print(as.data.frame(summary_df))

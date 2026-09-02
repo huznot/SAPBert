@@ -69,7 +69,7 @@ rows <- list()
 
 for (tr in tracks) {
   cfg <- CFG[[tr]]
-  fa <- readRDS(file.path(OUT_DIR, sprintf("rerank_features_%s.rds", tr)))
+  fa <- readRDS(out_path(sprintf("rerank_features_%s.rds", tr)))
   base <- fa %>% filter(has_truth == 1)
   truth <- base %>% filter(y == 1) %>% select(ICD_9_CM, target)
   feat <- apply_retrieval(base, cfg)
@@ -110,7 +110,7 @@ for (tr in tracks) {
 }
 
 res <- bind_rows(rows)
-write.csv(res, file.path(OUT_DIR, sprintf("learning_curve_%s.csv",
+write.csv(res, out_path(sprintf("learning_curve_%s.csv",
           paste(tracks, collapse = "_"))), row.names = FALSE)
 
 cat("\n===== is it still climbing? =====\n")
@@ -135,7 +135,7 @@ cat("\nProjections assume the curve keeps its shape and are not measurements.\n"
 # figure 3 in the report. reads both tracks from disk rather than `res` so the
 # plot is correct whether this ran one track or both
 suppressMessages(library(ggplot2))
-lc_files <- file.path(OUT_DIR, sprintf("learning_curve_%s.csv", c("10_9", "8_9")))
+lc_files <- out_path(sprintf("learning_curve_%s.csv", c("10_9", "8_9")))
 if (all(file.exists(lc_files))) {
   lc <- bind_rows(lapply(lc_files, read.csv, stringsAsFactors = FALSE))
   lc <- lc[!is.na(lc$f1_mean), ]
@@ -148,7 +148,7 @@ if (all(file.exists(lc_files))) {
     labs(x = "training codes", y = "held-out F1",
          title = "Does more manually mapped data help?") +
     theme_minimal(base_size = 11)
-  ggsave(file.path(OUT_DIR, "plot_learning_curve.png"), g,
+  ggsave(out_path("plot_learning_curve.png"), g,
          width = 8, height = 4, dpi = 150)
   cat("\nwrote results/plot_learning_curve.png\n")
 } else {

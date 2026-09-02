@@ -14,7 +14,7 @@ source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 source("scripts/pipeline_lib.R")
 
 OUT_DIR <- "results"
-preds <- readRDS(file.path(OUT_DIR, "cv_rerank_predictions.rds"))
+preds <- readRDS(out_path("cv_rerank_predictions.rds"))
 
 rows <- list()
 for (tr in unique(preds$track)) {
@@ -50,7 +50,7 @@ for (tr in unique(preds$track)) {
 }
 
 res <- bind_rows(rows)
-write.csv(res, file.path(OUT_DIR, "top1_accuracy.csv"), row.names = FALSE)
+write.csv(res, out_path("top1_accuracy.csv"), row.names = FALSE)
 
 cat("\n=== why this is not a head-to-head with the GPT-4 study ===\n")
 cat("  direction : that study translates ICD-10-CA -> ICD-9-CM, this goes ICD-9-CM -> ICD-10-CA\n")
