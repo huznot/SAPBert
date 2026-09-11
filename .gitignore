@@ -9,3 +9,4 @@ clean_paper.txt
 __pycache__/
 *.pyc
 logs/
+transcript.txt
