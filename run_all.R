@@ -75,4 +75,15 @@ run("45_absolute_threshold_grid.R")   # absolute cutoff against the relative one
 run("46_report_docx.R")               # the cutoff report
 run("43_e13_d48_review.R")            # per code look at 249 and 239
 
+# 50_ writes the per code rank file that 51_ reads, so it goes first. 53_ and
+# 55_ read the grid 45_ just wrote. 54_ reads results/grid/conditions/, which is
+# committed, so it works under --quick too. 54_ and 55_ reload the similarity
+# matrices to get the counts, which is most of the few minutes they take.
+run("50_descriptive_by_code.R")       # where the correct code ranks, per code
+run("51_analysis_tables.R")           # the five trend tables
+run("52_icda8_excluded_list.R")       # the 52 with no icda-8 match, described
+run("53_threshold_frequencies.R")     # counts behind each cutoff, not summaries
+run("54_icda8_code_in_label.R")       # code in the label on the icda-8 track
+run("55_median_similarity_gap.R")     # why sapberts median sits so much lower
+
 cat("\nall done. results/ is rebuilt.\n")
