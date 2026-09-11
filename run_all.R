@@ -72,7 +72,6 @@ run("27_show_results.R")             # every headline number
 # away hand formatting. use 47_patch_notes.R to change wording in place instead.
 run("41_identical_labels.R")          # proof the code prefix broke the similarity
 run("45_absolute_threshold_grid.R")   # absolute cutoff against the relative one
-run("46_report_docx.R")               # the cutoff report
 run("43_e13_d48_review.R")            # per code look at 249 and 239
 
 # 50_ writes the per code rank file that 51_ reads, so it goes first. 53_ and

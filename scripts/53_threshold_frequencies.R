@@ -9,7 +9,7 @@ suppressMessages(library(openxlsx))
 ORIG <- "data/original"
 GEN  <- "data/generated"
 VAL  <- file.path(ORIG, "ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx")
-OUT  <- out_path("absolute_threshold_frequencies.xlsx")
+OUT  <- out_path("1_threshold_frequencies.xlsx")
 
 res <- read.csv(out_path("absolute_threshold_grid.csv"), stringsAsFactors = FALSE)
 

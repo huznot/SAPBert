@@ -20,7 +20,7 @@ ORIG <- "data/original"
 GEN  <- "data/generated"
 VAL  <- file.path(ORIG, "ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx")
 LAB  <- file.path(ORIG, "ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx")
-OUT  <- out_path("absolute_threshold_by_category.xlsx")
+OUT  <- out_path("4_counts_by_ccs_category.xlsx")
 
 MODELS <- c(ClinicalBERT = "cosine_similarity_matrices_10_9_clinicalbert_base_nocode.xlsx",
             SapBERT      = "cosine_similarity_matrices_10_9_sapbert_base_nocode.xlsx",

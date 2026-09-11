@@ -19,6 +19,10 @@ results_subdir <- function(name) {
   if (grepl("^unmatched|^validation_pairs", n))                      return("unmatched")
   if (grepl("^(cv_rerank|rerank_features|base_emit|heldout_counts|precision_coverage|candidate_generation|chapter_filter)", n))
                                                                      return("rerank")
+  # the four things she asked for on 9 sep, numbered in the order she asked for
+  # them and kept together so they are one click from the repo front page
+  if (grepl("^[1-4]_(threshold_frequencies|icda8_code_in_label|similarity_gap_by_model|counts_by_ccs_category)", n))
+                                                                     return("sep9_meeting")
   if (grepl("^([0-9]+_codes|e13_d48|cutoff_|absolute_threshold|identical_labels)", n))
                                                                      return("review")
   if (grepl("[.](png|pdf)$", n))                                     return("figures")

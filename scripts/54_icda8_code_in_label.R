@@ -14,7 +14,7 @@ ORIG <- "data/original"
 GEN  <- "data/generated"
 VAL  <- file.path(ORIG, "ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx")
 LAB  <- file.path(ORIG, "ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx")
-OUT  <- out_path("absolute_threshold_icda8_codeinlabel.xlsx")
+OUT  <- out_path("2_icda8_code_in_label.xlsx")
 
 # the four pairs of arms that differ only by whether the code is in the text
 PAIRS <- list(
