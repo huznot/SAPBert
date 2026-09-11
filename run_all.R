@@ -85,5 +85,6 @@ run("52_icda8_excluded_list.R")       # the 52 with no icda-8 match, described
 run("53_threshold_frequencies.R")     # counts behind each cutoff, not summaries
 run("54_icda8_code_in_label.R")       # code in the label on the icda-8 track
 run("55_median_similarity_gap.R")     # why sapberts median sits so much lower
+run("56_category_counts.R")           # all 130 ccs categories at the plain cutoffs
 
 cat("\nall done. results/ is rebuilt.\n")
