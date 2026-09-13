@@ -148,71 +148,31 @@ print(size, row.names = FALSE)
 cat("\nsettings each model is scored at\n")
 print(settings, row.names = FALSE)
 
-readme <- data.frame(
-  Item = c(
-    "What this is",
-    "Track",
-    "Settings",
-    "",
-    "Read this before drilling",
-    "",
-    "",
-    "",
-    "Correct pairs to find",
-    "Mappings produced",
-    "True positives",
-    "False positives",
-    "False negatives",
-    "Blank precision or F1",
-    "",
-    "counts by category",
-    "ClinicalBERT only",
-    "category size",
-    "settings",
-    "",
-    "Not the same as",
-    "",
-    "Source"),
-  Detail = c(
-    "per CCS category counts for all 130 categories, at each model's own best plain cutoff",
-    "ICD-9-CM to ICD-10-CA only. the plain cutoffs were only worked out on that track",
-    "each model is scored at the cutoff and co-occurrence depth it does best at overall, see the settings sheet",
-    "",
-    sprintf("%d of the 130 categories hold a single ICD-9 code, and %.0f%% hold four or fewer",
-            sum(ccs_index$n_codes == 1), 100 * mean(ccs_index$n_codes <= 4)),
-    "a category with one or two pairs in it gives an F1 of 0 or 1 almost at random, so the code counts matter as much as the scores",
-    "the category size sheet shows how the 937 correct pairs are spread, which is the honest way to pick where to drill",
-    "",
-    "the pairs in this category the validation data marks correct",
-    "the mappings the pipeline output for this category, true positives plus false positives",
-    "mappings that match the validation data",
-    "mappings that do not",
-    "correct pairs the pipeline never produced",
-    "the category had nothing to compute it from, so it is left empty rather than shown as 0",
-    "",
-    "all 130 categories for all three models, 390 rows",
-    "the same thing for ClinicalBERT on its own, since that is the model going forward",
-    "how many categories hold how many codes, and how the correct pairs are spread over them",
-    "the cutoff, depth and rule each model is scored at, with its overall counts",
-    "",
-    "results/tables/ccs_all_categories_10_9.csv, which is the same breakdown at the old relative threshold settings",
-    "",
-    "the label only matrices in data/generated/, and results/review/absolute_threshold_grid.csv for the cutoffs"),
-  check.names = FALSE)
 
-hdr <- createStyle(textDecoration = "bold", valign = "bottom")
-wb <- createWorkbook()
-add <- function(name, df, widths) {
+hdr  <- createStyle(textDecoration = "bold", valign = "bottom")
+note <- createStyle(fontColour = "#595959", textDecoration = "italic")
+wb   <- createWorkbook()
+
+# one line of context in A1, blank row, then the header on row 3. no notes tab
+add <- function(name, df, widths, msg) {
   addWorksheet(wb, name)
-  writeData(wb, name, df, headerStyle = hdr)
+  writeData(wb, name, msg, startRow = 1, startCol = 1)
+  addStyle(wb, name, note, rows = 1, cols = 1)
+  writeData(wb, name, df, startRow = 3, headerStyle = hdr)
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 2)
+  freezePane(wb, name, firstActiveRow = 4)
 }
-add("read me", readme, c(26, 112))
+
+CAVEAT <- sprintf("ICD-9-CM to ICD-10-CA, each model at its own best plain cutoff. %d of the 130 categories hold a single ICD-9 code, so those F1s come off one or two pairs and swing between 0 and 1 on their own.",
+                  sum(ccs_index$n_codes == 1))
+
 add("counts by category", all_cat,
-    c(8, 46, 24, 19, 14, 14, 19, 20, 18, 15, 15, 16, 10, 9, 8))
-add("ClinicalBERT only", cb, c(8, 46, 24, 19, 20, 18, 15, 15, 16, 10, 9, 8))
-add("category size", size, c(18, 12, 13, 21, 19, 21))
-add("settings", settings, c(14, 14, 19, 32, 15, 15, 16, 11))
+    c(8, 46, 24, 19, 14, 14, 19, 20, 18, 15, 15, 16, 10, 9, 8), CAVEAT)
+add("ClinicalBERT only", cb, c(8, 46, 24, 19, 20, 18, 15, 15, 16, 10, 9, 8),
+    paste("ClinicalBERT on its own, since that is the model going forward.", CAVEAT))
+add("category size", size, c(18, 12, 13, 21, 19, 21),
+    "How the 937 correct pairs are spread over the categories by size. The small categories cannot carry a number on their own.")
+add("settings", settings, c(14, 14, 19, 32, 15, 15, 16, 11),
+    "The cutoff, co-occurrence depth and rule each model is scored at here, with its overall counts.")
 saveWorkbook(wb, OUT, overwrite = TRUE)
 cat("\nwrote", OUT, "\n")

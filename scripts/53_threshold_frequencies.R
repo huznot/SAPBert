@@ -114,62 +114,34 @@ side <- do.call(rbind, lapply(MODEL_ORDER, function(m) {
 cat("\nplain cutoff against the old multiplier, both at their own best setting\n")
 print(side, row.names = FALSE)
 
-## sheet 1. what the columns mean, so the workbook stands on its own
-readme <- data.frame(
-  Item = c(
-    "What this is",
-    "ICD-9-CM codes",
-    "ICD-10-CA codes",
-    "Possible pairs",
-    "Correct pairs to find",
-    "",
-    "Pairs above the cutoff",
-    "Mappings produced",
-    "True positives",
-    "False positives",
-    "False negatives",
-    "",
-    "Cosine cutoff",
-    "Top N co-occurring",
-    "Rule",
-    "",
-    "Source"),
-  Detail = c(
-    "counts behind the threshold results, for the ICD-9-CM to ICD-10-CA track",
-    n_icd9,
-    n_t10,
-    sprintf("%s, every ICD-9 code against every ICD-10-CA code", format(n_pairs, big.mark = ",")),
-    sprintf("%d, the pairs the validation data marks as correct", n_correct),
-    "",
-    "how many of the possible pairs score at or above the cosine cutoff",
-    "how many mappings the pipeline outputs after co-occurrence is brought in",
-    "mappings that match the validation data",
-    "mappings that do not",
-    "correct pairs the pipeline never produced",
-    "",
-    "a plain cosine score. a pair is kept if it scores at least this",
-    "how far down the co-occurrence list the pipeline is allowed to look",
-    "which combination of the cosine list and the co-occurrence list is used",
-    "",
-    "results/review/absolute_threshold_grid.csv, written by scripts/45_absolute_threshold_grid.R"),
-  check.names = FALSE)
+hdr  <- createStyle(textDecoration = "bold", valign = "bottom")
+note <- createStyle(fontColour = "#595959", textDecoration = "italic")
+wb   <- createWorkbook()
 
-hdr <- createStyle(textDecoration = "bold", valign = "bottom")
-wb <- createWorkbook()
-
-add <- function(name, df, widths) {
+# one line of context in A1, blank row, then the header on row 3. no separate
+# notes tab, she does not want documents
+add <- function(name, df, widths, msg) {
   addWorksheet(wb, name)
-  writeData(wb, name, df, headerStyle = hdr)
+  writeData(wb, name, msg, startRow = 1, startCol = 1)
+  addStyle(wb, name, note, rows = 1, cols = 1)
+  writeData(wb, name, df, startRow = 3, headerStyle = hdr)
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 2)
+  freezePane(wb, name, firstActiveRow = 4)
 }
 
-add("read me", readme, c(26, 88))
-add("pairs above the cutoff", step, c(14, 14, 15, 26, 18, 14, 27, 22))
-add("counts by rule", abs_counts, c(14, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8, 10))
-add("best rule per model", best_t, c(14, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8, 10))
-add("plain cutoff vs old rule", side, c(14, 30, 9, 19, 21, 18, 15, 15, 16, 8))
-add("old rule, all counts", rel_counts, c(14, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8, 10))
+SIZE <- sprintf("%d ICD-9-CM x %d ICD-10-CA = %s possible pairs, %d of them marked correct in the validation data.",
+                n_icd9, n_t10, format(n_pairs, big.mark = ","), n_correct)
+
+add("pairs above the cutoff", step, c(14, 14, 15, 26, 18, 14, 27, 22),
+    paste(SIZE, "How many pairs each cosine cutoff calls similar, before co-occurrence is brought in."))
+add("counts by rule", abs_counts, c(14, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8, 10),
+    paste(SIZE, "Every rule tested. True positives plus false positives is the mappings produced, true positives plus false negatives is the 937."))
+add("best rule per model", best_t, c(14, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8, 10),
+    "The highest F1 rule for each model, pulled from the counts by rule tab.")
+add("plain cutoff vs old rule", side, c(14, 30, 9, 19, 21, 18, 15, 15, 16, 8),
+    "The plain cosine cutoff against the old fraction-of-the-column-maximum rule, each at its own best setting.")
+add("old rule, all counts", rel_counts, c(14, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8, 10),
+    "The same counts for the old fraction-of-the-maximum rule.")
 
 saveWorkbook(wb, OUT, overwrite = TRUE)
 cat("\nwrote", OUT, "\n")

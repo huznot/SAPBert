@@ -170,49 +170,25 @@ print(best[, c("Track", "Model", "Text", "Label content", "Mappings produced",
                "True positives", "False positives", "False negatives", "F1")],
       row.names = FALSE)
 
-readme <- data.frame(
-  Item = c(
-    "Question",
-    "Answer",
-    "",
-    "Why the two tracks differ",
-    "",
-    "Code in the label",
-    "The label only",
-    "",
-    "counts at the best setting",
-    "paired difference",
-    "grid side by side",
-    "",
-    "Source"),
-  Detail = c(
-    "does putting the code number in front of the label before embedding change the result on the ICD-9-CM to ICDA-8 track",
-    "barely. across every grid point the mean change in F1 is near zero, and the best settings land within a few thousandths of each other",
-    "",
-    "ICD-9-CM and ICDA-8 are both numeric and the numbers often line up, so the code text adds almost nothing a model can be misled by. ICD-10-CA is alphanumeric, so the ICD-9 number never matches the ICD-10 code and the models were scoring that mismatch",
-    "",
-    "the text embedded was the code number followed by the label, which is what the original pipeline did",
-    "the text embedded was the label on its own",
-    "",
-    "each arm at its own best grid setting, with the raw counts",
-    "all 112 grid points per model per track, label only minus code in the label",
-    "every one of those points, both arms next to each other",
-    "",
-    "results/grid/conditions/, written by scripts/07_full_grid_comparison.R. counts rerun here from the same matrices in data/generated/"),
-  check.names = FALSE)
+hdr  <- createStyle(textDecoration = "bold", valign = "bottom")
+note <- createStyle(fontColour = "#595959", textDecoration = "italic")
+wb   <- createWorkbook()
 
-hdr <- createStyle(textDecoration = "bold", valign = "bottom")
-wb <- createWorkbook()
-add <- function(name, df, widths) {
+# one line of context in A1, blank row, then the header on row 3. no notes tab
+add <- function(name, df, widths, msg) {
   addWorksheet(wb, name)
-  writeData(wb, name, df, headerStyle = hdr)
+  writeData(wb, name, msg, startRow = 1, startCol = 1)
+  addStyle(wb, name, note, rows = 1, cols = 1)
+  writeData(wb, name, df, startRow = 3, headerStyle = hdr)
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 2)
+  freezePane(wb, name, firstActiveRow = 4)
 }
-add("read me", readme, c(28, 110))
 add("counts at the best setting", best,
-    c(22, 14, 18, 26, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8))
-add("paired difference", summ, c(22, 14, 18, 12, 18, 7, 21, 22, 13, 13))
-add("grid side by side", side, c(22, 14, 18, 14, 19, 32, 28, 14, 11))
+    c(22, 14, 18, 26, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8),
+    "Does putting the code number in front of the label before embedding change anything. Each arm at its own best grid setting.")
+add("paired difference", summ, c(22, 14, 18, 12, 18, 7, 21, 22, 13, 13),
+    "All 112 grid points per model per track. A positive difference means the label only version scored higher.")
+add("grid side by side", side, c(22, 14, 18, 14, 19, 32, 28, 14, 11),
+    "Every one of those grid points, both arms next to each other.")
 saveWorkbook(wb, OUT, overwrite = TRUE)
 cat("\nwrote", OUT, "\n")

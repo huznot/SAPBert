@@ -95,62 +95,24 @@ print(dist, row.names = FALSE)
 cat("\nthe gap, and what each model's own best cutoff lets through\n")
 print(summ, row.names = FALSE)
 
-readme <- data.frame(
-  Item = c(
-    "Question",
-    "Short answer",
-    "",
-    "Why it happens",
-    "",
-    "",
-    "Why a low median is the good sign",
-    "",
-    "",
-    "The two groups",
-    "pairs marked correct",
-    "every other pair",
-    "",
-    "score distribution",
-    "the gap",
-    "what each cutoff admits",
-    "",
-    "Caveat",
-    "",
-    "Source"),
-  Detail = c(
-    "why is SapBERT's median cosine similarity so much lower than ClinicalBERT's",
-    "because ClinicalBERT gives almost every pair of codes a high score, so its median is high and its cutoff has to be high too. SapBERT only scores a pair high when the two labels mean close to the same thing",
-    "",
-    "ClinicalBERT was trained on clinical notes, so it mostly learns that a piece of text is medical. Every ICD label is medical, so every pair looks alike to it and the scores bunch up near the top",
-    "SapBERT was trained on pairs of medical terms that name the same thing, so its job is telling apart two terms that are both medical. That is the thing being asked of it here",
-    "",
-    "a low median means the pairs that should not match are being pushed down, which is what leaves room between them and the pairs that should",
-    "the number to look at is the distance between the correct pairs and everything else, not the median on its own. see the gap sheet",
-    "",
-    "",
-    "the 937 pairs in the validation data. these are the ones a cutoff should let through",
-    "the other 720,515 of the 721,452 possible pairs. these are the ones a cutoff should keep out",
-    "",
-    "median and quartiles for each group, per model",
-    "the two medians, the distance between them, and what each model's best cutoff lets through",
-    "the same counts at every cutoff tested, so the tradeoff can be read off directly",
-    "",
-    "this is the cosine similarity step on its own. the co-occurrence step comes after it and removes some of what gets through, which is why the false positive counts in the other workbooks are far smaller than the other pairs counts here",
-    "",
-    "the label only matrices in data/generated/, and the validation sheet Validation_ICD9_ICD10"),
-  check.names = FALSE)
+hdr  <- createStyle(textDecoration = "bold", valign = "bottom")
+note <- createStyle(fontColour = "#595959", textDecoration = "italic")
+wb   <- createWorkbook()
 
-hdr <- createStyle(textDecoration = "bold", valign = "bottom")
-wb <- createWorkbook()
-add <- function(name, df, widths) {
+# one line of context in A1, blank row, then the header on row 3. no notes tab
+add <- function(name, df, widths, msg) {
   addWorksheet(wb, name)
-  writeData(wb, name, df, headerStyle = hdr)
+  writeData(wb, name, msg, startRow = 1, startCol = 1)
+  addStyle(wb, name, note, rows = 1, cols = 1)
+  writeData(wb, name, df, startRow = 3, headerStyle = hdr)
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 2)
+  freezePane(wb, name, firstActiveRow = 4)
 }
-add("read me", readme, c(30, 112))
-add("the gap", summ, c(14, 20, 24, 26, 12, 21, 21, 19, 19))
-add("score distribution", dist, c(14, 38, 11, 16, 16, 9, 16, 10, 8))
-add("what each cutoff admits", adm, c(14, 14, 21, 21, 19, 19, 22))
+add("the gap", summ, c(14, 20, 24, 26, 12, 21, 21, 19, 19),
+    "Why SapBERT's median sits lower. The 937 correct pairs against the other 720,515. A low median means unrelated pairs are pushed down, which is what leaves room between the two groups.")
+add("score distribution", dist, c(14, 38, 11, 16, 16, 9, 16, 10, 8),
+    "Median and quartiles for each group, per model.")
+add("what each cutoff admits", adm, c(14, 14, 21, 21, 19, 19, 22),
+    "At each cutoff, correct pairs kept against wrong pairs kept. Cosine step only, before co-occurrence, so these counts are larger than the false positives elsewhere.")
 saveWorkbook(wb, OUT, overwrite = TRUE)
 cat("\nwrote", OUT, "\n")
