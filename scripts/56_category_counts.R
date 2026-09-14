@@ -149,30 +149,19 @@ cat("\nsettings each model is scored at\n")
 print(settings, row.names = FALSE)
 
 
-hdr  <- createStyle(textDecoration = "bold", valign = "bottom")
-note <- createStyle(fontColour = "#595959", textDecoration = "italic")
-wb   <- createWorkbook()
+hdr <- createStyle(textDecoration = "bold", valign = "bottom")
+wb  <- createWorkbook()
 
-# one line of context in A1, blank row, then the header on row 3. no notes tab
-add <- function(name, df, widths, msg) {
+add <- function(name, df, widths) {
   addWorksheet(wb, name)
-  writeData(wb, name, msg, startRow = 1, startCol = 1)
-  addStyle(wb, name, note, rows = 1, cols = 1)
-  writeData(wb, name, df, startRow = 3, headerStyle = hdr)
+  writeData(wb, name, df, headerStyle = hdr)
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 4)
+  freezePane(wb, name, firstActiveRow = 2)
 }
-
-CAVEAT <- sprintf("ICD-9-CM to ICD-10-CA, each model at its own best plain cutoff. %d of the 130 categories hold a single ICD-9 code, so those F1s come off one or two pairs and swing between 0 and 1 on their own.",
-                  sum(ccs_index$n_codes == 1))
-
 add("counts by category", all_cat,
-    c(8, 46, 24, 19, 14, 14, 19, 20, 18, 15, 15, 16, 10, 9, 8), CAVEAT)
-add("ClinicalBERT only", cb, c(8, 46, 24, 19, 20, 18, 15, 15, 16, 10, 9, 8),
-    paste("ClinicalBERT on its own, since that is the model going forward.", CAVEAT))
-add("category size", size, c(18, 12, 13, 21, 19, 21),
-    "How the 937 correct pairs are spread over the categories by size. The small categories cannot carry a number on their own.")
-add("settings", settings, c(14, 14, 19, 32, 15, 15, 16, 11),
-    "The cutoff, co-occurrence depth and rule each model is scored at here, with its overall counts.")
+    c(8, 46, 24, 19, 14, 14, 19, 20, 18, 15, 15, 16, 10, 9, 8))
+add("ClinicalBERT only", cb, c(8, 46, 24, 19, 20, 18, 15, 15, 16, 10, 9, 8))
+add("category size", size, c(18, 12, 13, 21, 19, 21))
+add("settings", settings, c(14, 14, 19, 32, 15, 15, 16, 11))
 saveWorkbook(wb, OUT, overwrite = TRUE)
 cat("\nwrote", OUT, "\n")

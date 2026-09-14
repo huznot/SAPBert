@@ -170,25 +170,18 @@ print(best[, c("Track", "Model", "Text", "Label content", "Mappings produced",
                "True positives", "False positives", "False negatives", "F1")],
       row.names = FALSE)
 
-hdr  <- createStyle(textDecoration = "bold", valign = "bottom")
-note <- createStyle(fontColour = "#595959", textDecoration = "italic")
-wb   <- createWorkbook()
+hdr <- createStyle(textDecoration = "bold", valign = "bottom")
+wb  <- createWorkbook()
 
-# one line of context in A1, blank row, then the header on row 3. no notes tab
-add <- function(name, df, widths, msg) {
+add <- function(name, df, widths) {
   addWorksheet(wb, name)
-  writeData(wb, name, msg, startRow = 1, startCol = 1)
-  addStyle(wb, name, note, rows = 1, cols = 1)
-  writeData(wb, name, df, startRow = 3, headerStyle = hdr)
+  writeData(wb, name, df, headerStyle = hdr)
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 4)
+  freezePane(wb, name, firstActiveRow = 2)
 }
 add("counts at the best setting", best,
-    c(22, 14, 18, 26, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8),
-    "Does putting the code number in front of the label before embedding change anything. Each arm at its own best grid setting.")
-add("paired difference", summ, c(22, 14, 18, 12, 18, 7, 21, 22, 13, 13),
-    "All 112 grid points per model per track. A positive difference means the label only version scored higher.")
-add("grid side by side", side, c(22, 14, 18, 14, 19, 32, 28, 14, 11),
-    "Every one of those grid points, both arms next to each other.")
+    c(22, 14, 18, 26, 14, 19, 32, 15, 21, 18, 20, 15, 15, 16, 11, 9, 8))
+add("paired difference", summ, c(22, 14, 18, 12, 18, 7, 21, 22, 13, 13))
+add("grid side by side", side, c(22, 14, 18, 14, 19, 32, 28, 14, 11))
 saveWorkbook(wb, OUT, overwrite = TRUE)
 cat("\nwrote", OUT, "\n")

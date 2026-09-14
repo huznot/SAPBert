@@ -95,24 +95,17 @@ print(dist, row.names = FALSE)
 cat("\nthe gap, and what each model's own best cutoff lets through\n")
 print(summ, row.names = FALSE)
 
-hdr  <- createStyle(textDecoration = "bold", valign = "bottom")
-note <- createStyle(fontColour = "#595959", textDecoration = "italic")
-wb   <- createWorkbook()
+hdr <- createStyle(textDecoration = "bold", valign = "bottom")
+wb  <- createWorkbook()
 
-# one line of context in A1, blank row, then the header on row 3. no notes tab
-add <- function(name, df, widths, msg) {
+add <- function(name, df, widths) {
   addWorksheet(wb, name)
-  writeData(wb, name, msg, startRow = 1, startCol = 1)
-  addStyle(wb, name, note, rows = 1, cols = 1)
-  writeData(wb, name, df, startRow = 3, headerStyle = hdr)
+  writeData(wb, name, df, headerStyle = hdr)
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 4)
+  freezePane(wb, name, firstActiveRow = 2)
 }
-add("the gap", summ, c(14, 20, 24, 26, 12, 21, 21, 19, 19),
-    "Why SapBERT's median sits lower. The 937 correct pairs against the other 720,515. A low median means unrelated pairs are pushed down, which is what leaves room between the two groups.")
-add("score distribution", dist, c(14, 38, 11, 16, 16, 9, 16, 10, 8),
-    "Median and quartiles for each group, per model.")
-add("what each cutoff admits", adm, c(14, 14, 21, 21, 19, 19, 22),
-    "At each cutoff, correct pairs kept against wrong pairs kept. Cosine step only, before co-occurrence, so these counts are larger than the false positives elsewhere.")
+add("the gap", summ, c(14, 20, 24, 26, 12, 21, 21, 19, 19))
+add("score distribution", dist, c(14, 38, 11, 16, 16, 9, 16, 10, 8))
+add("what each cutoff admits", adm, c(14, 14, 21, 21, 19, 19, 22))
 saveWorkbook(wb, OUT, overwrite = TRUE)
 cat("\nwrote", OUT, "\n")

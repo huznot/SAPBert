@@ -2,7 +2,7 @@
 
 ICD-9-CM to ICD-10-CA unless a sheet says otherwise. 354 ICD-9-CM codes against
 2038 ICD-10-CA codes is 721,452 possible pairs, 937 of them marked correct in
-the validation data. Each sheet says what it is in the first row.
+the validation data.
 
 | | |
 |---|---|
