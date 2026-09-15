@@ -18,11 +18,11 @@ OUT  <- out_path("2_icda8_code_in_label.xlsx")
 
 # the four pairs of arms that differ only by whether the code is in the text
 PAIRS <- list(
-  list(model = "ClinicalBERT", text = "base",
+  list(model = "ClinicalBERT", text = "none",
        code = "clinicalbert_base", nocode = "clinicalbert_base_nocode"),
-  list(model = "SapBERT", text = "base",
+  list(model = "SapBERT", text = "none",
        code = "sapbert_base", nocode = "sapbert_base_nocode"),
-  list(model = "mpnet", text = "base",
+  list(model = "mpnet", text = "none",
        code = "mpnet_base", nocode = "mpnet_base_nocode"),
   list(model = "ClinicalBERT", text = "stopwords removed",
        code = "clinicalbert_stopwords", nocode = "clinicalbert_stopwords_nocode")
@@ -76,7 +76,7 @@ side <- do.call(rbind, lapply(PAIRS, function(p) {
              by = KEY, suffixes = c("_code", "_nocode"))
   data.frame(
     Track = vapply(m$track, function(t) TRACKS[[t]]$label, character(1)),
-    Model = p$model, Text = p$text,
+    Model = p$model, `Text cleaning` = p$text,
     `Cosine cutoff` = m$similarity_threshold,
     `Top N co-occurring` = m$top_n,
     Rule = unname(SCENARIO[as.character(m$flag_combination)]),
@@ -85,12 +85,12 @@ side <- do.call(rbind, lapply(PAIRS, function(p) {
     `Difference` = round(m$f1_nocode - m$f1_code, 4),
     check.names = FALSE, row.names = NULL)
 }))
-side <- side[order(side$Track, side$Model, side$Text, side$`Cosine cutoff`,
+side <- side[order(side$Track, side$Model, side$`Text cleaning`, side$`Cosine cutoff`,
                    side$`Top N co-occurring`), ]
 
 ## the summary of that: how often removing the code helped, and by how much
 summ <- side %>%
-  group_by(Track, Model, Text) %>%
+  group_by(Track, Model, `Text cleaning`) %>%
   summarise(`Grid points` = n(),
             `Label only better` = sum(Difference > 0),
             Tied = sum(Difference == 0),
@@ -100,7 +100,7 @@ summ <- side %>%
             `Largest loss` = round(min(Difference), 4),
             .groups = "drop") %>%
   as.data.frame()
-summ <- summ[order(summ$Track, summ$Model, summ$Text), ]
+summ <- summ[order(summ$Track, summ$Model, summ$`Text cleaning`), ]
 
 cat("\npaired across every grid point, label only minus code in the label\n")
 print(summ, row.names = FALSE)
@@ -148,7 +148,7 @@ for (tr in names(TRACKS)) {
       r <- run_one(tr, tag, b$similarity_threshold, b$top_n, b$flag_combination)
       stopifnot(abs(r$f1 - b$f1) < 0.002)
       rows[[length(rows) + 1]] <- data.frame(
-        Track = TRACKS[[tr]]$label, Model = p$model, Text = p$text,
+        Track = TRACKS[[tr]]$label, Model = p$model, `Text cleaning` = p$text,
         `Label content` = if (arm == "code") "code number then the label" else "the label only",
         `Cosine cutoff` = b$similarity_threshold,
         `Top N co-occurring` = b$top_n,
@@ -166,7 +166,7 @@ for (tr in names(TRACKS)) {
 best <- do.call(rbind, rows)
 
 cat("\ncounts at each arm's own best setting\n")
-print(best[, c("Track", "Model", "Text", "Label content", "Mappings produced",
+print(best[, c("Track", "Model", "Text cleaning", "Label content", "Mappings produced",
                "True positives", "False positives", "False negatives", "F1")],
       row.names = FALSE)
 
