@@ -17,9 +17,14 @@ worth making. It is tested on two migrations:
 
 ## Latest results
 
-The four things asked for in the 9 September meeting are together in
-**[results/sep9_meeting/](results/sep9_meeting/)**, with an index that says what
-each one answers:
+ClinicalBERT against SapBERT on the same top N (10, 20, 25) and the same rule, at the
+cutoffs set on 18 September, overall and for all 130 CCS categories:
+**[results/sep18_meeting/clinicalbert_vs_sapbert.xlsx](results/sep18_meeting/clinicalbert_vs_sapbert.xlsx)**
+
+Earlier, from 9 September:
+
+The four things asked for in the 9 September meeting are in
+**[results/sep9_meeting/](results/sep9_meeting/)**:
 
 1. [Frequencies at each cutoff](results/sep9_meeting/1_threshold_frequencies.xlsx) — counts, not just precision and recall
 2. [The code number in the label, ICDA-8](results/sep9_meeting/2_icda8_code_in_label.xlsx)
@@ -185,7 +190,8 @@ results/rerank/           candidate features, cv folds, precision-coverage
 results/rerank/csv_export/ the held-out predictions as csv
 results/unmatched/        the codes with no reference match
 results/review/           the reviewed nine codes and the cutoff work
-results/sep9_meeting/     the four workbooks asked for on 9 sep, with an index
+results/sep9_meeting/     the four workbooks asked for on 9 sep
+results/sep18_meeting/    clinicalbert against sapbert, same settings for both
 ```
 
 Scripts do not hardcode those subdirectories. They call `out_path("name.csv")`
