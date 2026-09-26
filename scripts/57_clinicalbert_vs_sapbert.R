@@ -25,8 +25,14 @@ MODELS <- list(
   SapBERT      = list(file = "cosine_similarity_matrices_10_9_sapbert_base_nocode.xlsx",
                       cutoffs = c(0.55, 0.60, 0.70, 0.80, 0.90, 0.99)))
 TOP_NS <- c(10, 20, 25)
-RULE   <- 4
-RULE_TEXT <- "any of the three"
+RULES  <- 1:4
+RULE_TEXT <- c("1" = "top cosine or top co-occurrence",
+               "2" = "top cosine or in both lists",
+               "3" = "top co-occurrence or in both lists",
+               "4" = "any of the three")
+# all four rules go in the overall tab so the rules can be compared on the same
+# footing. the category tab stays on rule 4, otherwise it is 15,600 rows
+CAT_RULE <- 4
 
 ccs_full <- read_excel(LAB, sheet = "CCS ICD-9-CM-3Level") %>%
   mutate(ICD_9_CM = as.character(ICD_9_CM))
@@ -64,44 +70,51 @@ for (m in names(MODELS)) {
   for (thr in MODELS[[m]]$cutoffs) {
     sim <- long %>% filter(Similarity >= thr)
     for (tn in TOP_NS) {
-      mg  <- merge_and_flag(sim, co_by_n[[as.character(tn)]], "ICD_10_CA",
-                            find_icd10ca_chapter, chapter_alignment_10)
-      au  <- select_rows_by_flags(mg, RULE)
-      fin <- validate_mapping(man, au, ccs_df, excl, "ICD-10-CA", "ICD_10_CA")
-      tp <- sum(fin$`True Positive`, na.rm = TRUE)
-      fp <- sum(fin$`False Positive`, na.rm = TRUE)
-      fn <- sum(fin$`False Negative`, na.rm = TRUE)
-      stopifnot(tp + fn == nrow(man), tp + fp == nrow(au))
+      # the merge is the slow part and does not depend on the rule, so it is
+      # done once and the four rules are applied to it
+      mg <- merge_and_flag(sim, co_by_n[[as.character(tn)]], "ICD_10_CA",
+                           find_icd10ca_chapter, chapter_alignment_10)
+      for (rl in RULES) {
+        au  <- select_rows_by_flags(mg, rl)
+        fin <- validate_mapping(man, au, ccs_df, excl, "ICD-10-CA", "ICD_10_CA")
+        tp <- sum(fin$`True Positive`, na.rm = TRUE)
+        fp <- sum(fin$`False Positive`, na.rm = TRUE)
+        fn <- sum(fin$`False Negative`, na.rm = TRUE)
+        stopifnot(tp + fn == nrow(man), tp + fp == nrow(au))
 
-      old <- grid[grid$model == m & grid$mode == "absolute" & grid$flag == RULE &
-                  abs(grid$threshold - thr) < 1e-9 & grid$top_n == tn, ]
-      if (nrow(old)) stopifnot(old$tp == tp, old$fp == fp, old$fn == fn)
+        old <- grid[grid$model == m & grid$mode == "absolute" & grid$flag == rl &
+                    abs(grid$threshold - thr) < 1e-9 & grid$top_n == tn, ]
+        if (nrow(old)) stopifnot(old$tp == tp, old$fp == fp, old$fn == fn)
 
-      s <- prf(tp, fp, fn)
-      cat(sprintf("  %-12s %.2f top %2d  tp %3d fp %3d fn %3d  f1 %.3f%s\n",
-                  m, thr, tn, tp, fp, fn, s$f1, if (nrow(old)) "  matches old grid" else ""))
-      overall[[length(overall) + 1]] <- data.frame(
-        Model = m, `Cosine cutoff` = thr, `Top N co-occurring` = tn, Rule = RULE_TEXT,
-        `Possible pairs` = n_pairs, `Pairs above the cutoff` = nrow(sim),
-        `Mappings produced` = tp + fp, `Correct pairs to find` = tp + fn,
-        `True positives` = tp, `False positives` = fp, `False negatives` = fn,
-        Precision = s$p, Recall = s$r, F1 = s$f1, check.names = FALSE)
+        s <- prf(tp, fp, fn)
+        cat(sprintf("  %-12s %.2f top %2d rule %d  tp %3d fp %4d fn %3d  f1 %.3f%s\n",
+                    m, thr, tn, rl, tp, fp, fn, s$f1, if (nrow(old)) "  ok" else ""))
+        overall[[length(overall) + 1]] <- data.frame(
+          Model = m, `Cosine cutoff` = thr, `Top N co-occurring` = tn,
+          `Rule number` = rl, Rule = unname(RULE_TEXT[as.character(rl)]),
+          `Possible pairs` = n_pairs, `Pairs above the cutoff` = nrow(sim),
+          `Mappings produced` = tp + fp, `Correct pairs to find` = tp + fn,
+          `True positives` = tp, `False positives` = fp, `False negatives` = fn,
+          Precision = s$p, Recall = s$r, F1 = s$f1, check.names = FALSE)
 
-      per <- fin %>% group_by(CCS_ID) %>%
-        summarise(TP = sum(`True Positive`, na.rm = TRUE),
-                  FP = sum(`False Positive`, na.rm = TRUE),
-                  FN = sum(`False Negative`, na.rm = TRUE), .groups = "drop")
-      per <- ccs_index %>% left_join(per, by = "CCS_ID") %>%
-        mutate(across(c(TP, FP, FN), ~ tidyr::replace_na(.x, 0L)))
-      stopifnot(sum(per$TP) == tp, sum(per$FP) == fp, sum(per$FN) == fn)
-      c3 <- prf(per$TP, per$FP, per$FN)
-      bycat[[length(bycat) + 1]] <- data.frame(
-        `CCS ID` = per$CCS_ID, Category = per$description,
-        `ICD-9 codes in the category` = per$n_codes,
-        Model = m, `Cosine cutoff` = thr, `Top N co-occurring` = tn,
-        `Correct pairs to find` = per$TP + per$FN, `Mappings produced` = per$TP + per$FP,
-        `True positives` = per$TP, `False positives` = per$FP, `False negatives` = per$FN,
-        Precision = c3$p, Recall = c3$r, F1 = c3$f1, check.names = FALSE)
+        if (rl != CAT_RULE) next
+        per <- fin %>% group_by(CCS_ID) %>%
+          summarise(TP = sum(`True Positive`, na.rm = TRUE),
+                    FP = sum(`False Positive`, na.rm = TRUE),
+                    FN = sum(`False Negative`, na.rm = TRUE), .groups = "drop")
+        per <- ccs_index %>% left_join(per, by = "CCS_ID") %>%
+          mutate(across(c(TP, FP, FN), ~ tidyr::replace_na(.x, 0L)))
+        stopifnot(sum(per$TP) == tp, sum(per$FP) == fp, sum(per$FN) == fn)
+        c3 <- prf(per$TP, per$FP, per$FN)
+        bycat[[length(bycat) + 1]] <- data.frame(
+          `CCS ID` = per$CCS_ID, Category = per$description,
+          `ICD-9 codes in the category` = per$n_codes,
+          Model = m, `Cosine cutoff` = thr, `Top N co-occurring` = tn,
+          Rule = unname(RULE_TEXT[as.character(rl)]),
+          `Correct pairs to find` = per$TP + per$FN, `Mappings produced` = per$TP + per$FP,
+          `True positives` = per$TP, `False positives` = per$FP, `False negatives` = per$FN,
+          Precision = c3$p, Recall = c3$r, F1 = c3$f1, check.names = FALSE)
+      }
     }
   }
 }
@@ -110,7 +123,7 @@ overall <- do.call(rbind, overall)
 bycat   <- do.call(rbind, bycat)
 bycat   <- bycat[order(as.numeric(bycat$`CCS ID`), match(bycat$Model, names(MODELS)),
                        bycat$`Cosine cutoff`, bycat$`Top N co-occurring`), ]
-stopifnot(nrow(bycat) == nrow(ccs_index) * nrow(overall))
+stopifnot(nrow(overall) == nrow(bycat) / nrow(ccs_index) * length(RULES))
 
 # correct pairs per category do not depend on the model, so this is one table
 size <- bycat[bycat$Model == "ClinicalBERT" & bycat$`Cosine cutoff` == 0.90 &
@@ -135,12 +148,15 @@ add <- function(name, df, widths, filter = FALSE) {
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
   freezePane(wb, name, firstActiveRow = 2)
 }
-add("overall", overall, c(14, 14, 19, 17, 15, 21, 18, 20, 15, 15, 16, 10, 9, 8))
-add("by category", bycat, c(8, 46, 24, 14, 14, 19, 20, 18, 15, 15, 16, 10, 9, 8), filter = TRUE)
+add("overall", overall, c(14, 14, 19, 12, 32, 15, 21, 18, 20, 15, 15, 16, 10, 9, 8), filter = TRUE)
+add("by category", bycat, c(8, 46, 24, 14, 14, 19, 32, 20, 18, 15, 15, 16, 10, 9, 8), filter = TRUE)
 add("category size", size, c(18, 12, 13, 21, 19, 21))
 saveWorkbook(wb, OUT, overwrite = TRUE)
 
-cat("\n"); print(overall[, c("Model", "Cosine cutoff", "Top N co-occurring",
-                             "True positives", "False positives", "False negatives", "F1")],
-                 row.names = FALSE)
+cat("\n"); best <- do.call(rbind, lapply(split(overall, list(overall$Model, overall$`Rule number`)),
+  function(d) d[which.max(d$F1), ]))
+print(best[order(best$Model, best$`Rule number`),
+           c("Model", "Rule number", "Cosine cutoff", "Top N co-occurring",
+             "True positives", "False positives", "False negatives", "F1")],
+      row.names = FALSE)
 cat("\nwrote", OUT, "with", nrow(overall), "settings and", nrow(bycat), "category rows\n")
