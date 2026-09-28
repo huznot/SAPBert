@@ -139,18 +139,67 @@ size$`Share of correct pairs` <- sprintf("%.0f%%", 100 * size$`Correct pairs to 
                                            sum(size$`Correct pairs to find`))
 names(size)[1] <- "Category size"
 
-hdr <- createStyle(textDecoration = "bold", valign = "bottom")
-wb  <- createWorkbook()
-add <- function(name, df, widths, filter = FALSE) {
+## one row per category: the best each model manages anywhere in the grid.
+## this is the tab to present from, 130 rows instead of 3,900
+summ <- bycat %>%
+  group_by(`CCS ID`, Category, `ICD-9 codes in the category`) %>%
+  summarise(`Correct pairs to find` = first(`Correct pairs to find`),
+            `Best F1 ClinicalBERT` = max(F1[Model == "ClinicalBERT"], na.rm = TRUE),
+            `Best F1 SapBERT`      = max(F1[Model == "SapBERT"], na.rm = TRUE),
+            .groups = "drop") %>%
+  as.data.frame()
+summ$`Better model` <- ifelse(summ$`Best F1 SapBERT` > summ$`Best F1 ClinicalBERT`, "SapBERT",
+                       ifelse(summ$`Best F1 SapBERT` < summ$`Best F1 ClinicalBERT`, "ClinicalBERT", "tied"))
+summ$`Best either`  <- pmax(summ$`Best F1 ClinicalBERT`, summ$`Best F1 SapBERT`)
+summ <- summ[order(summ$`Best either`, -summ$`ICD-9 codes in the category`), ]
+
+hdr  <- createStyle(textDecoration = "bold", valign = "bottom", fgFill = "#D9D9D9",
+                    border = "bottom", borderStyle = "medium")
+CB   <- createStyle(fgFill = "#EAF1FB")   # clinicalbert rows
+SB   <- createStyle(fgFill = "#FDF1E4")   # sapbert rows
+SEP  <- createStyle(border = "top", borderColour = "#808080", borderStyle = "thin")
+wb   <- createWorkbook()
+
+# red to green across the F1 column, so the weak categories stand out while she
+# scrolls rather than having to read every number
+scale3 <- function(sheet, col, n)
+  conditionalFormatting(wb, sheet, cols = col, rows = 2:(n + 1), type = "colourScale",
+                        style = c("#F8696B", "#FFEB84", "#63BE7B"), rule = c(0, 0.4, 0.8))
+
+add <- function(name, df, widths, filter = FALSE, freeze_col = 1, band_model = TRUE) {
   addWorksheet(wb, name)
   writeData(wb, name, df, headerStyle = hdr, withFilter = filter)
   setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 2)
+  freezePane(wb, name, firstActiveRow = 2, firstActiveCol = freeze_col)
+  n <- nrow(df)
+  if (band_model && "Model" %in% names(df)) {
+    cb <- which(df$Model == "ClinicalBERT") + 1
+    sb <- which(df$Model == "SapBERT") + 1
+    if (length(cb)) addStyle(wb, name, CB, rows = cb, cols = seq_along(widths),
+                             gridExpand = TRUE, stack = TRUE)
+    if (length(sb)) addStyle(wb, name, SB, rows = sb, cols = seq_along(widths),
+                             gridExpand = TRUE, stack = TRUE)
+  }
+  # a line between categories so the blocks are visible at a glance
+  if ("CCS ID" %in% names(df)) {
+    brk <- which(c(TRUE, df$`CCS ID`[-1] != df$`CCS ID`[-n])) + 1
+    addStyle(wb, name, SEP, rows = brk, cols = seq_along(widths),
+             gridExpand = TRUE, stack = TRUE)
+  }
+  for (cn in intersect(c("F1", "Best F1 ClinicalBERT", "Best F1 SapBERT", "Best either"), names(df)))
+    scale3(name, which(names(df) == cn), n)
 }
-add("overall", overall, c(14, 14, 19, 12, 32, 15, 21, 18, 20, 15, 15, 16, 10, 9, 8), filter = TRUE)
-for (rl in RULES)
-  add(sprintf("rule %d by category", rl), bycat_by_rule[[as.character(rl)]],
-      c(8, 46, 24, 14, 14, 19, 32, 20, 18, 15, 15, 16, 10, 9, 8), filter = TRUE)
+
+add("overall", overall, c(14, 12, 12, 8, 30, 14, 15, 14, 14, 12, 12, 13, 10, 9, 8),
+    filter = TRUE, freeze_col = 2)
+add("category summary", summ, c(7, 42, 13, 13, 17, 15, 14, 11), filter = TRUE, freeze_col = 3)
+for (rl in RULES) {
+  d <- bycat_by_rule[[as.character(rl)]]
+  d$Rule <- NULL   # the tab name already says which rule it is
+  add(sprintf("rule %d by category", rl), d,
+      c(7, 42, 13, 14, 12, 12, 14, 14, 12, 12, 13, 10, 9, 8),
+      filter = TRUE, freeze_col = 4)
+}
 add("category size", size, c(18, 12, 13, 21, 19, 21))
 saveWorkbook(wb, OUT, overwrite = TRUE)
 
