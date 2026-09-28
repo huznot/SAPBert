@@ -30,9 +30,8 @@ RULE_TEXT <- c("1" = "top cosine or top co-occurrence",
                "2" = "top cosine or in both lists",
                "3" = "top co-occurrence or in both lists",
                "4" = "any of the three")
-# all four rules go in the overall tab so the rules can be compared on the same
-# footing. the category tab stays on rule 4, otherwise it is 15,600 rows
-CAT_RULE <- 4
+# all four rules, in the overall tab and then one category tab each, so a
+# category can be read under whichever rule gets picked
 
 ccs_full <- read_excel(LAB, sheet = "CCS ICD-9-CM-3Level") %>%
   mutate(ICD_9_CM = as.character(ICD_9_CM))
@@ -97,7 +96,6 @@ for (m in names(MODELS)) {
           `True positives` = tp, `False positives` = fp, `False negatives` = fn,
           Precision = s$p, Recall = s$r, F1 = s$f1, check.names = FALSE)
 
-        if (rl != CAT_RULE) next
         per <- fin %>% group_by(CCS_ID) %>%
           summarise(TP = sum(`True Positive`, na.rm = TRUE),
                     FP = sum(`False Positive`, na.rm = TRUE),
@@ -123,11 +121,12 @@ overall <- do.call(rbind, overall)
 bycat   <- do.call(rbind, bycat)
 bycat   <- bycat[order(as.numeric(bycat$`CCS ID`), match(bycat$Model, names(MODELS)),
                        bycat$`Cosine cutoff`, bycat$`Top N co-occurring`), ]
-stopifnot(nrow(overall) == nrow(bycat) / nrow(ccs_index) * length(RULES))
+stopifnot(nrow(bycat) == nrow(overall) * nrow(ccs_index))
+bycat_by_rule <- split(bycat, match(bycat$Rule, RULE_TEXT))
 
 # correct pairs per category do not depend on the model, so this is one table
 size <- bycat[bycat$Model == "ClinicalBERT" & bycat$`Cosine cutoff` == 0.90 &
-              bycat$`Top N co-occurring` == 25, ] %>%
+              bycat$`Top N co-occurring` == 25 & bycat$Rule == RULE_TEXT[["4"]], ] %>%
   mutate(band = cut(`ICD-9 codes in the category`, c(0, 1, 2, 4, 9, Inf),
                     labels = c("1 code", "2 codes", "3 to 4 codes",
                                "5 to 9 codes", "10 or more codes"))) %>%
@@ -149,7 +148,9 @@ add <- function(name, df, widths, filter = FALSE) {
   freezePane(wb, name, firstActiveRow = 2)
 }
 add("overall", overall, c(14, 14, 19, 12, 32, 15, 21, 18, 20, 15, 15, 16, 10, 9, 8), filter = TRUE)
-add("by category", bycat, c(8, 46, 24, 14, 14, 19, 32, 20, 18, 15, 15, 16, 10, 9, 8), filter = TRUE)
+for (rl in RULES)
+  add(sprintf("rule %d by category", rl), bycat_by_rule[[as.character(rl)]],
+      c(8, 46, 24, 14, 14, 19, 32, 20, 18, 15, 15, 16, 10, 9, 8), filter = TRUE)
 add("category size", size, c(18, 12, 13, 21, 19, 21))
 saveWorkbook(wb, OUT, overwrite = TRUE)
 
