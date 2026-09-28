@@ -139,15 +139,43 @@ size$`Share of correct pairs` <- sprintf("%.0f%%", 100 * size$`Correct pairs to 
                                            sum(size$`Correct pairs to find`))
 names(size)[1] <- "Category size"
 
-## one row per category: the best each model manages anywhere in the grid.
-## this is the tab to present from, 130 rows instead of 3,900
-summ <- bycat %>%
+## one row per category: the best each model manages anywhere in the grid, and
+## the setting that produced it. this is the tab to present from, 130 rows
+## instead of 3,900. she asked that every table say which cutoff and top n it
+## is using, so the winning setting travels with each score
+# where several settings tie on f1, pick one deterministically rather than
+# whichever row happened to come first: fewest false positives, then the
+# smallest cutoff, top n and rule. otherwise the setting shown moves around
+win <- bycat %>%
+  mutate(.rule = match(Rule, RULE_TEXT)) %>%
+  arrange(`CCS ID`, Model, desc(F1), `False positives`,
+          `Cosine cutoff`, `Top N co-occurring`, .rule) %>%
+  group_by(`CCS ID`, Model) %>%
+  slice(1) %>%
+  ungroup()
+
+base <- bycat %>%
   group_by(`CCS ID`, Category, `ICD-9 codes in the category`) %>%
-  summarise(`Correct pairs to find` = first(`Correct pairs to find`),
-            `Best F1 ClinicalBERT` = max(F1[Model == "ClinicalBERT"], na.rm = TRUE),
-            `Best F1 SapBERT`      = max(F1[Model == "SapBERT"], na.rm = TRUE),
-            .groups = "drop") %>%
+  summarise(`Correct pairs to find` = first(`Correct pairs to find`), .groups = "drop") %>%
   as.data.frame()
+
+grab <- function(mdl, col) {
+  w <- win[win$Model == mdl, ]
+  w[[col]][match(base$`CCS ID`, w$`CCS ID`)]
+}
+summ <- data.frame(
+  `CCS ID` = base$`CCS ID`, Category = base$Category,
+  `ICD-9 codes in the category` = base$`ICD-9 codes in the category`,
+  `Correct pairs to find` = base$`Correct pairs to find`,
+  `Best F1 ClinicalBERT`  = grab("ClinicalBERT", "F1"),
+  `ClinicalBERT cutoff`   = grab("ClinicalBERT", "Cosine cutoff"),
+  `ClinicalBERT top N`    = grab("ClinicalBERT", "Top N co-occurring"),
+  `ClinicalBERT rule`     = grab("ClinicalBERT", "Rule"),
+  `Best F1 SapBERT`       = grab("SapBERT", "F1"),
+  `SapBERT cutoff`        = grab("SapBERT", "Cosine cutoff"),
+  `SapBERT top N`         = grab("SapBERT", "Top N co-occurring"),
+  `SapBERT rule`          = grab("SapBERT", "Rule"),
+  check.names = FALSE)
 summ$`Better model` <- ifelse(summ$`Best F1 SapBERT` > summ$`Best F1 ClinicalBERT`, "SapBERT",
                        ifelse(summ$`Best F1 SapBERT` < summ$`Best F1 ClinicalBERT`, "ClinicalBERT", "tied"))
 summ$`Best either`  <- pmax(summ$`Best F1 ClinicalBERT`, summ$`Best F1 SapBERT`)
@@ -192,7 +220,8 @@ add <- function(name, df, widths, filter = FALSE, freeze_col = 1, band_model = T
 
 add("overall", overall, c(14, 12, 12, 8, 30, 14, 15, 14, 14, 12, 12, 13, 10, 9, 8),
     filter = TRUE, freeze_col = 2)
-add("category summary", summ, c(7, 42, 13, 13, 17, 15, 14, 11), filter = TRUE, freeze_col = 3)
+add("category summary", summ, c(7, 40, 13, 13, 17, 15, 14, 30, 15, 13, 12, 30, 12, 10),
+    filter = TRUE, freeze_col = 3)
 for (rl in RULES) {
   d <- bycat_by_rule[[as.character(rl)]]
   d$Rule <- NULL   # the tab name already says which rule it is
