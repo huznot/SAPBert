@@ -2,10 +2,9 @@ source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 source("scripts/pipeline_lib.R")
 suppressMessages(library(openxlsx))
 
-# what she asked for on 30 sep: the 52 icd-9 codes with no icda-8 match were
-# reviewed (52_icda8_excluded_list.R, six look wrong), and now the icda-8
-# estimates have to account for them the way the icd-9 to icd-10-ca ones
-# already do.
+# the 52 icd-9 codes with no icda-8 match were reviewed in
+# 52_icda8_excluded_list.R, where six look wrong. the icda-8 estimates account
+# for them the same way the icd-9 to icd-10-ca ones do.
 #
 # nothing in the repo ever dropped them: validate_mapping defaults to
 # drop_unmatched = FALSE and no script overrides it. so they are already in

@@ -61,7 +61,7 @@ d$Notes <- ifelse(is.na(j), "", m$note[j])
 d <- d[order(as.numeric(d$`ICD-9-CM`)), ]
 
 ## chapter the icd-9 code sits in, and the icda-8 codes it actually travels
-## with in the co-occurrence data. she asked for both, the point being that the
+## with in the co-occurrence data. both are here because the
 ## validation says no valid match but the data may still show a companion
 CH9 <- c("1 infectious and parasitic", "2 neoplasms",
          "3 endocrine, nutritional, metabolic", "4 blood and blood-forming organs",

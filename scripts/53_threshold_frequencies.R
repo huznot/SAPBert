@@ -2,9 +2,9 @@ source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 source("scripts/pipeline_lib.R")
 suppressMessages(library(openxlsx))
 
-# she asked for the actual numbers at each cutoff, not the precision and recall
-# summaries. everything here is already in absolute_threshold_grid.csv, it has
-# just never been laid out as counts. no new runs, nothing recomputed.
+# raw counts behind each cutoff rather than the precision and recall summaries.
+# every number here already exists in absolute_threshold_grid.csv, this only
+# lays it out as counts. no new runs, nothing recomputed.
 
 ORIG <- "data/original"
 GEN  <- "data/generated"
@@ -38,7 +38,7 @@ pct <- function(x, d) sprintf("%.2f%%", 100 * x / d)
 
 ## sheet 2. the similarity step on its own, before co-occurrence is brought in.
 ## this is the "how many of all possible pairs does the cutoff call similar"
-## question she asked directly
+## question, answered in counts
 step <- unique(res[res$mode == "absolute",
                    c("model", "threshold", "sim_pairs_kept", "icd9_with_any_sim")])
 step <- step[order(step$model, step$threshold), ]
@@ -79,7 +79,8 @@ counts <- function(d) {
 abs_counts <- counts(res[res$mode == "absolute", ])
 rel_counts <- counts(res[res$mode == "relative", ])
 
-## sheet 4. the single best rule per model, so she does not have to hunt for it
+## sheet 4. the single best rule per model, so the operating point is not
+## buried in the full grid
 best <- do.call(rbind, lapply(MODEL_ORDER, function(m) {
   d <- res[res$model == m & res$mode == "absolute", ]
   d[which.max(d$f1), ]
@@ -91,8 +92,8 @@ print(best_t[, c("Model", "Cosine cutoff", "Top N co-occurring", "Mappings produ
                  "True positives", "False positives", "False negatives", "F1")],
       row.names = FALSE)
 
-## sheet 5. the plain cutoff against the old rule, in counts. she wanted to know
-## whether the simpler cutoff costs anything and this is the answer as numbers
+## sheet 5. the plain cutoff against the old rule, in counts, which is what
+## says whether the simpler cutoff costs anything
 side <- do.call(rbind, lapply(MODEL_ORDER, function(m) {
   a <- res[res$model == m & res$mode == "absolute", ]
   r <- res[res$model == m & res$mode == "relative", ]

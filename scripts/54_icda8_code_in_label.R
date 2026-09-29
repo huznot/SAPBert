@@ -4,7 +4,7 @@ suppressMessages(library(openxlsx))
 
 # does pasting the code number onto the front of the label before embedding
 # matter on the icd-9 to icda-8 track. it mattered a lot on the icd-9 to
-# icd-10-ca track, and her expectation was that it would not matter here
+# icd-10-ca track, and it should matter less here
 # because both classifications are numeric so the numbers themselves look
 # alike. both arms already ran in the full grid, so the grid comparison is
 # read from results/grid/conditions/. the counts at the best setting are not in
@@ -106,7 +106,7 @@ cat("\npaired across every grid point, label only minus code in the label\n")
 print(summ, row.names = FALSE)
 
 ## counts at the best setting for each arm. the grid files only carry precision,
-## recall and f1, and she wants the raw numbers
+## recall and f1, so the counts are recomputed here
 run_one <- function(track, tag, thr, tn, fl) {
   tk <- TRACKS[[track]]
   tcn <- tk$target_col_name

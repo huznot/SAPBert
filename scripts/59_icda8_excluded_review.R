@@ -6,9 +6,9 @@ suppressMessages(library(openxlsx))
 # nine codes on the icd-9 to icd-10-ca track were done: the ones that look
 # wrong first, then every code described, then the chapters, then the signals.
 #
-# her instruction was to assume the validation data is right unless something
-# obvious turns up, so only six are marked wrong and the reasoning travels with
-# each one. the accuracy effect is the last tab, it is the smallest part.
+# the validation data is taken as correct unless something unambiguous turns
+# up, so only six are marked wrong and the reasoning travels with each one.
+# the accuracy effect is the last tab, it is the smallest part.
 #
 # reads: 52_codes_no_icda8.xlsx      (52_icda8_excluded_list.R, the verdicts)
 #        unmatched_*_by_code.csv     (36_unmatched_descriptives.R, the signals)

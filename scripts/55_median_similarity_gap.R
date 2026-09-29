@@ -2,8 +2,8 @@ source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 source("scripts/pipeline_lib.R")
 suppressMessages(library(openxlsx))
 
-# she asked in the meeting why SapBERT's median similarity is so much lower
-# than ClinicalBERT's, and the answer given was a guess. this splits every one
+# why SapBERT's median similarity sits so much lower than ClinicalBERT's.
+# this splits every one
 # of the 721,452 possible pairs into the ones the validation data marks correct
 # and everything else, and scores the two groups separately for each model.
 # the median on its own is not the interesting number. the distance between the

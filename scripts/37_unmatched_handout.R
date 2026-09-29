@@ -2,14 +2,14 @@
 # someone who does not have the repo open. reads the csvs written by
 # 36_unmatched_descriptives.R and 35_unmatched_codes.R, so run those first.
 #
-# covers what was asked for in the 27 aug meeting, in her order: co-occurrence
+# covers, in order: co-occurrence
 # for the codes with no match, cosine similarity against every target code with
 # the average, minimum, maximum, 25th and 75th, the codes that do have a match
 # as the comparison group, the groups together and then each code on its own,
 # what the algorithm emits for them, and whether a threshold on either signal
 # would separate them.
 #
-# house style, all asked for by name: no em dashes, no date in the heading,
+# house style: no em dashes, no date in the heading,
 # short noun phrase headings, portrait letter with one inch margins, plain
 # words, and no recommendations. the methodology is the pi's, so this describes
 # and does not advise. no "as expected" framing either, nothing was predicted.

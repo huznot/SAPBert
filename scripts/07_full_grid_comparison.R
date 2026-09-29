@@ -43,7 +43,7 @@ CONDITIONS <- list(
   sapbert_stripped      = list(model = "SapBERT-stripped",      family = "SapBERT",      stripping = "stripped"),
   mpnet_base            = list(model = "mpnet-base",            family = "mpnet",        stripping = "base"),
   mpnet_stripped        = list(model = "mpnet-stripped",        family = "mpnet",        stripping = "stripped"),
-  # the 2x2 asked for: stopwords in or out, code number in or out of the text.
+  # the 2x2: stopwords in or out, code number in or out of the text.
   # clinicalbert_base is the top left cell of that square, it already exists above
   sapbert_base_nocode = list(
     model = "SapBERT-base-nocode", family = "SapBERT", stripping = "base"),

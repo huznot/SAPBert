@@ -2,7 +2,7 @@ source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 source("scripts/pipeline_lib.R")
 suppressMessages(library(openxlsx))
 
-# head to head, clinicalbert against sapbert, after the 18 sep meeting. the
+# head to head, clinicalbert against sapbert. the
 # cutoffs were set from each model's score distribution, not tuned for f1, and
 # they are the only thing allowed to differ between the two models. top n and
 # the rule are held the same for both, even where that is not the best setting
@@ -141,8 +141,8 @@ names(size)[1] <- "Category size"
 
 ## one row per category: the best each model manages anywhere in the grid, and
 ## the setting that produced it. this is the tab to present from, 130 rows
-## instead of 3,900. she asked that every table say which cutoff and top n it
-## is using, so the winning setting travels with each score
+## instead of 3,900. every table carries the cutoff and top n that produced it,
+## so the winning setting travels with each score
 # where several settings tie on f1, pick one deterministically rather than
 # whichever row happened to come first: fewest false positives, then the
 # smallest cutoff, top n and rule. otherwise the setting shown moves around
@@ -188,8 +188,8 @@ SB   <- createStyle(fgFill = "#FDF1E4")   # sapbert rows
 SEP  <- createStyle(border = "top", borderColour = "#808080", borderStyle = "thin")
 wb   <- createWorkbook()
 
-# red to green across the F1 column, so the weak categories stand out while she
-# scrolls rather than having to read every number
+# red to green across the F1 column, so the weak categories stand out when
+# scrolling rather than needing every number read
 scale3 <- function(sheet, col, n)
   conditionalFormatting(wb, sheet, cols = col, rows = 2:(n + 1), type = "colourScale",
                         style = c("#F8696B", "#FFEB84", "#63BE7B"), rule = c(0, 0.4, 0.8))

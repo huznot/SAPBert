@@ -2,7 +2,8 @@ source(if (file.exists("paths.R")) "paths.R" else "scripts/paths.R")
 source("scripts/pipeline_lib.R")
 suppressMessages(library(openxlsx))
 
-# per ccs category counts at the plain cutoffs, for her to pick where to drill.
+# per ccs category counts at the plain cutoffs, as the basis for choosing which
+# categories are worth looking at.
 # 31_category_breakdown.R already broke the categories down, but at the old
 # relative threshold settings out of full_grid_best.csv. this is the same shape
 # at the cutoff each model actually does best at, and with the raw counts kept
