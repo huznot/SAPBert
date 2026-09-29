@@ -20,7 +20,7 @@ ORIG <- "data/original"
 GEN  <- "data/generated"
 VAL  <- file.path(ORIG, "ICD_Codes_Files_and_Validation_Data/Validation_Data .xlsx")
 LAB  <- file.path(ORIG, "ICD_Codes_Files_and_Validation_Data/ICD_Codes_Labels.xlsx")
-OUT  <- out_path("52_codes_accuracy_effect.xlsx")
+OUT  <- out_path("52_codes_accuracy_effect.csv")   # 59_ reads this into the review workbook
 
 MODELS <- c(ClinicalBERT = "cosine_similarity_matrices_8_9_clinicalbert_base_nocode.xlsx",
             SapBERT      = "cosine_similarity_matrices_8_9_sapbert_base_nocode.xlsx")
@@ -149,30 +149,7 @@ fixes <- data.frame(
   `ICDA-8 label` = unname(a8lab[CORRECTIONS$icda8]),
   `Why` = CORRECTIONS$note, check.names = FALSE)
 
-hdr <- createStyle(textDecoration = "bold", valign = "bottom", fgFill = "#D9D9D9",
-                   border = "bottom", borderStyle = "medium")
-CB  <- createStyle(fgFill = "#EAF1FB"); SB <- createStyle(fgFill = "#FDF1E4")
-wb  <- createWorkbook()
-add <- function(name, df, widths, filter = FALSE, freeze_col = 1) {
-  addWorksheet(wb, name)
-  writeData(wb, name, df, headerStyle = hdr, withFilter = filter)
-  setColWidths(wb, name, cols = seq_along(widths), widths = widths)
-  freezePane(wb, name, firstActiveRow = 2, firstActiveCol = freeze_col)
-  if ("Model" %in% names(df)) {
-    for (p in list(list("ClinicalBERT", CB), list("SapBERT", SB))) {
-      r <- which(df$Model == p[[1]]) + 1
-      if (length(r)) addStyle(wb, name, p[[2]], rows = r, cols = seq_along(widths),
-                              gridExpand = TRUE, stack = TRUE)
-    }
-  }
-  for (cn in intersect(c("F1", "F1 codes included"), names(df)))
-    conditionalFormatting(wb, name, cols = which(names(df) == cn), rows = 2:(nrow(df) + 1),
-                          type = "colourScale", style = c("#F8696B", "#FFEB84", "#63BE7B"),
-                          rule = c(0.5, 0.7, 0.85))
-}
-add("effect at best setting", eff, c(14, 8, 30, 12, 12, 16, 14, 15, 15, 14, 16), freeze_col = 2)
-add("all settings", res, c(14, 16, 12, 12, 8, 30, 14, 16, 14, 12, 12, 13, 10, 9, 8),
-    filter = TRUE, freeze_col = 3)
-add("the six corrections", fixes, c(11, 42, 12, 46, 60))
-saveWorkbook(wb, OUT, overwrite = TRUE)
-cat("\nwrote", OUT, "with", nrow(res), "rows\n")
+write.csv(eff, OUT, row.names = FALSE)
+cat("
+wrote", OUT, "
+")
