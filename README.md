@@ -1,202 +1,83 @@
-# ICD Crosswalk Automation
+![Logos](results/figures/logos.png)
 
-Maps old medical diagnosis codes to newer ones automatically.
+# icd crosswalk
 
-When a country switches coding systems, decades of health records are stuck in
-the old system. Someone has to build a crosswalk, a mapping from every old
-code to its modern equivalent and that is normally done by hand, by clinical
-coders, over months.
+maps old medical diagnosis codes to newer ones automatically.
 
-This work builds on an existing pipeline and reports what changes to it are
-worth making. It is tested on two migrations:
+when a country switches coding systems, decades of health records are stuck in
+the old system. the crosswalk from every old code to its modern equivalent is
+normally built by hand, by clinical coders, over months. this builds on an
+existing pipeline and tests what changes to it are worth making.
 
-- **ICD-9-CM → ICD-10-CA** (Canadian, the modern standard)
-- **ICD-9-CM → ICDA-8** (historical, going backwards)
+two migrations:
 
-![Logos](results/logos.png)
+- icd-9-cm to icd-10-ca, the current canadian standard
+- icd-9-cm to icda-8, going backwards
 
-## Latest results
+## how it works
 
-ClinicalBERT against SapBERT on the same top N (10, 20, 25) and the same rule,
-overall and for all 130 CCS categories:
-**[results/head_to_head/clinicalbert_vs_sapbert.xlsx](results/head_to_head/clinicalbert_vs_sapbert.xlsx)**
+for each old code the pipeline builds two candidate lists, then picks from them:
 
-Four workbooks on the ICD-9-CM to ICD-10-CA track, in
-**[results/workbooks/](results/workbooks/)**:
+1. cosine similarity between the code labels, from a sentence embedding model
+2. the codes it most often co-occurs with in administrative records
+3. a rule that combines the two lists
+4. a chapter filter, so a mapping cannot cross clinical areas
 
-1. [Frequencies at each cutoff](results/workbooks/1_threshold_frequencies.xlsx) — counts, not just precision and recall
-2. [The code number in the label, ICDA-8](results/workbooks/2_icda8_code_in_label.xlsx)
-3. [Why SapBERT's median sits so much lower](results/workbooks/3_similarity_gap_by_model.xlsx)
-4. [Counts by CCS category](results/workbooks/4_counts_by_ccs_category.xlsx) — all 130
+## results
 
-## Branches
+| | |
+|---|---|
+| [clinicalbert vs sapbert](results/head_to_head/clinicalbert_vs_sapbert.xlsx) | both models on the same settings, overall and by category |
+| [counts at each cutoff](results/workbooks/1_threshold_frequencies.xlsx) | how many pairs each cutoff keeps, with true and false positives |
+| [code number in the label](results/workbooks/2_icda8_code_in_label.xlsx) | whether embedding the code number with the label matters |
+| [why sapbert scores lower](results/workbooks/3_similarity_gap_by_model.xlsx) | correct pairs against everything else, per model |
+| [all 130 ccs categories](results/workbooks/4_counts_by_ccs_category.xlsx) | counts per category |
+| [the 52 with no icda-8 match](results/review/52_codes_review.xlsx) | the review of those codes |
 
-`main` follows the existing four-step methodology. The changes on it are a
-newer embedding model, corrections to the parameter search, an analysis of
-where correct mappings are lost, and the text-cleaning work requested in
-review. Best F1 is 0.524 and 0.761, against 0.423 and 0.716 for the original.
+best f1 is 0.544 on icd-9 to icd-10-ca and 0.761 on icd-9 to icda-8, against
+0.423 and 0.716 for the original pipeline. those score all 354 icd-9-cm codes,
+including the ones with no match in the target system.
 
-Those figures score all 354 ICD-9-CM codes, including the 9 and 52 that have no
-match in the target system. The original scored only the codes that had one.
-`report.md` Section 2 covers what that changed.
+## running it
 
-`testing` additionally replaces the selection step with a wide candidate set
-and a trained scoring model, reaching 0.668 and 0.840 on unseen codes. It is
-kept separate because it departs from the existing methodology and has not been
-agreed.
-
-## Running it
-
-Needs R. All the data is in the repo, so nothing has to be downloaded or
-requested. Scripts find the repo root themselves, so it does not matter which
-directory you start them from.
-
-Every headline number, read from the committed results, about a second:
+needs r. all the data is in the repo, so nothing has to be downloaded. scripts
+find the repo root themselves, so it does not matter where you start them from.
 
 ```bash
-Rscript scripts/27_show_results.R
+Rscript scripts/27_show_results.R   # every headline number, about a second
+Rscript run_all.R                   # rebuild everything, about 45 minutes
+Rscript run_all.R --quick           # ~10 minutes, skips the parameter searches
 ```
 
-To rebuild everything from the data instead, in dependency order:
+r packages: `dplyr`, `tidyr`, `readxl`, `stringr`, `purrr`, `ggplot2`,
+`jsonlite`, `xgboost`, `stopwords`, `openxlsx`.
 
-```bash
-Rscript run_all.R           # about 45 minutes
-Rscript run_all.R --quick   # ~10 minutes, skips the parameter searches
-```
-
-Or run a single stage:
-
-```bash
-Rscript scripts/07_full_grid_comparison.R   # parameter grid, all conditions
-Rscript scripts/08_assemble_full_grid.R     # combine into summary tables
-Rscript scripts/09_error_analysis.R         # where correct mappings are lost
-Rscript scripts/23_code_prefix_test.R       # code number in the embedded text
-```
-
-R packages: `dplyr`, `tidyr`, `readxl`, `stringr`, `purrr`,
-`ggplot2`, `jsonlite`, `xgboost`, `stopwords`. `reticulate` only for
-`01_generate_sapbert_embeddings.R`, which the Python script supersedes.
-
-Python is only needed to regenerate embeddings (`torch`, `transformers`,
-`sentence-transformers`, `pandas`, `openpyxl`):
+python is only needed to rebuild the embeddings:
 
 ```bash
 python scripts/generate_embeddings.py --model mpnet --clean base
 ```
 
-### All scripts
-
-Numbering is chronological, the order the work was done in. Everything below
-still runs.
-
-**Build the inputs**
-
-| | |
-|---|---|
-| `generate_embeddings.py` | similarity matrices for any model and text cleaning |
-| `01_generate_sapbert_embeddings.R` | how `data/sapbert/` was made, superseded by the Python script |
-| `pipeline_lib.R` | shared functions, sourced by everything |
-| `paths.R` | finds the repo root so scripts run from any directory |
-
-**The original pipeline, reproduced and searched**
-
-| | |
-|---|---|
-| `02_run_comparison.R` | first ClinicalBERT vs SapBERT run |
-| `03_visualize_results.R` | per-CCS-category charts |
-| `05_bidirectional_and_roundtrip.R` | mapping in the reverse direction |
-| `06_extended_comparison.R` | wider parameter sweep, superseded by `07` |
-| `07_full_grid_comparison.R` | full grid, one file per condition |
-| `08_assemble_full_grid.R` | combines those into the summary tables and report Figure 1 |
-
-**Diagnosing the ceiling**
-
-| | |
-|---|---|
-| `09_error_analysis.R` | where correct pairs are lost, report Section 4 |
-| `10_candidate_generation_study.R` | what a wider candidate step would reach |
-
-**The revised pipeline**
-
-| | |
-|---|---|
-| `11_rerank_features.R` | candidates and the 52 features |
-| `12_cv_rerank.R`, `12b_merge_cv_results.R` | train and evaluate, held out |
-| `13_precision_coverage.R` | confidence thresholds and triage |
-| `14_predict_crosswalk.R` | map codes with no known answer |
-
-**Follow-up experiments**
-
-| | |
-|---|---|
-| `16_ablation.R` | which feature groups matter in the scoring model |
-| `17_retrieval_sensitivity.R` | how much the candidate settings matter |
-| `18_learning_curve.R` | would more training data help |
-| `19_category_holdout.R` | does it work on unseen clinical areas |
-| `20_top1_accuracy.R` | is the right answer reachable at all |
-| `21_error_by_code_type.R` | single vs multi target codes |
-| `22_target_block_structure.R` | do multi-target answers sit in blocks |
-| `23_code_prefix_test.R` | code number in the text, report Section 5 |
-| `29_portability.R` | performance without health records or a chapter table |
-| `30_variability.R` | bootstrap standard deviation on every reported score and difference, report Section 9 |
-| `31_category_breakdown.R` | performance across all 130 CCS categories, every condition, report Section 10 |
-
-**Show the results, no recomputation, a second or two each**
-
-| | |
-|---|---|
-| `27_show_results.R` | every headline number |
-| `34_export_rds_as_csv.R` | the held-out predictions as csv, for reading without R |
-| `35_unmatched_codes.R` | codes with no correct answer, report Section 2 and Figure 1 |
-| `36_unmatched_descriptives.R` | similarity and co-occurrence for those codes on their own, report Section 11 |
-| `37_unmatched_handout.R` | a one page handout of the same thing, for sending to someone without the repo |
-| `24_show_similarity_matrix.R` | a worked similarity matrix |
-| `25_frequency_distributions.R` | report Section 8 |
-| `26_stopword_choice.R` | which stop word dictionary, report Section 6 |
-| `28_stopwords_and_codes.R` | report Section 7 |
-
-`04` and `15` were removed. `15` compared stop word dictionaries using a
-hardcoded approximation of the word lists rather than the real ones and gave
-wrong collision counts; `26` does the same job correctly.
-
-## Using it on other code systems
-
-To point this at a different migration you need, per code system:
-
-- code labels (code → text description)
-- co-occurrence counts between old and new codes, from records coded both ways
-- a chapter/category grouping, if one exists
-- some manually verified mappings for training, a few hundred is enough
-
-Then swap the paths in the `TRACKS` list at the top of `11_rerank_features.R`.
-
-## Layout
+## layout
 
 ```
-data/original/            labels, co-occurrence tables, manual crosswalks
-data/sapbert/             SapBERT similarity matrices
-data/generated/           regenerated / filler-stripped / mpnet matrices
-scripts/                  pipeline code
-docs/                     the paper drafts and the change log
-run_all.R                 rebuilds everything in dependency order
-
-results/tables/           headline csv output
-results/figures/          every plot
-results/grid/             parameter grid summaries
-results/grid/conditions/  one csv per embedding condition
-results/rerank/           candidate features, cv folds, precision-coverage
-results/rerank/csv_export/ the held-out predictions as csv
-results/unmatched/        the codes with no reference match
-results/review/           the reviewed nine codes and the cutoff work
-results/workbooks/        the four icd-9 to icd-10-ca workbooks
-results/head_to_head/     clinicalbert against sapbert, same settings for both
+data/        labels, co-occurrence tables, manual crosswalks, matrices
+scripts/     pipeline code, numbered in the order it was written
+docs/        the paper drafts and the change log
+results/     everything the scripts produce
+run_all.R    rebuilds it all in dependency order
 ```
 
-Scripts do not hardcode those subdirectories. They call `out_path("name.csv")`
-and `scripts/paths.R` decides where it goes from the file name, so the folder
-layout and the code cannot drift apart. If you add an output that should live
-somewhere new, add the rule in `results_subdir()` rather than at the call site.
+scripts call `out_path("name.csv")` and `scripts/paths.R` works out which
+results folder it belongs in from the file name, so the layout and the code
+cannot drift apart.
 
-`data/` is committed, which is why the repository is about 350 MB. That keeps the
-analysis reproducible from a clone without a GPU, and it is also why cloning is
-slow. Deliberate, not an accident.
+`data/` is committed, which is why the repo is about 350 mb. that keeps the
+analysis reproducible from a clone without a gpu.
+
+## branches
+
+`main` follows the existing four step methodology. `testing` replaces the
+selection step with a wide candidate set and a trained scoring model, reaching
+0.668 and 0.840 on unseen codes. it is kept separate because it departs from the
+agreed methodology.

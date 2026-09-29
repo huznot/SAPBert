@@ -33,6 +33,24 @@ a8lab <- setNames(as.character(a8$ICDA_8_LABEL), as.character(a8$ICDA_8))
 base$proposed <- ifelse(base$`Closest ICDA-8 code` == "none", NA_character_,
                         sub(" .*$", "", base$`Closest ICDA-8 code`))
 
+# each of the six checked against the 858 icda-8 rubrics in ICD_Codes_Labels.xlsx.
+# BLOCK is the surrounding icda-8 range, printed from the file so the check is
+# visible rather than asserted
+JUST <- c(
+  "165" = "ICDA-8 has no 165. Its respiratory block stops at 163, other and unspecified respiratory organs, which is where an ill-defined respiratory site goes.",
+  "175" = "ICDA-8 has no 175. Breast cancer is a single rubric, 174, not split by sex.",
+  "179" = "ICDA-8 has no 179. The uterus is split into 180 cervix, 181 chorionepithelioma and 182 other, so part unspecified goes to 182.",
+  "555" = "ICDA-8 has no 555. Regional enteritis is a chronic enteritis, and 563 is the chronic rubric. 561 is the only other candidate and does not mention chronic disease.",
+  "576" = "Same number in both, and the same rubric: ICD-9 576 other disorders of biliary tract, ICDA-8 576 other diseases of gallbladder and biliary ducts.",
+  "745" = "ICD-9 745 is a heart defect and 746 is the only heart rubric in ICDA-8. ICDA-8 745 also exists but is ear, face and neck, so the numbers do not line up between the two systems.")
+BLOCK <- list("165" = 160:163, "175" = 172:174, "179" = 180:183,
+              "555" = 560:565, "576" = 574:577, "745" = 743:747)
+block_text <- function(k) {
+  r <- as.character(BLOCK[[k]])
+  r <- r[r %in% names(a8lab)]
+  paste(sprintf("%s %s", r, a8lab[r]), collapse = "; ")
+}
+
 ## what each model actually scores for these codes. for the six with a proposed
 ## match this says whether the label similarity could ever have found it, which
 ## is the "why is the correct code missing" column from the nine code review
@@ -76,7 +94,10 @@ six <- data.frame(
   `ICD-9 chapter` = wrong$`ICD-9 chapter`,
   `Proposed ICDA-8` = wrong$proposed,
   `ICDA-8 label` = unname(a8lab[wrong$proposed]),
-  `Why it looks wrong` = wrong$Notes,
+  Justification = unname(JUST[wrong$`ICD-9-CM`]),
+  `ICDA-8 codes in that block` = vapply(wrong$`ICD-9-CM`, block_text, character(1)),
+  `Is the ICD-9 number itself in ICDA-8?` = ifelse(wrong$`ICD-9-CM` %in% names(a8lab),
+                                                   "yes, as a different rubric", "no"),
   `ClinicalBERT top cosine` = wrong$`ClinicalBERT top cosine`,
   `Rank of proposed, ClinicalBERT` = wrong$`Rank of proposed, ClinicalBERT`,
   `SapBERT top cosine` = wrong$`SapBERT top cosine`,
@@ -106,23 +127,7 @@ ch$`Of which look wrong` <- vapply(ch$`ICD-9 chapter`,
 ch$Share <- sprintf("%.0f%%", 100 * ch$`Codes with no ICDA-8 match` / nrow(base))
 ch <- ch[order(-ch$`Codes with no ICDA-8 match`), ]
 
-## tab 4. the two signals per code, with the codes that do have a match as the
-## comparison group. straight out of 36_unmatched_descriptives.R
-sim <- read.csv(out_path("unmatched_similarity_by_code.csv"), stringsAsFactors = FALSE)
-sim <- sim[sim$track == "8_9" & sim$model %in% names(MODELS), ]
-sig <- data.frame(
-  Model = sim$model, Group = sim$group,
-  `ICD-9-CM` = as.character(sim$icd9), `ICD-9-CM label` = sim$icd9_label,
-  `CCS category` = sim$ccs_category,
-  `ICDA-8 codes scored` = sim$n,
-  Mean = sim$mean, Lowest = sim$min, `25th` = sim$q1, Median = sim$median,
-  `75th` = sim$q3, Highest = sim$max,
-  `Nearest ICDA-8` = sim$nearest_target, `Nearest label` = sim$nearest_target_label,
-  check.names = FALSE)
-sig <- sig[order(sig$Model, sig$Group != "no reference match",
-                 as.numeric(sig$`ICD-9-CM`)), ]
-
-## tab 5. the accuracy effect, last and smallest
+## tab 4. the accuracy effect, last and smallest
 eff <- read.csv(out_path("52_codes_accuracy_effect.csv"), stringsAsFactors = FALSE,
                 check.names = FALSE)
 names(eff) <- gsub("\\.", " ", names(eff))
@@ -151,11 +156,10 @@ add <- function(name, df, widths, filter = FALSE, freeze_col = 1, wrap = TRUE) {
                               gridExpand = TRUE, stack = TRUE)
     }
 }
-add("the six that look wrong", six, c(10, 34, 28, 11, 38, 60, 34, 17, 34, 17, 12), freeze_col = 2)
+add("the six that look wrong", six,
+    c(10, 34, 28, 11, 38, 70, 70, 22, 34, 17, 34, 17, 12), freeze_col = 2)
 add("the other 46", rest, c(10, 34, 28, 52, 34, 34, 12, 40), filter = TRUE, freeze_col = 2)
 add("by chapter", ch, c(42, 16, 13, 8))
-add("similarity and co-occurrence", sig,
-    c(14, 22, 10, 34, 28, 12, 9, 9, 9, 9, 9, 9, 13, 34), filter = TRUE, freeze_col = 4)
 add("accuracy effect", eff, c(14, 8, 30, 12, 12, 16, 14, 15, 15, 14, 16),
     freeze_col = 2, wrap = FALSE)
 saveWorkbook(wb, OUT, overwrite = TRUE)
