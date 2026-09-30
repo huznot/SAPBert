@@ -137,9 +137,9 @@ eff <- do.call(rbind, lapply(split(res, list(res$Model, res$`Rule number`)), fun
              Accuracy = round(b$`True positives` /
                               (b$`True positives` + b$`False positives` +
                                b$`False negatives`), 3),
-             `F1 codes dropped` = g("codes dropped"),
-             `F1 six corrections` = g("six corrections"),
-             `Cost of including them` = round(g("codes included") - g("codes dropped"), 3),
+             `F1 if the 52 are dropped` = g("codes dropped"),
+             `F1 with the six fixes` = g("six corrections"),
+             `F1 change from including` = round(g("codes included") - g("codes dropped"), 3),
              check.names = FALSE)
 }))
 eff <- eff[order(eff$Model, eff$`Rule number`), ]
@@ -148,7 +148,7 @@ cat("
 effect at each model's best setting, per rule
 ")
 print(eff[, c("Model", "Rule number", "Precision", "Recall", "F1", "Accuracy",
-              "F1 codes dropped", "Cost of including them")], row.names = FALSE)
+              "F1 if the 52 are dropped", "F1 change from including")], row.names = FALSE)
 
 write.csv(eff, OUT, row.names = FALSE)
 cat("

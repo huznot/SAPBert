@@ -97,9 +97,6 @@ six <- data.frame(
   `ICDA-8 label` = unname(a8lab[wrong$proposed]),
   Justification = unname(JUST[wrong$`ICD-9-CM`]),
   `ICDA-8 codes in that block` = vapply(wrong$`ICD-9-CM`, block_text, character(1)),
-  `Is the ICD-9 number itself in ICDA-8?` = ifelse(
-      wrong$`ICD-9-CM` %in% names(a8lab),
-      paste0("yes, ", a8lab[wrong$`ICD-9-CM`]), "no"),
   `ClinicalBERT top cosine` = wrong$`ClinicalBERT top cosine`,
   `Rank of proposed, ClinicalBERT` = wrong$`Rank of proposed, ClinicalBERT`,
   `SapBERT top cosine` = wrong$`SapBERT top cosine`,
@@ -158,7 +155,7 @@ add <- function(name, df, widths, filter = FALSE, freeze_col = 1, wrap = TRUE) {
     }
 }
 add("the six that look wrong", six,
-    c(10, 34, 28, 11, 38, 70, 70, 22, 34, 17, 34, 17, 12), freeze_col = 2)
+    c(10, 34, 28, 11, 38, 70, 70, 34, 17, 34, 17, 12), freeze_col = 2)
 add("the other 46", rest, c(10, 34, 28, 34, 34, 12, 40), filter = TRUE, freeze_col = 2)
 add("by chapter", ch, c(42, 16, 13, 8))
 add("accuracy effect", eff, c(14, 8, 30, 12, 12, 16, 14, 15, 15, 14, 16),
