@@ -3,8 +3,8 @@ source("scripts/pipeline_lib.R")
 suppressMessages({library(openxlsx); library(readxl)})
 
 # the icd-9-cm codes the validation data has no icda-8 match for, checked
-# against the 858 three character icda-8 rubrics in ICD_Codes_Labels.xlsx.
-# six are marked wrong, where the icda-8 rubric is unambiguous and there is no
+# against the 858 three character icda-8 codes in ICD_Codes_Labels.xlsx.
+# six are marked wrong, where the icda-8 code is unambiguous and there is no
 # competing candidate in the surrounding range. everything else is left as
 # validation data correct. a plausible candidate is not a confirmed mapping and
 # icd-8 inclusion notes are not in the repo, so the rest is not second guessed.
@@ -16,18 +16,18 @@ OUT  <- out_path("52_codes_no_icda8.xlsx")
 
 W <- "validation data wrong"; C <- "validation data correct"
 
-# only the six where the icda-8 rubric is unambiguous are marked wrong. every
+# only the six where the icda-8 code is unambiguous are marked wrong. every
 # other code is left as validation data correct, because a plausible candidate
 # is not the same as a confirmed mapping and guessing would be worse than
 # leaving the validation alone.
 chk <- list(
   c("165", W, "163", "ICD-8 stops at 163 other and unspecified respiratory organs, there is no other home for ill-defined respiratory and intrathoracic sites"),
-  c("175", W, "174", "ICD-8 did not split breast cancer by sex. 174 malignant neoplasm of breast is the only breast rubric and it covers both"),
+  c("175", W, "174", "ICD-8 did not split breast cancer by sex. 174 malignant neoplasm of breast is the only breast code and it covers both"),
   c("179", W, "182", "ICD-8 uterus is 180 cervix, 181 chorionepithelioma, 182 other. Part unspecified has only one home, 182"),
-  c("555", W, "563", "563 chronic enteritis and ulcerative colitis is the only chronic inflammatory bowel rubric in ICD-8, regional enteritis sits there"),
-  c("576", W, "576", "576 other diseases of gallbladder and biliary ducts is the same rubric under the same number"),
-  c("745", W, "746", "746 congenital anomalies of heart is the only heart rubric. Note ICD-8 745 is ear face and neck, the numbers do not line up between the two classifications"),
-  c("176", C, "", "no Kaposi sarcoma rubric in ICD-8, it entered ICD-9-CM later"),
+  c("555", W, "563", "563 chronic enteritis and ulcerative colitis is the only chronic inflammatory bowel code in ICD-8, regional enteritis sits there"),
+  c("576", W, "576", "576 other diseases of gallbladder and biliary ducts is the same thing under the same number"),
+  c("745", W, "746", "746 congenital anomalies of heart is the only heart code. Note ICD-8 745 is ear face and neck, the numbers do not line up between the two classifications"),
+  c("176", C, "", "no Kaposi sarcoma code in ICD-8, it entered ICD-9-CM later"),
   c("230", C, "", "ICD-8 230 to 239 is neoplasm of unspecified nature. There is no carcinoma in situ block in ICD-8"),
   c("231", C, "", "no carcinoma in situ block in ICD-8"),
   c("233", C, "", "no carcinoma in situ block in ICD-8"),
@@ -35,9 +35,9 @@ chk <- list(
   c("249", C, "", "ICD-8 has only 250 diabetes mellitus. Secondary diabetes is a later ICD-9-CM concept"),
   c("305", C, "", "ICD-8 has 304 drug dependence only. Nondependent abuse is a later concept"),
   c("315", C, "", "ICD-8 315 is unspecified mental retardation, a different concept"),
-  c("327", C, "", "no sleep disorder rubric in ICD-8, organic sleep disorders entered ICD-9-CM in 2005"),
-  c("338", C, "", "no pain NEC rubric in ICD-8, it entered ICD-9-CM in 2006"),
-  c("495", C, "", "extrinsic allergic alveolitis has no ICD-8 rubric"),
+  c("327", C, "", "no sleep disorder code in ICD-8, organic sleep disorders entered ICD-9-CM in 2005"),
+  c("338", C, "", "no pain NEC code in ICD-8, it entered ICD-9-CM in 2006"),
+  c("495", C, "", "extrinsic allergic alveolitis has no ICD-8 code"),
   c("496", C, "", "chronic airway obstruction NEC is an ICD-9 concept")
 )
 

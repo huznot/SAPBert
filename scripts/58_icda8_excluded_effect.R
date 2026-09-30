@@ -31,7 +31,7 @@ RULE_TEXT  <- c("1" = "top cosine or top co-occurrence",
                 "3" = "top co-occurrence or in both lists",
                 "4" = "any of the three")
 
-# the six the review marked as validation data wrong, where the icda-8 rubric is
+# the six the review marked as validation data wrong, where the icda-8 code is
 # unambiguous and nothing competes. same six as 52_icda8_excluded_list.R
 CORRECTIONS <- data.frame(
   icd9  = c("165", "175", "179", "555", "576", "745"),
@@ -39,9 +39,9 @@ CORRECTIONS <- data.frame(
   note  = c("ICD-8 stops at 163, no other home for ill-defined respiratory sites",
             "ICD-8 did not split breast cancer by sex, 174 covers both",
             "uterus part unspecified has only one home, 182 other",
-            "563 is the only chronic inflammatory bowel rubric in ICD-8",
-            "same rubric under the same number",
-            "746 is the only heart rubric, the numbers do not line up"),
+            "563 is the only chronic inflammatory bowel code in ICD-8",
+            "the same thing under the same number",
+            "746 is the only heart code, the numbers do not line up"),
   stringsAsFactors = FALSE)
 
 man  <- read_excel(VAL, sheet = "Validaion_ICD9_ICD8")
@@ -114,7 +114,9 @@ res <- do.call(rbind, rows)
 res <- res[order(res$Model, res$`Rule number`, res$`Similarity threshold`,
                  res$`Top N co-occurring`, match(res$Scenario, vapply(SCEN, `[[`, "", "name"))), ]
 
-## what including them costs, at each model's best setting under each rule
+## what including them costs, at each model's best setting under each rule.
+## precision, recall and accuracy for the scenario that is actually reported,
+## then f1 for all three so the scenarios can be compared
 eff <- do.call(rbind, lapply(split(res, list(res$Model, res$`Rule number`)), function(d) {
   inc <- d[d$Scenario == "codes included", ]
   b   <- inc[which.max(inc$F1), ]
@@ -125,28 +127,28 @@ eff <- do.call(rbind, lapply(split(res, list(res$Model, res$`Rule number`)), fun
              `Similarity threshold` = b$`Similarity threshold`,
              `Top N co-occurring` = b$`Top N co-occurring`,
              `Mappings for the 52 excluded codes` = b$`Mappings for the 52 excluded codes`,
+             `Correct pairs to find` = b$`Correct pairs to find`,
+             `True positives` = b$`True positives`,
+             `False positives` = b$`False positives`,
+             `False negatives` = b$`False negatives`,
+             Precision = b$Precision, Recall = b$Recall, F1 = b$F1,
+             # accuracy here is tp / (tp + fp + fn), the measure the rest of the
+             # repo uses. there is no true negative count to work with
+             Accuracy = round(b$`True positives` /
+                              (b$`True positives` + b$`False positives` +
+                               b$`False negatives`), 3),
              `F1 codes dropped` = g("codes dropped"),
-             `F1 codes included` = g("codes included"),
              `F1 six corrections` = g("six corrections"),
              `Cost of including them` = round(g("codes included") - g("codes dropped"), 3),
-             `Change from the corrections` = round(g("six corrections") - g("codes included"), 3),
              check.names = FALSE)
 }))
 eff <- eff[order(eff$Model, eff$`Rule number`), ]
 
-cat("\neffect at each model's best setting, per rule\n")
-print(eff[, c("Model", "Rule number", "Mappings for the 52 excluded codes",
-              "F1 codes dropped", "F1 codes included", "F1 six corrections",
-              "Cost of including them", "Change from the corrections")], row.names = FALSE)
-
-a8lab <- setNames(as.character(a8$ICDA_8_LABEL), as.character(a8$ICDA_8))
-n9    <- setNames(as.character(lab9$ICD_9_CM_LABEL), as.character(lab9$ICD_9_CM))
-fixes <- data.frame(
-  `ICD-9-CM` = CORRECTIONS$icd9,
-  `ICD-9-CM label` = unname(n9[CORRECTIONS$icd9]),
-  `Proposed ICDA-8` = CORRECTIONS$icda8,
-  `ICDA-8 label` = unname(a8lab[CORRECTIONS$icda8]),
-  `Why` = CORRECTIONS$note, check.names = FALSE)
+cat("
+effect at each model's best setting, per rule
+")
+print(eff[, c("Model", "Rule number", "Precision", "Recall", "F1", "Accuracy",
+              "F1 codes dropped", "Cost of including them")], row.names = FALSE)
 
 write.csv(eff, OUT, row.names = FALSE)
 cat("

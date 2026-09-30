@@ -33,16 +33,17 @@ a8lab <- setNames(as.character(a8$ICDA_8_LABEL), as.character(a8$ICDA_8))
 base$proposed <- ifelse(base$`Closest ICDA-8 code` == "none", NA_character_,
                         sub(" .*$", "", base$`Closest ICDA-8 code`))
 
-# each of the six checked against the 858 icda-8 rubrics in ICD_Codes_Labels.xlsx.
+# each of the six checked against the 858 three character icda-8 codes in
+# ICD_Codes_Labels.xlsx.
 # BLOCK is the surrounding icda-8 range, printed from the file so the check is
 # visible rather than asserted
 JUST <- c(
   "165" = "ICDA-8 has no 165. Its respiratory block stops at 163, other and unspecified respiratory organs, which is where an ill-defined respiratory site goes.",
-  "175" = "ICDA-8 has no 175. Breast cancer is a single rubric, 174, not split by sex.",
+  "175" = "ICDA-8 has no 175. Breast cancer is one code in ICDA-8, 174, not split by sex.",
   "179" = "ICDA-8 has no 179. The uterus is split into 180 cervix, 181 chorionepithelioma and 182 other, so part unspecified goes to 182.",
-  "555" = "ICDA-8 has no 555. Regional enteritis is a chronic enteritis, and 563 is the chronic rubric. 561 is the only other candidate and does not mention chronic disease.",
-  "576" = "Same number in both, and the same rubric: ICD-9 576 other disorders of biliary tract, ICDA-8 576 other diseases of gallbladder and biliary ducts.",
-  "745" = "ICD-9 745 is a heart defect and 746 is the only heart rubric in ICDA-8. ICDA-8 745 also exists but is ear, face and neck, so the numbers do not line up between the two systems.")
+  "555" = "ICDA-8 has no 555. Regional enteritis is a chronic enteritis, and 563 is the chronic one. 561 is the only other option and it does not mention chronic disease.",
+  "576" = "Same number in both, and the same thing: ICD-9 576 other disorders of biliary tract, ICDA-8 576 other diseases of gallbladder and biliary ducts.",
+  "745" = "ICD-9 745 is a heart defect and 746 is the only heart code in ICDA-8. ICDA-8 745 also exists but it is ear, face and neck, so the numbers do not line up between the two systems.")
 BLOCK <- list("165" = 160:163, "175" = 172:174, "179" = 180:183,
               "555" = 560:565, "576" = 574:577, "745" = 743:747)
 block_text <- function(k) {
@@ -96,8 +97,9 @@ six <- data.frame(
   `ICDA-8 label` = unname(a8lab[wrong$proposed]),
   Justification = unname(JUST[wrong$`ICD-9-CM`]),
   `ICDA-8 codes in that block` = vapply(wrong$`ICD-9-CM`, block_text, character(1)),
-  `Is the ICD-9 number itself in ICDA-8?` = ifelse(wrong$`ICD-9-CM` %in% names(a8lab),
-                                                   "yes, as a different rubric", "no"),
+  `Is the ICD-9 number itself in ICDA-8?` = ifelse(
+      wrong$`ICD-9-CM` %in% names(a8lab),
+      paste0("yes, ", a8lab[wrong$`ICD-9-CM`]), "no"),
   `ClinicalBERT top cosine` = wrong$`ClinicalBERT top cosine`,
   `Rank of proposed, ClinicalBERT` = wrong$`Rank of proposed, ClinicalBERT`,
   `SapBERT top cosine` = wrong$`SapBERT top cosine`,
@@ -111,7 +113,6 @@ rest <- data.frame(
   `ICD-9-CM` = right$`ICD-9-CM`,
   `ICD-9-CM label` = right$`ICD-9-CM label`,
   `ICD-9 chapter` = right$`ICD-9 chapter`,
-  `Why there is no ICDA-8 rubric` = right$Notes,
   `ClinicalBERT top cosine` = right$`ClinicalBERT top cosine`,
   `SapBERT top cosine` = right$`SapBERT top cosine`,
   `In the co-occurrence data` = right$`In the co-occurrence data`,
@@ -158,7 +159,7 @@ add <- function(name, df, widths, filter = FALSE, freeze_col = 1, wrap = TRUE) {
 }
 add("the six that look wrong", six,
     c(10, 34, 28, 11, 38, 70, 70, 22, 34, 17, 34, 17, 12), freeze_col = 2)
-add("the other 46", rest, c(10, 34, 28, 52, 34, 34, 12, 40), filter = TRUE, freeze_col = 2)
+add("the other 46", rest, c(10, 34, 28, 34, 34, 12, 40), filter = TRUE, freeze_col = 2)
 add("by chapter", ch, c(42, 16, 13, 8))
 add("accuracy effect", eff, c(14, 8, 30, 12, 12, 16, 14, 15, 15, 14, 16),
     freeze_col = 2, wrap = FALSE)
